@@ -50,7 +50,10 @@ logs/                                     # logs de ejecución
 !artifacts/.gitkeep                       # [FIX]
 !logs/.gitkeep                            # [FIX]
 audit/                                    # [FIX] auditoría histórica (gitignored; .gitkeep tracked)
+audit/**                                  # [FIX S14] subdirs concretos (logs/, reports/, trails/) — bug: audit/ solo no matcheaba contenido
 !audit/.gitkeep                           # [FIX] mantener marcador
+docs/audit/                               # [FIX S14] mirror histórico de auditoría en docs/
+docs/audit/**                             # [FIX S14] subdirs (logs/, reports/, trails/)
 
 # ─────────────────────────────────────────────────────────────
 # Datos de ejecución local (mencionado en .env: LIQUIDACION_DATA_PATH=./data)

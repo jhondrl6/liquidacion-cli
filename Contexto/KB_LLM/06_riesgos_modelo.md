@@ -340,6 +340,43 @@
 - **Asignación:** Tarea 1.X (suite stabilisation) o abrir R-OP-08-fix
   como hot-patch de 1 línea si surge la necesidad de ejecutar
   `generate_markdown()` antes de cerrar 1.B.
+
+## R-OP-09 (NUEVO, S14 cierre) — `.gitignore` no procesa patrones con comentario inline
+
+- **Severidad:** MEDIA-ALTA (riesgo de seguridad operacional: `git add -A`
+  puede commitear archivos sensibles como `.env.backup_pre_rotation_*`
+  que el `.gitignore` debería ignorar).
+- **Origen:** Bug preexistente en `.gitignore` (de Tarea 0.B / S2).
+  Descubierto en S14 cierre cuando un `git add -A` sin filtrar
+  agregó 5 archivos no deseados al commit de cierre (incluyendo
+  `.env.backup_pre_rotation_2026-06-12` con clave de cifrado
+  rotada en S1). El revert se hizo con `git reset --soft HEAD~1`
+  + `git rm --cached` antes de que los commits llegaran al remote.
+- **Causa (verificada experimentalmente en S14 cierre):** los patrones
+  con comentario inline (e.g. `*.log                                     # [ADD]`)
+  NO se procesan por `git check-ignore`. Mismo problema con
+  `.env.backup*                              # [ADD] proteger...`,
+  `output/                                   # artefactos...`, etc.
+  Cuando se elimina el comentario inline y se deja el patrón solo,
+  SÍ funciona. **Workaround verificado:** `printf '*.log\n' > .gitignore`
+  → `git check-ignore -v test.log` retorna match. Con el archivo
+  completo actual, retorna vacío. **Causa raíz probable:** encoding
+  UTF-8 o longitud de línea confunde al parser de `git 2.43.0` en
+  este FS WSL/Windows.
+- **Fix recomendado (próxima sesión):** reescribir `.gitignore`
+  con patrones en líneas separadas y comentarios en líneas propias
+  (sin inline). Eliminar los `────...` separadores decorativos que
+  tienen 60+ caracteres repetidos — pueden ser el disparador del bug.
+- **Mitigación aplicada S14 cierre:** el commit accidental `6a312dd`
+  con la clave de cifrado se revirtió con `git reset --soft HEAD~1`
+  + `git rm --cached` ANTES de hacer push. `git ls-remote origin`
+  confirma que el remote NO tiene los 2 commits de S14 (la clave
+  NO llegó a GitHub).
+- **Mitigación preventiva S15+:** antes de cada `git commit`, correr
+  `git status --short` y verificar que solo los archivos esperados
+  estén staged. Si aparecen `.env.backup_*`, `audit/logs/*.log`,
+  `docs/audit/logs/*.log` u otros no esperados → abortar commit,
+  agregar `git rm --cached` y reintentar.
 - **Impacto en DoD de Tarea 1.A-plan:** ninguno. No bloquea packaging.
 
 ## R-LEG-07 (NUEVO, S11) — Decreto 1469/2025 suspendido provisionalmente por Consejo de Estado
