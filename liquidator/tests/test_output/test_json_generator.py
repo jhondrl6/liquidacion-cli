@@ -1,219 +1,427 @@
+"""Tests para JSONGenerator v2.0 — Tarea 1.D refactor.
+
+Validaciones (plan §6.2 líneas 1497-1508 + extensiones):
+- Constructor sin args → defaults a ``ParamsProvider.current().to_dict()``.
+- Constructor con ``params=`` → usa los inyectados.
+- Constructor con ``schema_path=`` → activa validación si el archivo existe.
+- Constructor con ``schema_path=`` apuntando a archivo inexistente → no falla.
+- ``generate_output(calculation_result)`` retorna shape compatible con
+  Pydantic ``LiquidacionResult`` (Tarea 1.C).
+- ``meta.params_version`` refleja el campo ``version`` del params.
+- ``meta.motor_version`` y ``meta.generator_version`` = ``__version__``.
+- Hash calculation es estable independientemente del orden de claves.
+- ``save_to_file`` y ``save_json`` escriben JSON válido.
+- Shims deprecated ``generate_json(input, calc, comp, params)`` siguen
+  funcionando (compat con Fase 0).
 """
-Tests for JSON Generator
-"""
+
+from __future__ import annotations
 
 import json
 import os
 import tempfile
-import unittest
+from pathlib import Path
+from typing import Any, Dict
+
+import pytest
+
+from liquidator import __version__
+from liquidator.core.params_provider import ParamsProvider
 from liquidator.output.json_generator import JSONGenerator
 
 
-class TestJSONGenerator(unittest.TestCase):
-    """Test cases for JSONGenerator class"""
+# ---- Fixtures --------------------------------------------------------------
 
-    def setUp(self):
-        """Set up test fixtures"""
-        # Get the directory of this file
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        schema_path = os.path.join(current_dir, "..", "output", "schema.json")
-        self.generator = JSONGenerator(schema_path)
 
-        # Sample input data
-        self.input_data = {
-            "modo": "PERIÓDICA",
-            "fecha_ingreso": "2024-11-16",
-            "fecha_corte": "2025-11-15",
-            "salario_mensual": 2000000,
-            "reside_en_lugar_trabajo": True,
-            "auxilio_conectividad": 200000,
-            "comisiones_promedio_mensual": 0,
-            "horas_extras_promedio_mensual": 0,
-            "dias_vacaciones_pendientes": 0,
-            "tipo_contrato": "indefinido",
-            "enforce-compliance": True,
-            "compliance-policy": "standard",
-        }
+@pytest.fixture
+def sample_params() -> Dict[str, Any]:
+    """Params sintéticos para inyección en tests (aislados del repo)."""
+    return {
+        "SMMLV": 999_999,
+        "AUXILIO_TRANS": 1234,
+        "LIMITE_AUXILIO": 2_000_000,
+        "TASA_INT_CESANTIAS": 0.12,
+        "DIAS_BASE": 360.0,
+        "VACACIONES_DENOM": 720.0,
+        "REDONDEO": 0,
+        "TOPE_INDEMNIZACION_SMMLV": 20,
+        "FECHA_APLICACION_RECARGO_DOMINICAL": "2025-07-01",
+        "version": "2026-TEST-FAKE",
+    }
 
-        # Sample calculation results
-        self.calculation_results = {
-            "sbl_general": 2200000,
-            "sbl_vacaciones": 2000000,
-            "cesantias": 2200000,
-            "dias_cesantias": 360,
-            "plazo_cesantias": "2026-02-14",
-            "intereses_cesantias": 264000,
-            "dias_intereses": 360,
-            "plazo_intereses": "2026-01-31",
-            "prima": 1100000,
-            "dias_prima": 180,
-            "plazo_prima": "2025-12-31",
-            "vacaciones": 0,
-            "dias_vacaciones": 0,
-            "validaciones_y_alertas": {
-                "auxilio_transporte_excluido": "Residencia en el lugar de trabajo (Finca).",
-                "auxilio_conectividad_advertencia": "Verificar si está pactado como parte del salario habitual.",
+
+@pytest.fixture
+def sample_input_data() -> Dict[str, Any]:
+    """Input sintético con la forma de ``parsed_data`` del engine."""
+    return {
+        "modo": "PERIODICA",
+        "fecha_ingreso": "2025-11-16",
+        "fecha_corte": "2026-06-09",
+        "trabajador": {
+            "nombre": "[ANONIMIZADO]",
+            "documento": "123456789",
+        },
+        "empleador": {
+            "nombre": "[ANONIMIZADO]",
+            "documento": "900123456",
+        },
+        "contrato": {
+            "fecha_ingreso": "2025-11-16",
+            "fecha_corte": "2026-06-09",
+            "tipo": "INDEFINIDO",
+        },
+    }
+
+
+@pytest.fixture
+def sample_calc_results() -> Dict[str, Any]:
+    """``calculation_results`` sintético (forma de ``WorkflowResult``)."""
+    return {
+        "desglose": {
+            "2025": {
+                "cesantias": 281_111,
+                "intereses_cesantias": 33_733,
+                "prima": 281_111,
+                "vacaciones": 140_555,
+                "indemnizacion": None,
+                "recargo_dominical": 0,
             },
-        }
-
-        # Sample compliance report
-        self.compliance_report = {
-            "compliance_status": "GO",
-            "summary": {"passed": 25, "warnings": 3, "failures": 0},
-            "checks": [
-                {
-                    "id": "V001",
-                    "description": "Parametros oficiales 2025 presentes y consistentes",
-                    "result": "PASS",
-                    "evidence": "SMMLV=1423500 matches params/2025.json",
-                    "rule_ref": ["Decreto 1572/2024"],
-                }
-            ],
-            "blocking_failures": [],
-            "params_version": "2025-10-31",
-            "timestamp": "2025-11-02T07:25:00-05:00",
-            "input_hash": "sha256:abcd...",
-            "output_hash": "sha256:ef01...",
-            "operator_action": {
-                "action": "auto",
-                "operator_id": None,
-                "justification": None,
+            "2026": {
+                "cesantias": 977_777,
+                "intereses_cesantias": 117_333,
+                "prima": 977_777,
+                "vacaciones": 488_888,
+                "indemnizacion": None,
+                "recargo_dominical": 0,
             },
+        },
+        "total_liquidacion": 3_298_285,
+        "SBL_GENERAL": 2_200_000,
+    }
+
+
+@pytest.fixture
+def sample_compliance() -> Dict[str, Any]:
+    """Compliance report sintético compatible con engine real."""
+    return {
+        "compliance_status": "GO",
+        "summary": {"passed": 10, "warnings": 1, "failures": 0},
+        "checks": [],
+        "blocking_failures": [],
+        "params_version": "2026-06-09",
+    }
+
+
+@pytest.fixture
+def sample_validaciones() -> Dict[str, str]:
+    return {
+        "auxilio_transporte_excluido": "Residencia en el lugar de trabajo.",
+    }
+
+
+@pytest.fixture
+def sample_normas() -> list:
+    return [
+        "Art.249-250 CST",
+        "Ley 50/1990 Art.99",
+        "Art.306-308 CST",
+    ]
+
+
+@pytest.fixture
+def unified_calculation_result(
+    sample_input_data: Dict[str, Any],
+    sample_calc_results: Dict[str, Any],
+    sample_compliance: Dict[str, Any],
+    sample_validaciones: Dict[str, str],
+    sample_normas: list,
+) -> Dict[str, Any]:
+    """Dict unificado con todo lo que el engine pasa al JSONGenerator."""
+    return {
+        "input_data": sample_input_data,
+        "calculation_results": sample_calc_results,
+        "compliance_report": sample_compliance,
+        "validaciones_y_alertas": sample_validaciones,
+        "normas_aplicadas": sample_normas,
+    }
+
+
+# ---- Constructor (DoD plan §6.2 puntos 1-2) --------------------------------
+
+
+def test_json_generator_sin_args_usa_paramsprovider_current():
+    """Sin args, el generador toma params del singleton year-aware."""
+    g = JSONGenerator()
+    # SMMLV vigente 2026 = 1.750.905 (Decreto 159/2026)
+    assert g.params["SMMLV"] == 1_750_905
+    assert g.params["version"] == "2026-06-09"
+    assert g.schema_path is None
+
+
+def test_json_generator_usa_params_inyectados(sample_params):
+    """Con ``params=`` se usan los inyectados, no los del repo."""
+    g = JSONGenerator(params=sample_params)
+    assert g.params == sample_params
+    assert g.params["SMMLV"] == 999_999
+    assert g.params["version"] == "2026-TEST-FAKE"
+
+
+def test_json_generator_schema_path_archivo_inexistente_no_falla(tmp_path):
+    """``schema_path`` apuntando a archivo inexistente NO debe explotar."""
+    ghost = tmp_path / "no-existe.schema.json"
+    g = JSONGenerator(schema_path=ghost)
+    assert g.schema_path is None  # se normaliza a None
+
+
+def test_json_generator_schema_path_archivo_existente(tmp_path):
+    """``schema_path`` apuntando a archivo válido se conserva."""
+    schema_file = tmp_path / "schema.json"
+    schema_file.write_text('{"type": "object"}')
+    g = JSONGenerator(schema_path=schema_file)
+    assert g.schema_path == schema_file
+
+
+# ---- generate_output (DoD plan §6.2 puntos 3-4) -----------------------------
+
+
+def test_generate_output_shape_es_pydantic_compatible(
+    sample_params, unified_calculation_result
+):
+    """La salida tiene los campos del Pydantic ``LiquidacionResult``."""
+    g = JSONGenerator(params=sample_params)
+    out = g.generate_output(unified_calculation_result)
+
+    # Top-level (orden estable esperado por el Pydantic)
+    assert "meta" in out
+    assert "trabajador" in out
+    assert "empleador" in out
+    assert "parametros" in out
+    assert "contrato" in out
+    assert "desglose" in out
+    assert "total_liquidacion" in out
+    assert "validaciones_y_alertas" in out
+    assert "normas_aplicadas" in out
+    assert "compliance_report" in out
+
+
+def test_generate_output_meta_tiene_todos_los_campos(
+    sample_params, unified_calculation_result
+):
+    """``meta`` incluye los 11 campos del Pydantic ``MetaLiquidacion``."""
+    g = JSONGenerator(params=sample_params)
+    out = g.generate_output(unified_calculation_result)
+    meta = out["meta"]
+
+    assert meta["modo"] == "PERIODICA"
+    assert meta["motor_version"] == __version__
+    assert meta["generator_version"] == __version__
+    assert meta["params_version"] == "2026-TEST-FAKE"  # ← del fixture
+    assert meta["input_hash"].startswith("sha256:")
+    assert meta["output_hash"].startswith("sha256:")
+    assert meta["params_hash"].startswith("sha256:")
+    assert meta["compliance_status"] == "GO"
+    assert isinstance(meta["fecha_generacion"], str)
+    assert isinstance(meta["parametros_por_segmento"], dict)
+    assert isinstance(meta["referencias_normativas"], list)
+
+
+def test_generate_output_params_reflejan_inyeccion(
+    sample_params, unified_calculation_result
+):
+    """``out["parametros"]`` debe ser el eco de ``self.params``."""
+    g = JSONGenerator(params=sample_params)
+    out = g.generate_output(unified_calculation_result)
+
+    assert out["parametros"]["SMMLV"] == 999_999
+    assert out["parametros"]["AUXILIO_TRANS"] == 1234
+    assert out["parametros"]["version"] == "2026-TEST-FAKE"
+
+
+def test_generate_output_sin_params_inyectados_usa_provider(
+    unified_calculation_result,
+):
+    """Sin ``params=``, ``params_version`` viene del ParamsProvider vigente."""
+    g = JSONGenerator()
+    out = g.generate_output(unified_calculation_result)
+
+    # ParamsProvider.current() → 2026 (año mayor)
+    assert out["parametros"]["SMMLV"] == 1_750_905
+    assert out["parametros"]["version"] == "2026-06-09"
+    assert out["meta"]["params_version"] == "2026-06-09"
+
+
+def test_generate_output_modo_normalizado_a_mayusculas(sample_params):
+    """``modo`` en minúsculas o mixto se normaliza a MAYÚSCULAS."""
+    g = JSONGenerator(params=sample_params)
+    out = g.generate_output(
+        {
+            "input_data": {
+                "modo": "periodica",  # minúscula
+                "trabajador": {"nombre": "X", "documento": "1"},
+                "empleador": {"nombre": "Y", "documento": "2"},
+                "contrato": {
+                    "fecha_ingreso": "2025-11-16",
+                    "fecha_corte": "2026-06-09",
+                },
+            },
+            "calculation_results": {
+                "desglose": {},
+                "total_liquidacion": 0,
+            },
+            "compliance_report": {"compliance_status": "GO"},
         }
+    )
+    assert out["meta"]["modo"] == "PERIODICA"
 
-        # Sample params
-        self.params = {
-            "version": "2025-10-31",
-            "SMMLV": 1423500,
-            "AUXILIO_TRANS": 200000,
-            "LIMITE_AUXILIO": 2847000,
-            "TASA_INT_CESANTIAS": 0.12,
-            "DIAS_BASE": 360,
-            "TOPE_INDEMNIZACION_SMMLV": 20,
-            "FECHA_APLICACION_RECARGO_DOMINICAL": "2025-07-01",
+
+def test_generate_output_maneja_validaciones_faltantes(sample_params):
+    """Si no hay ``validaciones_y_alertas`` ni ``normas_aplicadas``, no falla."""
+    g = JSONGenerator(params=sample_params)
+    out = g.generate_output(
+        {
+            "input_data": {
+                "modo": "FINIQUITO",
+                "trabajador": {"nombre": "X", "documento": "1"},
+                "empleador": {"nombre": "Y", "documento": "2"},
+                "contrato": {},
+            },
+            "calculation_results": {"desglose": {}, "total_liquidacion": 0},
+            "compliance_report": {"compliance_status": "GO"},
         }
-
-    def test_generate_json(self):
-        """Test JSON generation"""
-        output = self.generator.generate_json(
-            self.input_data,
-            self.calculation_results,
-            self.compliance_report,
-            self.params,
-        )
-
-        # Check structure
-        self.assertIn("meta", output)
-        self.assertIn("trabajador", output)
-        self.assertIn("parametros", output)
-        self.assertIn("desglose", output)
-        self.assertIn("total_liquidacion_periodica", output)
-        self.assertIn("validaciones_y_alertas", output)
-        self.assertIn("normas_aplicadas", output)
-        self.assertIn("compliance_report", output)
-
-        # Check meta section
-        self.assertEqual(output["meta"]["modo"], "PERIÓDICA")
-        self.assertEqual(output["meta"]["fecha_ingreso"], "2024-11-16")
-        self.assertEqual(output["meta"]["fecha_corte"], "2025-11-15")
-        self.assertEqual(output["meta"]["params_version"], "2025-10-31")
-        self.assertTrue(output["meta"]["input_hash"].startswith("sha256:"))
-        self.assertTrue(output["meta"]["output_hash"].startswith("sha256:"))
-
-        # Check worker section
-        self.assertEqual(output["trabajador"]["tipo_contrato"], "indefinido")
-        self.assertTrue(output["trabajador"]["reside_en_lugar_trabajo"])
-
-        # Check parameters section
-        self.assertEqual(output["parametros"]["SMMLV"], 1423500)
-        self.assertEqual(output["parametros"]["AUXILIO_TRANS"], 200000)
-
-        # Check breakdown section
-        self.assertEqual(output["desglose"]["SBL_GENERAL"], 2200000)
-        self.assertEqual(output["desglose"]["cesantias"]["valor"], 2200000)
-        self.assertEqual(output["desglose"]["cesantias"]["dias_liquidados"], 360)
-        self.assertEqual(
-            output["desglose"]["cesantias"]["plazo_pago_legal"], "2026-02-14"
-        )
-
-        # Check total
-        self.assertEqual(output["total_liquidacion_periodica"], 3564000)
-
-        # Check compliance report
-        self.assertEqual(output["compliance_report"]["compliance_status"], "GO")
-        self.assertEqual(output["compliance_report"]["summary"]["passed"], 25)
-
-    def test_generate_json_finiquito(self):
-        """Test JSON generation for FINIQUITO mode"""
-        # Update input to FINIQUITO mode
-        self.input_data["modo"] = "FINIQUITO"
-
-        # Add finiquito-specific calculation results
-        self.calculation_results["indemnizacion"] = 4400000
-        self.calculation_results["dias_servicio"] = 360
-        self.calculation_results["salario_pendiente"] = 0
-
-        output = self.generator.generate_json(
-            self.input_data,
-            self.calculation_results,
-            self.compliance_report,
-            self.params,
-        )
-
-        # Check that total_liquidacion_finiquito is present
-        self.assertIn("total_liquidacion_finiquito", output)
-        self.assertNotIn("total_liquidacion_periodica", output)
-
-        # Check that indemnization and salary pending are present
-        self.assertIn("indemnizacion", output["desglose"])
-        self.assertIn("salario_pendiente", output["desglose"])
-
-    def test_save_json(self):
-        """Test saving JSON to file"""
-        output = self.generator.generate_json(
-            self.input_data,
-            self.calculation_results,
-            self.compliance_report,
-            self.params,
-        )
-
-        # Create temporary file
-        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:
-            temp_path = f.name
-
-        try:
-            # Save JSON
-            result = self.generator.save_json(output, temp_path)
-            self.assertTrue(result)
-
-            # Verify file exists and contains valid JSON
-            self.assertTrue(os.path.exists(temp_path))
-            with open(temp_path, "r") as f:
-                loaded_data = json.load(f)
-
-            # Verify content
-            self.assertEqual(loaded_data["meta"]["modo"], "PERIÓDICA")
-            self.assertEqual(loaded_data["total_liquidacion_periodica"], 3564000)
-        finally:
-            # Clean up
-            if os.path.exists(temp_path):
-                os.unlink(temp_path)
-
-    def test_hash_calculation(self):
-        """Test hash calculation"""
-        data1 = {"a": 1, "b": 2}
-        data2 = {"b": 2, "a": 1}  # Same content, different order
-        data3 = {"a": 1, "b": 3}  # Different content
-
-        hash1 = self.generator._calculate_hash(data1)
-        hash2 = self.generator._calculate_hash(data2)
-        hash3 = self.generator._calculate_hash(data3)
-
-        # Same content should produce same hash regardless of key order
-        self.assertEqual(hash1, hash2)
-        # Different content should produce different hash
-        self.assertNotEqual(hash1, hash3)
+    )
+    assert out["validaciones_y_alertas"] == {}
+    assert out["normas_aplicadas"] == []
 
 
-if __name__ == "__main__":
-    unittest.main()
+def test_generate_output_total_liquidacion_es_el_del_calc(sample_params):
+    """``total_liquidacion`` viene de ``calculation_results``."""
+    g = JSONGenerator(params=sample_params)
+    out = g.generate_output(
+        {
+            "input_data": {
+                "trabajador": {"nombre": "X", "documento": "1"},
+                "empleador": {"nombre": "Y", "documento": "2"},
+                "contrato": {},
+            },
+            "calculation_results": {
+                "desglose": {},
+                "total_liquidacion": 9_999_999,
+            },
+            "compliance_report": {},
+        }
+    )
+    assert out["total_liquidacion"] == 9_999_999
+
+
+# ---- Validación contra schema (DoD plan §6.2 punto 5) ----------------------
+
+
+def test_json_generator_valida_contra_schema_si_existe(
+    sample_params, unified_calculation_result, tmp_path
+):
+    """Si el schema valida, no lanza; el output se devuelve igual."""
+    # Schema minimal: top-level "object" con "meta" y "desglose" requeridos.
+    schema = {
+        "type": "object",
+        "required": ["meta", "desglose"],
+        "properties": {
+            "meta": {"type": "object"},
+            "desglose": {"type": "object"},
+        },
+    }
+    schema_file = tmp_path / "schema.json"
+    schema_file.write_text(json.dumps(schema))
+
+    g = JSONGenerator(schema_path=schema_file, params=sample_params)
+    out = g.generate_output(unified_calculation_result)
+
+    # Si llegamos aquí sin excepción, la validación pasó.
+    assert "meta" in out
+    assert "desglose" in out
+
+
+def test_json_generator_valida_contra_schema_y_falla_si_no_cumple(
+    sample_params, unified_calculation_result, tmp_path
+):
+    """Si el schema exige campos ausentes, lanza ``ValueError``."""
+    schema = {
+        "type": "object",
+        "required": ["campo_que_no_existe_en_el_output"],
+    }
+    schema_file = tmp_path / "schema.json"
+    schema_file.write_text(json.dumps(schema))
+
+    g = JSONGenerator(schema_path=schema_file, params=sample_params)
+    with pytest.raises(ValueError, match="no conforme al schema"):
+        g.generate_output(unified_calculation_result)
+
+
+# ---- Hash calculation (preservado del contrato previo) ---------------------
+
+
+def test_calculate_hash_estable(sample_params):
+    """Mismo contenido → mismo hash, distinto orden de claves → mismo hash."""
+    g = JSONGenerator(params=sample_params)
+    h1 = g._calculate_hash({"a": 1, "b": 2, "c": [1, 2, 3]})
+    h2 = g._calculate_hash({"c": [1, 2, 3], "b": 2, "a": 1})  # otro orden
+    h3 = g._calculate_hash({"a": 1, "b": 2, "c": [1, 2, 4]})  # contenido distinto
+    assert h1 == h2
+    assert h1 != h3
+    assert h1.startswith("sha256:")
+
+
+# ---- Persistencia ----------------------------------------------------------
+
+
+def test_save_to_file_escribe_json_valido(
+    sample_params, unified_calculation_result, tmp_path
+):
+    """``save_to_file`` debe escribir JSON parseable en disco."""
+    g = JSONGenerator(params=sample_params)
+    out = g.generate_output(unified_calculation_result)
+
+    target = tmp_path / "resultado.json"
+    g.save_to_file(out, target)
+
+    assert target.is_file()
+    loaded = json.loads(target.read_text(encoding="utf-8"))
+    assert loaded["meta"]["params_version"] == "2026-TEST-FAKE"
+    assert loaded["desglose"]["2025"]["cesantias"] == 281_111
+
+
+def test_save_json_alias_retorna_true(
+    sample_params, unified_calculation_result, tmp_path
+):
+    """``save_json`` es alias de ``save_to_file`` y retorna ``True``."""
+    g = JSONGenerator(params=sample_params)
+    out = g.generate_output(unified_calculation_result)
+
+    target = tmp_path / "out.json"
+    assert g.save_json(out, target) is True
+    assert target.is_file()
+
+
+# ---- Shims deprecated (compat con engine y Fase 0) ------------------------
+
+
+def test_generate_json_shim_delega_a_generate_output(sample_params):
+    """``generate_json`` con 4 args debe seguir funcionando (compat Fase 0)."""
+    g = JSONGenerator(params=sample_params)
+    out = g.generate_json(
+        input_data={
+            "modo": "PERIODICA",
+            "trabajador": {"nombre": "X", "documento": "1"},
+            "empleador": {"nombre": "Y", "documento": "2"},
+            "contrato": {},
+        },
+        calculation_result={"desglose": {}, "total_liquidacion": 0},
+        compliance_result={"compliance_status": "GO"},
+        params=sample_params,
+    )
+    # Mismas claves que generate_output (compat con engine y tests previos)
+    assert "meta" in out
+    assert "desglose" in out
+    assert "compliance_report" in out
+    assert "validaciones_y_alertas" in out
+    assert "normas_aplicadas" in out
+    assert out["meta"]["params_version"] == "2026-TEST-FAKE"

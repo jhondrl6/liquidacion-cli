@@ -95,16 +95,21 @@ class LiquidacionEngine:
         calc_results = deepcopy(workflow_result.calculation_results)
         alerts = dict(workflow_result.validaciones_y_alertas)
         calc_results["validaciones_y_alertas"] = alerts
+        calc_results["normas_aplicadas"] = workflow_result.normas_aplicadas
 
-        output = self.json_generator.generate_json(
-            parsed_data,
-            calc_results,
-            compliance_report,
-            params,
+        # 1.D — delegamos al JSONGenerator con el dict unificado y los
+        # params que el engine ya cargó (ParamsLoader -> dict). El
+        # generador no necesita hardcodear valores ni re-leer disco.
+        self.json_generator.params = params
+        output = self.json_generator.generate_output(
+            {
+                "input_data": parsed_data,
+                "calculation_results": calc_results,
+                "compliance_report": compliance_report,
+                "validaciones_y_alertas": alerts,
+                "normas_aplicadas": workflow_result.normas_aplicadas,
+            }
         )
-
-        output["validaciones_y_alertas"] = alerts
-        output["normas_aplicadas"] = workflow_result.normas_aplicadas
 
         # Actualizar hashes de compliance
         output_hash = output["meta"]["output_hash"]
