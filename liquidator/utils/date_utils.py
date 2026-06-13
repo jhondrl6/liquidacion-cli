@@ -77,3 +77,55 @@ def add_business_days(start_date: str, days: int) -> str:
             business_days_added += 1
 
     return current_date.strftime("%Y-%m-%d")
+
+
+# ---------------------------------------------------------------------------
+# Date-object helpers (used by tests and date arithmetic).
+# Unlike the str-based helpers above, these accept/return ``datetime.date``.
+# ---------------------------------------------------------------------------
+
+
+def is_valid_date(value: str) -> bool:
+    """Return ``True`` if ``value`` is a valid ``YYYY-MM-DD`` date string.
+
+    No exception is raised on bad input; the caller is expected to handle the
+    boolean directly (mirrors the contract the test suite assumes).
+    """
+    if not isinstance(value, str):
+        return False
+    try:
+        datetime.strptime(value, "%Y-%m-%d")
+    except ValueError:
+        return False
+    return True
+
+
+def is_leap_year(year: int) -> bool:
+    """Return ``True`` for a Gregorian leap year."""
+    return year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)
+
+
+def days_in_year(year: int) -> int:
+    """Return 366 for a leap year, 365 otherwise."""
+    return 366 if is_leap_year(year) else 365
+
+
+def get_semester(d: date) -> int:
+    """Return ``1`` for H1 (Jan–Jun) or ``2`` for H2 (Jul–Dec)."""
+    return 1 if d.month <= 6 else 2
+
+
+def get_semester_bounds(d: date) -> tuple[date, date]:
+    """Return ``(start, end)`` of the academic/calendar semester that contains ``d``.
+
+    H1 spans Jan 1 – Jun 30 (inclusive). H2 spans Jul 1 – Dec 31 (inclusive).
+    """
+    if d.month <= 6:
+        return (date(d.year, 1, 1), date(d.year, 6, 30))
+    return (date(d.year, 7, 1), date(d.year, 12, 31))
+
+
+def days_in_semester(d: date) -> int:
+    """Return the number of days in the semester that contains ``d``."""
+    start, end = get_semester_bounds(d)
+    return (end - start).days + 1

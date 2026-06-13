@@ -176,6 +176,86 @@
   operativos deberían actualizar la nota del sandbox para reflejar
   que `uv run` es la ruta correcta cuando `python3` directo falla.
 
+## R-OP-05 (NUEVO, S12) — 3 collection errors restantes en `liquidator/params/` por exports faltantes
+
+- **Severidad:** BAJA (3 archivos de test no se pueden colectar; motor no
+  afectado; tests de versionado/integridad/validación de params quedan
+  sin poder correr).
+- **Origen:** Tarea 1.A / S12 (2026-06-13). Al resolver Causa 1 de R-OP-02
+  (exports de `SalaryError` + `ValidationError` en `liquidator/utils/__init__.py`
+  + 6 funciones utils nuevas + 4 exports adicionales de `currency_utils`),
+  5 de los 8 collection errors originales se desbloquearon. Los 3 restantes
+  tienen **causa raíz distinta**: símbolos no exportados desde los
+  `__init__.py` de los sub-paquetes `liquidator/params/`.
+- **Causa (3 archivos, símbolos faltantes):**
+  - `liquidator/params/params_loader.py` no exporta `ParamsError` ni
+    `ParamsSource` (afecta `test_params/test_loader.py:4` y
+    `test_params/test_params_loader.py:6`).
+  - `liquidator/params/params_validator.py` no exporta `ValidationError`
+    (afecta `test_params/test_validator.py:4`).
+- **Acción propuesta:** Fix de ~3 líneas (agregar los símbolos faltantes
+  al `__all__` o importarlos en los `__init__.py` correspondientes).
+  - Verificar primero que `ParamsError` está definido en `params_loader.py`
+    (proviene de `error_handler.py`, ya exportado por `liquidator.utils`).
+  - Verificar que `ParamsSource` es un enum/clase existente en `params_loader.py`.
+  - `ValidationError` ya existe en `error_handler.py:4` (exportado por
+    `liquidator.utils` tras 1.A); solo falta re-exportarlo desde
+    `liquidator/params/params_validator.py`.
+- **Asignación:** Tarea 1.B (CLI) o tarea de cleanup dedicada (1.X).
+  No es bloqueante para 1.A (cuyo DoD es 5/8 desbloqueados + 10 símbolos
+  utils).
+- **Relación con R-OP-02 Causa 1:** los 3 archivos estaban listados
+  como "bloqueados por Causa 1" en la sección de Tarea 0.J, pero la
+  causa real es distinta (sub-paquetes de `params`, no `utils`). El
+  conteo de Causa 1 ahora es **5/8 resueltos**; los 3 restantes se
+  renombran a R-OP-05.
+
+## R-OP-06 (NUEVO, S12) — 3 runtime failures en `test_utils/test_date_currency_utils.py` por signatures incompatibles
+
+- **Severidad:** BAJA (3 tests fallan en runtime; motor no afectado; los
+  asserts cubren edge cases útiles: date-based, holidays-aware).
+- **Origen:** Tarea 1.A / S12 (2026-06-13). Al desbloquear la collection
+  de `liquidator/tests/test_utils/test_date_currency_utils.py` (antes
+  fallaba en collection, ahora corre), 3 tests fallan en runtime por
+  signatures de funciones pre-existentes que NO matchean el contrato
+  esperado por los tests. Resultado: 4 PASS / 3 FAIL de 7 tests en el
+  archivo.
+- **Causa (3 issues):**
+  1. **`test_parse_and_validate_date`:** test llama `parse_date("2025-12-31")`
+     y espera `date(2025, 12, 31)`. Pero `liquidator/utils/__init__.py:18`
+     define `parse_date = calculate_days_between` (alias a función que
+     requiere 2 args y retorna `int`). `TypeError: calculate_days_between()
+     missing 1 required positional argument: 'end_date'`.
+  2. **`test_days_between_inclusive`:** test llama `days_between_inclusive(d1: date, d2: date)`
+     pasando objetos `date`. Pero el alias apunta a `calculate_days_between`
+     que internamente llama `datetime.strptime(start_date, "%Y-%m-%d")`
+     esperando `str`, no `date`. `TypeError: strptime() argument 1 must
+     be str, not datetime.date`.
+  3. **`test_business_day_calculations`:** test llama
+     `add_business_days(start, 3, holidays={...})` con kwarg `holidays`.
+     Pero la implementación actual de `add_business_days` (en
+     `date_utils.py:58`) solo acepta `(start_date: str, days: int)` — no
+     soporta `holidays`. `TypeError: add_business_days() got an
+     unexpected keyword argument ' holidays'`. Adicionalmente el test
+     usa objetos `date` no strings.
+- **Acción propuesta:** (decisión de scope — opciones, no implementación):
+  1. **Opción A (recomendada):** redefinir `parse_date` y
+     `days_between_inclusive` como funciones reales (no aliases rotos) en
+     `date_utils.py`, y agregar `holidays` kwarg a `add_business_days` /
+     `business_days_between`. Esto requiere decisión sobre backward
+     compatibility del alias `parse_date = calculate_days_between` (lo
+     usa `date_validator.py:11-12` esperando `date` — confirma que el
+     contrato "date-based" es el correcto).
+  2. **Opción B:** ajustar los tests al contrato actual de las funciones
+     pre-existentes (str-based, sin holidays). Riesgo: contradice el uso
+     esperado en `date_validator.py`.
+- **Asignación:** Tarea 1.B o tarea 1.X dedicada. El fix completo es
+  ~30 líneas (3 funciones con sus firmas correctas + `holidays` kwarg
+  en 2 funciones).
+- **Impacto en DoD de Tarea 1.A:** ninguno. 1.A cierra con 4/7 tests
+  PASS en `test_utils/`; los 3 FAIL son pre-existentes y se documentan
+  para resolución posterior.
+
 ## R-LEG-07 (NUEVO, S11) — Decreto 1469/2025 suspendido provisionalmente por Consejo de Estado
 
 - **Severidad:** MEDIA (vigilar — no afecta cálculo, afecta trazabilidad).
@@ -271,15 +351,29 @@
   exportados, verificar nombres exactos.
 - **Fase de resolución:** 1.A/1.B (cleanup imports + pytest
   estable).
-- **Tests bloqueados (8 módulos, 0 tests corren):**
-  - `liquidator/tests/test_params/test_loader.py`
-  - `liquidator/tests/test_params/test_params_loader.py`
-  - `liquidator/tests/test_params/test_validator.py`
-  - `liquidator/tests/test_utils/test_date_currency_utils.py`
-  - `liquidator/tests/test_validators/test_contract_validator.py`
-  - `liquidator/tests/test_validators/test_date_validator.py`
-  - `liquidator/tests/test_validators/test_input_validator.py`
-  - `liquidator/tests/test_validators/test_salary_validator.py`
+- **Resolución parcial (S12, 2026-06-13, Tarea 1.A):** agregados
+  `SalaryError` y `ValidationError` al import y `__all__` de
+  `liquidator/utils/__init__.py`. **5 de 8 collection errors
+  resueltos.** Los 3 restantes (`test_params/test_loader.py`,
+  `test_params/test_params_loader.py`, `test_params/test_validator.py`)
+  tienen causa raíz distinta — ver **R-OP-05**. La causa real
+  del "Causa 1" era doble: faltaban 2 exports en `utils/`
+  (`SalaryError` + `ValidationError`) y 6 funciones de utilidad
+  no existían — ambos resueltos en Tarea 1.A. El conteo de
+  símbolos desbloqueados fue 10 (no 8 como sugería el framing
+  inicial): 6 funciones nuevas + 4 exports pre-existentes
+  (`format_cop`, `normalize_amount`, `parse_cop`, `to_decimal`).
+- **Tests desbloqueados por Causa 1 (5 módulos, ahora corren):**
+  - ✓ `liquidator/tests/test_utils/test_date_currency_utils.py`
+    (4 de 7 tests PASS; 3 FAIL por R-OP-06)
+  - ✓ `liquidator/tests/test_validators/test_contract_validator.py`
+  - ✓ `liquidator/tests/test_validators/test_date_validator.py`
+  - ✓ `liquidator/tests/test_validators/test_input_validator.py`
+  - ✓ `liquidator/tests/test_validators/test_salary_validator.py`
+- **Tests aún bloqueados (3 módulos, sub-causa R-OP-05):**
+  - ✗ `liquidator/tests/test_params/test_loader.py`
+  - ✗ `liquidator/tests/test_params/test_params_loader.py`
+  - ✗ `liquidator/tests/test_params/test_validator.py`
 
 #### Causa 2 — Regresión de `datetime` en `params_versioning.py` (9 failed)
 
@@ -642,8 +736,42 @@
 
 ## Última validación contra código
 
-- **Fecha:** 2026-06-13 (sesión S11.6 — ejecución de las 5 validaciones
-  pendientes P-S11.1 a P-S11.5 vía `uv run`).
+- **Fecha:** 2026-06-13 (sesión S12 — cierre de Tarea 1.A).
+- **Verificado (S12 — Tarea 1.A resuelta):**
+  - 10 símbolos utils desbloqueados en `liquidator/utils/__init__.py`:
+    6 implementaciones nuevas (`is_valid_date`, `is_leap_year`,
+    `days_in_year`, `get_semester`, `get_semester_bounds`,
+    `days_in_semester`) + 4 exports agregados (`format_cop`,
+    `normalize_amount`, `parse_cop`, `to_decimal`). Más los 2
+    exports de error_handler (`SalaryError`, `ValidationError`).
+  - Validación unitaria: 8/8 funciones con 31 asserts PASS
+    (incluye boundary tests para `get_semester`,
+    `get_semester_bounds`, leap-year, format COP,
+    `ROUND_HALF_UP`).
+  - `pytest liquidator/tests --collect-only`:
+    8 collection errors → 3 collection errors. **5/8 resueltos
+    (Causa 1 de R-OP-02 parcial, ver R-OP-05 para los 3
+    restantes).**
+  - `pytest liquidator/tests/test_utils/`:
+    4 PASS / 3 FAIL. Los 3 FAIL son pre-existentes (R-OP-06)
+    y NO en scope de 1.A.
+  - 2 archivos modificados: `liquidator/utils/date_utils.py`
+    (+52 líneas) y `liquidator/utils/__init__.py` (+29 líneas).
+    Diff total: 80 insertions, 1 deletion.
+  - 0 regresiones: ningún código de negocio usa las 6 funciones
+    nuevas; los 4 exports nuevos (`format_cop`, etc.) ya
+    existían y se usan solo desde tests.
+- **Hallazgos nuevos S12:**
+  - **R-OP-05 (BAJA):** 3 collection errors restantes en
+    `liquidator/params/` por exports faltantes (`ParamsError`,
+    `ParamsSource`, `ValidationError`). Asignar a Tarea 1.B.
+  - **R-OP-06 (BAJA):** 3 runtime failures en
+    `test_utils/test_date_currency_utils.py` por signatures
+    incompatibles (alias `parse_date` roto, alias
+    `days_between_inclusive` roto, `add_business_days` sin
+    `holidays` kwarg). Asignar a Tarea 1.B o 1.X.
+- **Fecha anterior:** 2026-06-13 (sesión S11.6 — ejecución de las
+  5 validaciones pendientes P-S11.1 a P-S11.5 vía `uv run`).
 - **Verificado (S11.6 — validaciones ejecutables):**
   - **P-S11.1** `jsonschema.validate(2025.json)` → **OK** ✓
   - **P-S11.2** `jsonschema.validate(2026.json)` → **OK** ✓
