@@ -20,6 +20,15 @@
 > **Reparos bloqueantes del addendum finiquito/vacaciones (a cerrar antes de marcar las tareas como DoD):** (a) **Verificar texto literal del Art. 189 CST en SUIN** (https://www.suin-juriscol.gov.co/) antes de cerrar Tarea 2.B-ter — específicamente el párr. 1° sobre compensación obligatoria de vacaciones no disfrutadas al terminar el contrato; (b) **confirmar que el motor distingue explícitamente** entre *vacaciones compensadas por acuerdo mutuo* (Art. 189, periodo vigente) y *vacaciones obligatoriamente compensadas en finiquito* (Art. 189 párr. 1° + Art. 190, terminación del contrato) — el modo `FINIQUITO` debe invocar `calculate_vacaciones_compensadas_finiquito` y el modo `PERIODICA` no debe pagarlas por error; (c) **Indemnización Art. 64 CST NO se implementa en esta iteración** (queda referenciada y documentada en el addendum para casos futuros de despido sin justa causa, pero no es código de v2.0). **Convención:** 1 fase por sesión (respetar convención del usuario). **Regresión dura:** el caso canónico PERIODICA (SBL 2.200.000, 206d, dos segmentos) **sigue verde** — los nuevos campos de `Contrato` y `LiquidacionInput` son retrocompatibles (opcionales o con default seguro).
 >
 > **Reparos bloqueantes del addendum (a cerrar antes de marcar Fase 2-bis como DoD):** (a) **NO usar Art. 155 CST** como sustento de prescripción — usar **Art. 488 CST**; (b) verificar **texto literal, sala y URL oficial** de SL2630-2024 antes de tratar su `texto_relevante` como cita verificada (estado inicial: `PENDIENTE_VERBATIM`); (c) modelar IPC como **índices acumulados**, no como tasas anuales de inflación. **Convención:** 1 fase por sesión (respetar convención del usuario).
+>
+> **Addendum preaviso (contrato a término fijo, Art. 46 CST) absorbido en v2.0.0 (2026-06-13):** Por decisión del 2026-06-13, el tratamiento del preaviso en contratos a término fijo se incorpora a v2.0.0 como **corrección de alcance antes del release**. Distribución:
+> - **Tarea 1.C-quater** (extender `Contrato` con campos de preaviso: `preaviso_entregado`, `fecha_preaviso`, `dias_preaviso`, `fecha_vencimiento_termino_fijo`) → **Fase 1** (anexada como Tarea 1.C-quater en §6.2).
+> - **Tarea 2.B-cuater** (`calculate_indemnizacion_preaviso` en `IndemnizacionCalculator`, fórmula Art. 46 CST: `SBL / 30 × dias_faltantes_preaviso`) → **Fase 2** (anexada como Tarea 2.B-cuater en §7.2).
+> - **Tarea 2.Y** (reglas de compliance `V_PREAVISO_TERMINO_FIJO` CRITICAL y `V_PREAVISO_DECLARADO` MEDIUM) → **Fase 2** (anexada como Tarea 2.Y en §7.2).
+> - **Tarea 3.H** (actualización de matriz `REQUISITOS_POR_MOTIVO` para `termino_fijo_vencido` + bloque condicional en `finiquito.j2` para preaviso) → **Fase 3** (anexada como Tarea 3.H en §8.2).
+>
+> **Alcance jurídico del preaviso (Art. 46 CST):** El preaviso aplica únicamente al **contrato a término fijo**. El empleador debe comunicar por escrito al trabajador, con al menos **30 días de anticipación** a la fecha de vencimiento, si NO desea renovar el contrato. Consecuencia de no dar preaviso: (a) si no se notifica antes del vencimiento, el contrato se **entiende renovado automáticamente** por un término igual al pactado inicialmente; (b) si se notifica tardíamente (menos de 30 días), la sanción es el pago de una **indemnización equivalente al salario correspondiente al lapso de preaviso no otorgado** (máximo 30 días × SBL/30). Para contratos **indefinidos**, **por obra o labor**, y **prestación de servicios** NO existe obligación legal de preaviso en Colombia. La **renuncia voluntaria** del trabajador tampoco requiere preaviso legal (Art. 49 num. 6 CST). **Convención:** 1 fase por sesión.
+> **Reparos del addendum preaviso:** (a) **Verificar texto literal del Art. 46 CST en SUIN** (https://www.suin-juriscol.gov.co/) antes de cerrar Tarea 2.B-cuater — específicamente el párrafo sobre renovación automática y la indemnización por preaviso insuficiente; (b) **Confirmar si la indemnización por preaviso se aplica como renglón separado de la indemnización por despido sin justa causa** (Art. 64) o si se acumula — en v2.0 se modelan como renglones separados; (c) **No implementar preaviso contractual** (pacto entre partes que excede los 30 días legales) en esta iteración — queda documentado como extensión futura. **Regresión dura:** el caso canónico PERIODICA (contrato INDEFINIDO, sin preaviso) **sigue verde** — los nuevos campos de `Contrato` son retrocompatibles (todos opcionales).
 
 ---
 
@@ -165,7 +174,7 @@ liquidacion_cli/
 |---|---|---|---|---|
 | **0** | Higiene + segundo cerebro mínimo | Repo limpio, sintaxis válida, KB esbozada, `.git` inicializado tras rotar clave | `compileall`=0, `git status` limpio, 9 notas KB + AGENTS.md creados, suite al 100% o fallos preexistentes documentados | Bajo-Medio |
 | **1** | Estabilizar y formalizar | `pyproject.toml`, CLI real, schemas Pydantic, generadores consistentes, caso canónico verde | `pip install -e .` OK, `python -m liquidator.cli --help` OK, caso canónico verde, suite 100% | Medio |
-| **2** | Contrato legal y cálculo correcto | Cap de cesantías resuelto con cita legal, `severity→blocking` activo, `OVERRIDE_APPROVED` implementado, `NormasRepository`/`PlazosManager` integrados, tests golden | Caso canónico exacto, todos los golden tests verdes, suite 100% | Alto |
+| **2** | Contrato legal y cálculo correcto | Cap de cesantías resuelto con cita legal, `severity→blocking` activo, `OVERRIDE_APPROVED` implementado, `NormasRepository`/`PlazosManager` integrados, tests golden, **preaviso Art. 46 CST** (calculadora + compliance) | Caso canónico exacto, todos los golden tests verdes, suite 100%, tests de preaviso (sin/parcial/suficiente) verdes | Alto |
 | **2-bis** | Indexación IPC + anualización salarial *(absorción addendum SL2630-2024)* | `IPCIndexador` con datos DANE en **formato índice acumulado**, `params/normas.json` con SL2630-2024 y Art. 488 CST (NO Art. 155), regla `V_INDEXACION_IPC` (severity MEDIUM, no bloqueante), test golden de prescripción/indexación verde, KB actualizada | `IPCIndexador.indexar()` retorna VA coherente con datos DANE reales; SL2630-2024 citada con `estado_verificacion` real (no `PENDIENTE_VERBATIM`); Art. 488 CST citado para prescripción; cero referencias a Art. 155 CST en código/params/KB; suite 100% | Alto (3-4 sesiones) |
 | **3** | Documento generable robusto | `document_context` formal, plantillas Jinja, estados GO/WARN/NO_GO/OVERRIDE_APPROVED, evidencia legal por renglón, validación pre-render, `liquidacion_BLOQUEADA.*`, auditoría inmutable por ejecución | Caso canónico genera 3 archivos correctos; caso bloqueado genera `*_BLOQUEADA.*` con explicación; suite 100% | Alto |
 | **4** | v2.0 release | Pydantic total, ruff+black+mypy en CI, CLI con Typer/Click, PDF robusto, CHANGELOG v2.0, README reescrito, `liquidacion --version`=2.0.0 | `liquidacion --version`=2.0.0, CHANGELOG con breaking changes, CI verde, suite 100%, **3 liquidaciones reales verificadas por Jhond** (diag. §6.8) | Medio |
@@ -692,6 +701,8 @@ pytest liquidator/tests -q
 - [ ] **Nuevo modelo `VacacionesEstado` tipado** (reemplaza el `dict` libre de `LiquidacionInput.vacaciones`) con campos `dias_causados_proporcionales`, `dias_disfrutados`, `dias_pendientes` (en `Decimal`, no `int`, para soportar fracciones de día legalmente válidas CST), `fechas_disfrute` opcional. `model_validator` rechaza `dias_pendientes > dias_causados - dias_disfrutados` con mensaje claro.
 - [ ] `LiquidacionInput._finiquito_requiere_motivo` valida que `modo == "FINIQUITO"` exige `contrato.motivo_terminacion`. Caso canónico PERIODICA (sin `motivo_terminacion`) **sigue verde** (regresión cero: PERIODICA no requiere motivo).
 - [ ] Tests nuevos en `liquidator/tests/test_contracts/test_vacaciones_estado.py` y `liquidator/tests/test_contracts/test_motivo_terminacion.py` verdes; caso canónico (PERIODICA) sin campos nuevos **sigue verde** (regresión obligatoria).
+- [ ] **Schema `Contrato` extendido con campos de preaviso** *(absorción addendum preaviso 2026-06-13)*: `preaviso_entregado: bool | None` (default `None`), `fecha_preaviso: date | None`, `dias_preaviso: int | None` (días de anticipación efectivos), `fecha_vencimiento_termino_fijo: date | None` (fecha de vencimiento del contrato a término fijo). Todos opcionales, retrocompatibles. `model_validator` exige que si `contrato.tipo == "FIJO"` y `modo == "FINIQUITO"` y `motivo_terminacion == "termino_fijo_vencido"`, entonces `preaviso_entregado` es obligatorio. Caso canónico (INDEFINIDO) sin campos de preaviso sigue parseando idéntico.
+- [ ] Tests nuevos en `liquidator/tests/test_contracts/test_preaviso_contrato.py` verdes; caso canónico PERIODICA sin campos nuevos **sigue verde** (regresión obligatoria).
 - [ ] Suite al 100%.
 
 ### 6.2 Tareas Fase 1 (orden sugerido)
@@ -1257,6 +1268,195 @@ PYTHONPATH=. pytest liquidator/tests -q
 
 ---
 
+#### Tarea 1.C-quater — Extender `Contrato` con campos de preaviso *(absorción addendum preaviso 2026-06-13)*
+
+>**Origen:** Addendum preaviso (decisión 2026-06-13). El preaviso aplica exclusivamente al contrato a término fijo (Art. 46 CST). Esta tarea NO cambia el cálculo del caso canónico (contrato INDEFINIDO, sin preaviso); prepara el terreno para Tarea 2.B-cuater (Fase 2, `calculate_indemnizacion_preaviso`) y Tarea 3.H (Fase 3, pre-render + plantilla).
+
+**Archivos:**
+- Modificar `liquidator/contracts/input_model.py` (agregar campos de preaviso a `Contrato`; agregar `model_validator` para validación cruzada).
+- Actualizar `Contexto/KB_LLM/04_schema_entrada.md` (documentar campos de preaviso y su aplicación exclusiva a término fijo).
+- Crear `liquidator/tests/test_contracts/test_preaviso_contrato.py` (cubrir validación, casos válidos, casos inválidos, regresión).
+- Actualizar `examples/inputs/caso_canonico_periodico_206d.json` (sin nuevos campos, mantener regresión — verificar que sigue parseando idéntico).
+
+**Cambios al schema (forma mínima viable, retrocompatible):**
+
+```python
+# liquidator/contracts/input_model.py — adición a Contrato existente
+class Contrato(BaseModel):
+    fecha_ingreso: date
+    fecha_corte: date
+    tipo: Literal["INDEFINIDO", "FIJO", "OBRA_LABOR", "PRESTACION"]
+    motivo_terminacion: MotivoTerminacion | None = None
+    fecha_terminacion_real: date | None = None
+    # NUEVOS (opcionales, retrocompatibles; consumo en Tarea 2.B-cuater)
+    fecha_vencimiento_termino_fijo: date | None = None
+    preaviso_entregado: bool | None = None
+    fecha_preaviso: date | None = None
+    dias_preaviso: int | None = None  # días de anticipación efectivos
+
+    @model_validator(mode="after")
+    def _preaviso_consistencia(self):
+        # Regla 1: Preaviso solo aplica a término fijo
+        if self.preaviso_entregado is not None and self.tipo != "FIJO":
+            raise ValueError(
+                "preaviso_entregado solo aplica a contratos tipo FIJO (Art. 46 CST)"
+            )
+        # Regla 2: Si preaviso_entregado=True, requiere fecha_preaviso
+        if self.preaviso_entregado and self.fecha_preaviso is None:
+            raise ValueError(
+                "Si preaviso_entregado=True, es obligatorio fecha_preaviso"
+            )
+        # Regla 3: FINIQUITO por término fijo vencido exige preaviso declarado
+        if (
+            self.tipo == "FIJO"
+            and self.motivo_terminacion == MotivoTerminacion.TERMINO_FIJO_VENCIDO
+            and self.preaviso_entregado is None
+        ):
+            raise ValueError(
+                "FINIQUITO por termino_fijo_vencido requiere declarar "
+                "preaviso_entregado (bool). Art. 46 CST."
+            )
+        # Regla 4: fecha_terminacion_real sigue requiriendo motivo (heredado)
+        if self.fecha_terminacion_real and not self.motivo_terminacion:
+            raise ValueError(
+                "Si hay fecha_terminacion_real, es obligatorio motivo_terminacion"
+            )
+        return self
+```
+
+**Cálculo de días de preaviso efectivos (opcional, puede hacerse en Fase 2):** si el usuario no provee `dias_preaviso` pero sí `fecha_preaviso` y `fecha_vencimiento_termino_fijo`, el motor calculará la diferencia en Tarea 2.B-cuater. Si no hay `fecha_vencimiento_termino_fijo`, el motor usa `fecha_terminacion_real` como proxy.
+
+**Compatibilidad hacia atrás:**
+- Caso canónico PERIODICA (contrato INDEFINIDO, sin campos de preaviso): input **sigue parseando idéntico**.
+- Inputs con `tipo: "INDEFINIDO"` que tienen `preaviso_entregado` declarado: **fallan** (el validador rechaza preaviso en contratos que no son FIJO).
+
+**DoD específico de Tarea 1.C-quater:**
+- Caso canónico (PERIODICA, contrato INDEFINIDO) **sigue verde** sin modificar el JSON de input (regresión cero obligatoria).
+- Input nuevo `FINIQUITO` con `tipo: "FIJO"`, `motivo_terminacion: "termino_fijo_vencido"`, `preaviso_entregado: true`, `fecha_preaviso: "2026-05-01"`, `fecha_vencimiento_termino_fijo: "2026-06-01"` pasa validación.
+- Input `FINIQUITO` con `tipo: "FIJO"`, `motivo_terminacion: "termino_fijo_vencido"` **sin** `preaviso_entregado` falla con `ValidationError` claro.
+- Input con `tipo: "INDEFINIDO"`, `preaviso_entregado: true` falla (preaviso solo para FIJO).
+- Input con `preaviso_entregado: true` sin `fecha_preaviso` falla.
+
+**Validación (tests de Fase 1):**
+
+```python
+# liquidator/tests/test_contracts/test_preaviso_contrato.py
+import pytest
+from datetime import date
+from pydantic import ValidationError
+from liquidator.contracts.input_model import (
+    LiquidacionInput, Contrato, MotivoTerminacion,
+)
+
+def test_canonico_periodico_sin_preaviso_sigue_verde():
+    """Regresión dura: INDEFINIDO sin preaviso no se afecta."""
+    inp = LiquidacionInput.model_validate({
+        "trabajador": {"nombre": "X", "documento": "1"},
+        "empleador":  {"nombre": "Y", "documento": "2"},
+        "contrato": {
+            "fecha_ingreso": "2025-11-16",
+            "fecha_corte": "2026-06-09",
+            "tipo": "INDEFINIDO",
+        },
+        "salario": {"SBL": 2200000},
+        "modo": "PERIODICA",
+    })
+    assert inp.contrato.preaviso_entregado is None
+    assert inp.contrato.dias_preaviso is None
+
+def test_fijo_vencido_con_preaviso_pasa():
+    """Caso feliz: FIJO + vencido + preaviso 30 días antes."""
+    inp = LiquidacionInput.model_validate({
+        "trabajador": {"nombre": "X", "documento": "1"},
+        "empleador":  {"nombre": "Y", "documento": "2"},
+        "contrato": {
+            "fecha_ingreso": "2025-06-01",
+            "fecha_corte": "2026-06-01",
+            "tipo": "FIJO",
+            "motivo_terminacion": "termino_fijo_vencido",
+            "fecha_terminacion_real": "2026-06-01",
+            "fecha_vencimiento_termino_fijo": "2026-06-01",
+            "preaviso_entregado": True,
+            "fecha_preaviso": "2026-05-01",
+        },
+        "salario": {"SBL": 2200000},
+        "modo": "FINIQUITO",
+    })
+    assert inp.contrato.preaviso_entregado is True
+
+def test_fijo_vencido_sin_preaviso_falla():
+    """FIJO + vencido sin preaviso: ValidationError."""
+    with pytest.raises(ValidationError, match="preaviso_entregado"):
+        LiquidacionInput.model_validate({
+            "trabajador": {"nombre": "X", "documento": "1"},
+            "empleador":  {"nombre": "Y", "documento": "2"},
+            "contrato": {
+                "fecha_ingreso": "2025-06-01",
+                "fecha_corte": "2026-06-01",
+                "tipo": "FIJO",
+                "motivo_terminacion": "termino_fijo_vencido",
+                "fecha_terminacion_real": "2026-06-01",
+            },
+            "salario": {"SBL": 2200000},
+            "modo": "FINIQUITO",
+        })
+
+def test_indefinido_con_preaviso_falla():
+    """INDEFINIDO no acepta campos de preaviso."""
+    with pytest.raises(ValidationError, match="solo aplica.*FIJO"):
+        LiquidacionInput.model_validate({
+            "trabajador": {"nombre": "X", "documento": "1"},
+            "empleador":  {"nombre": "Y", "documento": "2"},
+            "contrato": {
+                "fecha_ingreso": "2025-11-16",
+                "fecha_corte": "2026-06-09",
+                "tipo": "INDEFINIDO",
+                "preaviso_entregado": True,
+                "fecha_preaviso": "2026-05-01",
+            },
+            "salario": {"SBL": 2200000},
+            "modo": "FINIQUITO",
+        })
+
+def test_preaviso_sin_fecha_falla():
+    """preaviso_entregado=True exige fecha_preaviso."""
+    with pytest.raises(ValidationError, match="fecha_preaviso"):
+        LiquidacionInput.model_validate({
+            "trabajador": {"nombre": "X", "documento": "1"},
+            "empleador":  {"nombre": "Y", "documento": "2"},
+            "contrato": {
+                "fecha_ingreso": "2025-06-01",
+                "fecha_corte": "2026-06-01",
+                "tipo": "FIJO",
+                "motivo_terminacion": "termino_fijo_vencido",
+                "fecha_terminacion_real": "2026-06-01",
+                "fecha_vencimiento_termino_fijo": "2026-06-01",
+                "preaviso_entregado": True,
+            },
+            "salario": {"SBL": 2200000},
+            "modo": "FINIQUITO",
+        })
+```
+
+```bash
+# Pruebas de regresión obligatorias
+PYTHONPATH=. pytest liquidator/tests/test_contracts/test_preaviso_contrato.py -v
+# Esperado: 5+ passed
+
+PYTHONPATH=. pytest liquidator/tests/test_canonico/test_caso_canonico_usuario.py -v
+# Esperado: 1+ passed (caso canónico sin cambios)
+
+PYTHONPATH=. pytest liquidator/tests -q
+# Esperado: 100% passed, 0 errors
+```
+
+**Riesgos específicos:**
+- **R1:** El `model_validator` que exige `preaviso_entregado` cuando `tipo == "FIJO"` y `motivo == "termino_fijo_vencido"` puede romper inputs existentes de contratos FIJO que no tenían preaviso. Mitigación: revisar `examples/inputs/` por contratos FIJO y agregarles `preaviso_entregado` apropiado.
+- **R2:** Usuarios que liquidan un FIJO por otro motivo (ej. mutuo acuerdo) no están obligados a declarar preaviso. Mitigación: el validador solo exige preaviso cuando `motivo_terminacion == "termino_fijo_vencido"`.
+- **R3:** El campo `dias_preaviso` puede ser inconsistente con `fecha_preaviso` y `fecha_vencimiento_termino_fijo`. Mitigación: en Tarea 2.B-cuater, el motor calcula `dias_preaviso` automáticamente si no se provee; si se provee, el motor verifica consistencia (WARNING si difiere en más de 1 día, CRITICAL si difiere en más de 5 días).
+
+---
+
 #### Tarea 1.D — Refactor `JSONGenerator`
 
 **Archivo:** `liquidator/output/json_generator.py`
@@ -1637,6 +1837,9 @@ Actualizar `Contexto/KB_LLM/09_caso_canonico_usuario.md` con la salida real obse
 - [ ] **Reglas de compliance `V_VACACIONES_FINIQUITO` (severity CRITICAL, blocking)** y `V_VACACIONES_DECLARADAS_FINIQUITO` (severity MEDIUM, no blocking) activas en `params/checklist.json`. La regla CRITICAL bloquea el documento si modo=FINIQUITO, `dias_pendientes > 0` y no hay renglón `vacaciones` en el desglose. La regla MEDIUM emite WARNING si modo=FINIQUITO y `vacaciones is None`.
 - [ ] **Test golden "vacaciones en finiquito" ampliado** (`test_vacaciones_finiquito` del diag. §3.13): incluye sub-caso de **renuncia voluntaria** con `dias_pendientes=7.5` (Decimal) que retorna `$550.000` (redondeado HALF_UP). Total liquidación entre $4.400.000 y $4.450.000.
 - [ ] Tests nuevos en `liquidator/tests/test_calculators/test_vacaciones_finiquito.py` verdes (4+ tests: caso 7.5 días, caso 0 días, evidencia legal, días negativos son no-input).
+- [ ] **`calculate_indemnizacion_preaviso` implementado en `IndemnizacionCalculator`** con fórmula Art. 46 CST: `SBL / 30 × dias_faltantes_preaviso` (donde `dias_faltantes = 30 - dias_preaviso_efectivos`, mínimo 0). El motor lo invoca **solo** cuando `modo == "FINIQUITO"` y `contrato.tipo == "FIJO"` y `motivo_terminacion == "termino_fijo_vencido"` y `preaviso_entregado == False` o `dias_preaviso < 30`. **Regresión dura:** cualquier otro modo/tipo/motivo NO invoca este método.
+- [ ] Reglas de compliance `V_PREAVISO_TERMINO_FIJO` (severity CRITICAL, blocking) y `V_PREAVISO_DECLARADO` (severity MEDIUM, no blocking) activas en `params/checklist.json`. La CRITICAL bloquea si `modo=FINIQUITO AND tipo=FIJO AND motivo=termino_fijo_vencido AND preaviso_insuficiente AND renglón indemnizacion_preaviso ausente del desglose`. La MEDIUM advierte si el usuario no declara preaviso en un finiquito FIJO.
+- [ ] Tests nuevos en `liquidator/tests/test_calculators/test_indemnizacion_preaviso.py` y `liquidator/tests/test_compliance/test_preaviso_compliance.py` verdes.
 - [ ] Suite al 100%.
 
 ### 7.2 Tareas Fase 2 (orden sugerido)
@@ -2287,6 +2490,312 @@ PYTHONPATH=. pytest liquidator/tests -q
 
 ---
 
+#### Tarea 2.B-cuater — `calculate_indemnizacion_preaviso` en `IndemnizacionCalculator` *(absorción addendum preaviso 2026-06-13)*
+
+>**Origen:** Addendum preaviso (decisión 2026-06-13). **Prereq:** Tarea 1.C-quater cerrada (schema `Contrato` con campos de preaviso). **Cambio central del motor:** cuando `inp.modo == "FINIQUITO"` y `inp.contrato.tipo == "FIJO"` y `inp.contrato.motivo_terminacion == "termino_fijo_vencido"` y el preaviso fue insuficiente (`preaviso_entregado == False` o `dias_preaviso_efectivos < 30`), el motor añade un renglón de indemnización por preaviso al desglose con fórmula Art. 46 CST: `indemnizacion_preaviso = (SBL / 30) × dias_faltantes`, donde `dias_faltantes = 30 - dias_preaviso_efectivos`. Si `preaviso_entregado == False` (no entregó preaviso), `dias_faltantes = 30`. Si `preaviso_entregado == True` y `dias_preaviso >= 30`, no hay indemnización (regresión: el renglón NO aparece en el desglose).
+
+**Archivos:**
+- Modificar `liquidator/calculators/indemnizacion.py` (agregar método `calculate_indemnizacion_preaviso` en `IndemnizacionCalculator`).
+- Modificar `liquidator/core/engine.py` (agregar método privado `_calcular_indemnizacion_preaviso_si_aplica`).
+- Crear `liquidator/tests/test_calculators/test_indemnizacion_preaviso.py` (5+ tests).
+- Crear `examples/inputs/finiquito_termino_fijo_sin_preaviso.json` + `examples/expected/finiquito_termino_fijo_sin_preaviso_result.json` (caso golden).
+- Crear `liquidator/tests/test_golden/test_finiquito_termino_fijo_preaviso.py`.
+- Actualizar `Contexto/KB_LLM/01_reglas_calculo.md` (sección "Indemnización por preaviso insuficiente — Art. 46 CST").
+
+**Diseño del método en `IndemnizacionCalculator`:**
+
+```python
+# liquidator/calculators/indemnizacion.py
+from decimal import Decimal, ROUND_HALF_UP
+from datetime import date
+
+def calculate_indemnizacion_preaviso(
+    self,
+    sbl: Decimal,
+    preaviso_entregado: bool | None,
+    fecha_preaviso: date | None,
+    fecha_vencimiento: date,
+    dias_preaviso_declarado: int | None = None,
+) -> dict:
+    """Indemnización por preaviso insuficiente (Art. 46 CST).
+
+    Aplica SOLO a contratos a término fijo cuando el empleador
+    no da preaviso de 30 días antes del vencimiento para no renovar.
+
+    Fórmula: (SBL / 30) × dias_faltantes_preaviso
+    dias_faltantes = max(0, 30 - dias_preaviso_efectivos)
+
+    Si preaviso_entregado=False: dias_faltantes = 30 (no dio preaviso).
+    Si preaviso_entregado=True: días_efectivos = fecha_vencimiento - fecha_preaviso.
+    """
+    DIAS_PREAVISO_LEGALES = 30
+
+    if not preaviso_entregado:
+        dias_faltantes = DIAS_PREAVISO_LEGALES
+    else:
+        # Calcular días efectivos de preaviso
+        if dias_preaviso_declarado is not None:
+            dias_efectivos = dias_preaviso_declarado
+        elif fecha_preaviso is not None:
+            dias_efectivos = (fecha_vencimiento - fecha_preaviso).days
+        else:
+            dias_efectivos = 0  # sin fecha de preaviso, asumir 0
+        dias_faltantes = max(0, DIAS_PREAVISO_LEGALES - dias_efectivos)
+
+    if dias_faltantes <= 0:
+        return {
+            "concepto": "Indemnización por preaviso insuficiente",
+            "valor": Decimal("0"),
+            "dias_faltantes": 0,
+            "aplica": False,
+            "formula": "SBL / 30 × dias_faltantes",
+            "evidencia_legal": self.normas_repo.cita("preaviso", "Art. 46 CST"),
+        }
+
+    valor = (sbl / Decimal(30) * Decimal(dias_faltantes)).quantize(
+        Decimal("1"), rounding=ROUND_HALF_UP
+    )
+    return {
+        "concepto": "Indemnización por preaviso insuficiente",
+        "valor": valor,
+        "dias_faltantes": dias_faltantes,
+        "aplica": True,
+        "formula": "SBL / 30 × dias_faltantes",
+        "evidencia_legal": self.normas_repo.cita("preaviso", "Art. 46 CST"),
+        "params_usados": {
+            "SBL": sbl,
+            "dias_faltantes": dias_faltantes,
+            "preaviso_entregado": preaviso_entregado,
+        },
+    }
+```
+
+**Integración en el motor (`liquidator/core/engine.py`):**
+
+```python
+def _calcular_indemnizacion_preaviso_si_aplica(self, inp, renglones):
+    """Hook de indemnización por preaviso insuficiente (Tarea 2.B-cuater).
+    Idempotente: solo se invoca cuando aplica (FINIQUITO + FIJO + vencido).
+    """
+    if inp.modo != "FINIQUITO":
+        return
+    if inp.contrato.tipo != "FIJO":
+        return
+    if inp.contrato.motivo_terminacion != MotivoTerminacion.TERMINO_FIJO_VENCIDO:
+        return
+    fecha_venc = (
+        inp.contrato.fecha_vencimiento_termino_fijo
+        or inp.contrato.fecha_terminacion_real
+        or inp.contrato.fecha_corte
+    )
+    renglon = self.indemnizacion.calculate_indemnizacion_preaviso(
+        sbl=inp.salario.SBL,
+        preaviso_entregado=inp.contrato.preaviso_entregado,
+        fecha_preaviso=inp.contrato.fecha_preaviso,
+        fecha_vencimiento=fecha_venc,
+        dias_preaviso_declarado=inp.contrato.dias_preaviso,
+    )
+    if renglon["aplica"]:
+        renglones.append(renglon)
+```
+
+**Caso golden propuesto (contrato a término fijo de 1 año, sin preaviso):**
+
+**Input:** `examples/inputs/finiquito_termino_fijo_sin_preaviso.json`
+
+```json
+{
+  "trabajador": {"nombre": "ANONIMIZADO", "documento": "0"},
+  "empleador":  {"nombre": "ANONIMIZADO", "documento": "1"},
+  "contrato":   {
+    "fecha_ingreso": "2025-06-01",
+    "fecha_corte":   "2026-06-01",
+    "tipo": "FIJO",
+    "fecha_terminacion_real": "2026-06-01",
+    "motivo_terminacion": "termino_fijo_vencido",
+    "fecha_vencimiento_termino_fijo": "2026-06-01",
+    "preaviso_entregado": false
+  },
+  "salario":    {"SBL": 2200000, "auxilio_transporte": false, "variable": false},
+  "modo":       "FINIQUITO",
+  "vacaciones": {"dias_pendientes": 15}
+}
+```
+
+**Output esperado (conceptos clave):**
+
+| Concepto | Valor | Fórmula |
+|---|---|---|
+| Cesantías | $7.333.333 | 2.200.000 × 360 / 360 |
+| Prima | $4.400.000 | 2 semestres × (2.200.000 × 180 / 360) |
+| **Indemnización preaviso** | **$2.200.000** | **2.200.000 / 30 × 30** |
+| Vacaciones | $1.100.000 | 2.200.000 / 30 × 15 |
+
+**Caso con preaviso parcial (10 días antes del vencimiento):**
+
+```json
+{
+  "contrato": {
+    "tipo": "FIJO",
+    "motivo_terminacion": "termino_fijo_vencido",
+    "preaviso_entregado": true,
+    "fecha_preaviso": "2026-05-22",
+    "fecha_vencimiento_termino_fijo": "2026-06-01"
+  }
+}
+```
+
+Indemnización: `2.200.000 / 30 × (30 - 10) = 2.200.000 / 30 × 20 = $1.466.667`.
+
+**Validación (DoD Fase 2):**
+
+```python
+# liquidator/tests/test_calculators/test_indemnizacion_preaviso.py
+from decimal import Decimal
+from datetime import date
+from liquidator.calculators.indemnizacion import IndemnizacionCalculator
+
+def test_sin_preaviso_indemnizacion_completa():
+    """No dio preaviso: 30 días de salario."""
+    calc = IndemnizacionCalculator(...)
+    r = calc.calculate_indemnizacion_preaviso(
+        sbl=Decimal("2200000"),
+        preaviso_entregado=False,
+        fecha_preaviso=None,
+        fecha_vencimiento=date(2026, 6, 1),
+    )
+    # 2.200.000 / 30 × 30 = 2.200.000
+    assert r["valor"] == Decimal("2200000")
+    assert r["dias_faltantes"] == 30
+
+def test_preaviso_parcial_10_dias():
+    """10 días de preaviso: faltan 20."""
+    calc = IndemnizacionCalculator(...)
+    r = calc.calculate_indemnizacion_preaviso(
+        sbl=Decimal("2200000"),
+        preaviso_entregado=True,
+        fecha_preaviso=date(2026, 5, 22),
+        fecha_vencimiento=date(2026, 6, 1),
+    )
+    # 2.200.000 / 30 × 20 = 1.466.667
+    assert r["valor"] == Decimal("1466667")
+    assert r["dias_faltantes"] == 20
+
+def test_preaviso_suficiente_30_dias():
+    """30+ días: sin indemnización."""
+    calc = IndemnizacionCalculator(...)
+    r = calc.calculate_indemnizacion_preaviso(
+        sbl=Decimal("2200000"),
+        preaviso_entregado=True,
+        fecha_preaviso=date(2026, 5, 1),
+        fecha_vencimiento=date(2026, 6, 1),
+    )
+    assert r["valor"] == Decimal("0")
+    assert r["aplica"] is False
+
+def test_preaviso_con_sbl_1_smmlv_2026():
+    """Sanity: 1 SMMLV 2026, 15 días faltantes."""
+    calc = IndemnizacionCalculator(...)
+    r = calc.calculate_indemnizacion_preaviso(
+        sbl=Decimal("1750905"),
+        preaviso_entregado=True,
+        fecha_preaviso=date(2026, 5, 17),
+        fecha_vencimiento=date(2026, 6, 1),
+    )
+    # 1.750.905 / 30 × 15 = 875.453
+    assert r["valor"] == Decimal("875453")
+    assert r["dias_faltantes"] == 15
+```
+
+**Regresión dura (no romper Fase 1 ni canónico):**
+
+```python
+def test_canonico_periodico_no_calcula_preaviso():
+    """INDEFINIDO PERIODICA NO debe generar renglón de preaviso."""
+    inp = json.loads((REPO / "examples" / "inputs" /
+                      "caso_canonico_periodico_206d.json").read_text())
+    provs = ParamsProvider.for_range(...)
+    engine = LiquidacionEngine(provs=provs)
+    result = engine.process_input(inp)
+    assert "indemnizacion_preaviso" not in result["desglose"]
+```
+
+**Riesgos específicos:**
+- **R1:** Confundir indemnización por preaviso con indemnización por despido sin justa causa (Art. 64). Mitigación: son renglones separados con IDs distintos (`indemnizacion_preaviso` vs `indemnizacion_despido`); test que verifica que un contrato FIJO con preaviso insuficiente Y despido sin justa causa genera AMBOS renglones.
+- **R2:** El cálculo de `dias_efectivos` puede ser incorrecto si `fecha_vencimiento` se infiere de `fecha_terminacion_real` (que puede no coincidir con la fecha contractual de vencimiento). Mitigación: usar `fecha_vencimiento_termino_fijo` como fuente primaria; documentar en KB que la inferencia es un fallback.
+- **R3:** La jurisprudencia puede interpretar Art. 46 CST de forma distinta a la indemnización directa (algunos jueces ordenan renovación automática en vez de pago). Mitigación: documentar que la indemnización por preaviso es la interpretación mayoritaria para efectos de liquidación contable; el motor registra la evidencia legal para auditoría.
+
+---
+
+#### Tarea 2.Y — Reglas de compliance `V_PREAVISO_TERMINO_FIJO` y `V_PREAVISO_DECLARADO` *(absorción addendum preaviso 2026-06-13)*
+
+>**Origen:** Addendum preaviso (decisión 2026-06-13). **Prereq:** Tarea 1.C-quater cerrada (schema `Contrato` con campos de preaviso) y Tarea 2.B-cuater cerrada (cálculo de indemnización preaviso). **Propósito:** cerrar el loop de compliance para preaviso: si el preaviso fue insuficiente y no hay renglón de indemnización en el desglose, CRITICAL bloquea; si el usuario no declaró preaviso en un contrato FIJO con terminación por vencimiento, MEDIUM advierte.
+
+**Archivos:**
+- Modificar `params/checklist.json` (agregar entradas `V_PREAVISO_TERMINO_FIJO` y `V_PREAVISO_DECLARADO`).
+- Modificar `liquidator/compliance/compliance_engine.py` (evaluar ambas reglas).
+- Crear `liquidator/tests/test_compliance/test_preaviso_compliance.py` (4+ tests).
+- Actualizar `Contexto/KB_LLM/03_compliance_blocking.md` (documentar las 2 reglas).
+
+**Reglas en `params/checklist.json`:**
+
+```json
+{
+  "id": "V_PREAVISO_TERMINO_FIJO",
+  "description": "En finiquito de contrato a término fijo por vencimiento, si el preaviso fue insuficiente (< 30 días), debe incluirse indemnización por preaviso (Art. 46 CST). La ausencia del renglón cuando el preaviso fue insuficiente es fallo CRITICAL.",
+  "severity": "CRITICAL",
+  "blocking": true,
+  "rule_ref": "Art. 46 CST",
+  "formula": "SBL / 30 × (30 - dias_preaviso_efectivos)",
+  "aplica_si": "modo == FINIQUITO AND contrato.tipo == FIJO AND motivo_terminacion == termino_fijo_vencido AND (preaviso_entregado == false OR dias_preaviso < 30)"
+},
+{
+  "id": "V_PREAVISO_DECLARADO",
+  "description": "En FINIQUITO de contrato FIJO con motivo termino_fijo_vencido se RECOMIENDA declarar preaviso_entregado explícitamente. Si preaviso_entregado es None y el motivo es termino_fijo_vencido, se emite WARNING (severity MEDIUM).",
+  "severity": "MEDIUM",
+  "blocking": false,
+  "rule_ref": "Art. 46 CST",
+  "aplica_si": "modo == FINIQUITO AND contrato.tipo == FIJO AND motivo_terminacion == termino_fijo_vencido AND preaviso_entregado IS NULL"
+}
+```
+
+**Validación (tests):**
+
+```python
+# liquidator/tests/test_compliance/test_preaviso_compliance.py
+def test_fijo_sin_preaviso_con_renglon_pasa(engine, inp_fijo_sin_preaviso):
+    """Motor calculó indemnización: regla CRITICAL pasa."""
+    result = engine.evaluate(inp_fijo_sin_preaviso, desglose_con_preaviso_2_2M)
+    failures = [f for f in result["failures"] if f["rule_id"] == "V_PREAVISO_TERMINO_FIJO"]
+    assert failures == []
+
+def test_fijo_sin_preaviso_sin_renglon_bloquea(engine, inp_fijo_sin_preaviso):
+    """Motor NO calculó: CRITICAL bloquea."""
+    result = engine.evaluate(inp_fijo_sin_preaviso, desglose_sin_preaviso)
+    failures = [f for f in result["failures"] if f["rule_id"] == "V_PREAVISO_TERMINO_FIJO"]
+    assert len(failures) == 1
+    assert failures[0]["blocking"] is True
+
+def test_fijo_preaviso_no_declarado_emite_warning(engine, inp_fijo_preaviso_none):
+    """MEDIUM si preaviso_entregado no declarado."""
+    result = engine.evaluate(inp_fijo_preaviso_none, desglose_basico)
+    warnings = [w for w in result["warnings"] if w["rule_id"] == "V_PREAVISO_DECLARADO"]
+    assert len(warnings) == 1
+
+def test_indefinido_no_evalua_preaviso(engine, inp_canonico):
+    """Regresión: INDEFINIDO no evalúa reglas de preaviso."""
+    result = engine.evaluate(inp_canonico, desglose_canonico)
+    failures = [f for f in result["failures"] if "PREAVISO" in f["rule_id"]]
+    warnings = [w for w in result["warnings"] if "PREAVISO" in w["rule_id"]]
+    assert failures == [] and warnings == []
+```
+
+**Riesgos específicos:**
+- **R1:** La regla CRITICAL puede bloquear un finiquito FIJO legítimo si el empleador renovó el contrato (no hay preaviso porque se renovó). Mitigación: el preaviso solo aplica cuando `motivo_terminacion == "termino_fijo_vencido"`. Si se renovó, el motivo sería otro (ej. `mutuo_acuerdo` en la renovación) y la regla no aplica.
+- **R2:** El campo `preaviso_entregado` puede estar ausente (None) en inputs legacy. Mitigación: la regla MEDIUM advierte pero no bloquea; el motor usa `None` como señal de datos faltantes.
+
+---
+
 #### Tarea 2.C — `severity → blocking` en `params/checklist.json`
 
 **Archivos:** `params/checklist.json` (modificar), `liquidator/compliance/compliance_engine.py` (verificar uso).
@@ -2811,9 +3320,9 @@ REQUISITOS_POR_MOTIVO = {
         "nota_render":   "NO HAY INDEMNIZACIÓN: despido con causa legal (Art. 62 CST).",
     },
     "termino_fijo_vencido": {
-        "requiere":      ["vacaciones"],
-        "no_requiere":   ["indemnizacion"],   # salvo preaviso Art. 46
-        "nota_render":   "NO HAY INDEMNIZACIÓN: contrato a término fijo vencido.",
+        "requiere":      ["vacaciones", "preaviso_check"],
+        "no_requiere":   ["indemnizacion_despido"],   # excepto indemnización preaviso Art. 46
+        "nota_render":   "NO HAY INDEMNIZACIÓN POR DESPIDO: contrato a término fijo vencido. Verificar preaviso Art. 46 CST (si < 30 días → indemnización preaviso).",
     },
     "obra_o_labor_terminada": {
         "requiere":      ["vacaciones"],
@@ -3036,6 +3545,105 @@ PYTHONPATH=. pytest liquidator/tests -q
 - **R4:** La validación `validar_requisitos_por_motivo` puede romper la generación de plantillas para casos legacy (sin motivo_terminacion). Mitigación: guard `if inp.contrato.motivo_terminacion is None: return` al inicio; test de regresión `test_periodico_no_evalua_matriz`.
 - **R5:** La indemnización Art. 64 CST no se implementa en Tarea 2.B-ter; por tanto, el caso `despido_sin_justa_causa` no puede pasar la validación `validar_requisitos_por_motivo` hasta que se implemente la indemnización (lo cual está fuera del scope del addendum 2026-06-11). Mitigación: documentar explícitamente en KB y en CHANGELOG que `despido_sin_justa_causa` solo funciona tras implementar indemnización (Tarea 2.W futura, fuera de v2.0).
 - **R6:** Crear `finiquito_renuncia.j2` separado duplica la lógica base de `finiquito.j2`. Mitigación: preferir bloque condicional en `finiquito.j2` (más mantenible, una sola fuente de verdad para la estructura del documento). El addendum ya lo recomienda.
+
+---
+
+#### Tarea 3.H — Actualización de `PreRenderValidator` y plantilla `finiquito.j2` para preaviso *(absorción addendum preaviso 2026-06-13)*
+
+>**Origen:** Addendum preaviso (decisión 2026-06-13). **Prereq:** Tareas 1.C-quater, 2.B-cuater y 2.Y cerradas (schema + motor + compliance). **Propósito:** cerrar el loop de presentación para preaviso: la matriz `REQUISITOS_POR_MOTIVO` debe distinguir entre indemnización por despido (Art. 64, NO aplica a término fijo vencido) e indemnización por preaviso (Art. 46, SÍ puede aplicar). La plantilla debe renderizar una sección visible de preaviso cuando `tipo == "FIJO"` con información del estado del preaviso.
+
+**Archivos:**
+- Modificar `liquidator/output/pre_render_validator.py` (actualizar entrada `termino_fijo_vencido` en `REQUISITOS_POR_MOTIVO` — ya cambiada en esta sesión).
+- Modificar `liquidator/templates/finiquito.j2` (agregar bloque condicional para preaviso).
+- Crear `liquidator/tests/test_output/test_preaviso_render.py` (verifica bloque de preaviso).
+- Actualizar `Contexto/KB_LLM/05_plantillas.md` (documentar el bloque condicional de preaviso).
+
+**Bloque condicional en `finiquito.j2` para preaviso:**
+
+```jinja
+{# liquidator/templates/finiquito.j2 — bloque preaviso agregado #}
+
+{% if contrato.tipo == "FIJO" and contrato.motivo_terminacion == "termino_fijo_vencido" %}
+## Preaviso (Art. 46 CST)
+{% if contrato.preaviso_entregado %}
+Preaviso entregado: **SÍ** ({{ contrato.fecha_preaviso }}, {{ contrato.dias_preaviso }} días antes del vencimiento).
+{% if desglose.indemnizacion_preaviso and desglose.indemnizacion_preaviso.valor > 0 %}
+**Preaviso insuficiente** (menos de 30 días). Indemnización por preaviso:
+**{{ format_cop(desglose.indemnizacion_preaviso.valor) }}**
+Fórmula: SBL / 30 × {{ desglose.indemnizacion_preaviso.dias_faltantes }} días faltantes = {{ format_cop(salario.SBL) }} / 30 × {{ desglose.indemnizacion_preaviso.dias_faltantes }}.
+Base legal: Art. 46 CST.
+{% else %}
+Preaviso con anticipación suficiente (≥ 30 días). No aplica indemnización por preaviso.
+{% endif %}
+{% else %}
+Preaviso entregado: **NO**.
+**Indemnización por falta de preaviso (30 días):**
+**{{ format_cop(desglose.indemnizacion_preaviso.valor) }}**
+Fórmula: SBL / 30 × 30 = {{ format_cop(salario.SBL) }} / 30 × 30.
+Base legal: Art. 46 CST.
+**Nota:** El empleador debió notificar por escrito al trabajador con al menos 30 días
+de anticipación al vencimiento del contrato sobre su decisión de no renovarlo.
+{% endif %}
+{% endif %}
+```
+
+**Validación (DoD Fase 3):**
+
+```python
+# liquidator/tests/test_output/test_preaviso_render.py
+def test_plantilla_renderiza_preaviso_sin_entrega():
+    """Verifica que muestra indemnización completa cuando no hay preaviso."""
+    contexto = {
+        "contrato": {
+            "tipo": "FIJO",
+            "motivo_terminacion": "termino_fijo_vencido",
+            "fecha_terminacion_real": "2026-06-01",
+            "preaviso_entregado": False,
+            "fecha_preaviso": None,
+            "dias_preaviso": 0,
+        },
+        "salario": {"SBL": 2200000},
+        "desglose": {
+            "indemnizacion_preaviso": {"valor": 2200000, "dias_faltantes": 30},
+        },
+    }
+    rendered = env.get_template("finiquito.j2").render(contexto)
+    assert "Preaviso entregado: **NO**" in rendered
+    assert "2.200.000" in rendered
+    assert "Art. 46 CST" in rendered
+
+def test_plantilla_renderiza_preaviso_suficiente():
+    """Preaviso de 30+ días: no muestra indemnización."""
+    contexto = {
+        "contrato": {
+            "tipo": "FIJO",
+            "motivo_terminacion": "termino_fijo_vencido",
+            "preaviso_entregado": True,
+            "fecha_preaviso": "2026-05-01",
+            "dias_preaviso": 31,
+        },
+        "salario": {"SBL": 2200000},
+        "desglose": {},
+    }
+    rendered = env.get_template("finiquito.j2").render(contexto)
+    assert "Preaviso entregado: **SÍ**" in rendered
+    assert "suficiente" in rendered.lower()
+
+def test_plantilla_no_muestra_preaviso_en_indefinido():
+    """INDEFINIDO no renderiza sección de preaviso."""
+    contexto = {
+        "contrato": {"tipo": "INDEFINIDO", "motivo_terminacion": "renuncia_voluntaria"},
+        "salario": {"SBL": 2200000},
+        "desglose": {},
+    }
+    rendered = env.get_template("finiquito.j2").render(contexto)
+    assert "Preaviso" not in rendered or "Art. 46" not in rendered
+```
+
+**Riesgos específicos:**
+- **R1:** El bloque Jinja puede renderizar mal si `preaviso_entregado` es `None` (en vez de `False`). Mitigación: Jinja evalúa `None` como falso en `{% if not X %}`, pero es más seguro usar `{% if contrato.preaviso_entregado == false %}` explícitamente. Test que cubre el caso `None`.
+- **R2:** El formato COP puede no manejar valores grandes (millones). Mitigación: el filtro `format_cop` ya está probado en Tarea 3.B; verificar cobertura con valores > 1.000.000.
+- **R3:** La nota "El empleador debió notificar..." puede ser demasiado detallada para un comprobante estándar. Mitigación: la nota solo se renderiza cuando `preaviso_entregado == False` (caso de incumplimiento); en otros casos es información concisa.
 
 ---
 
@@ -3269,6 +3877,14 @@ liquidacion --version   # 2.0.0 al cerrar Fase 4
    - [ ] **Verificación verbatim del Art. 189 CST párr. 1°** en SUIN (https://www.suin-juriscol.gov.co/) con `estado_verificacion: "VERIFICADO"` y URL/fecha de captura registrados en `params/normas.json` (entrada `CST_189_VACACIONES`). NO se cierra Tarea 2.B-ter con verificación pendiente. Indemnización Art. 64 CST queda **explícitamente fuera del scope** de v2.0 (referenciada en `Contexto/KB_LLM/01_reglas_calculo.md` para casos futuros).
    - [ ] Test golden del addendum (`test_finiquito_renuncia_212d`): SBL 2.200.000, 7.5 días vacaciones, total ~$4.427.014 (rango $4.400.000–$4.450.000), renglón vacaciones = $550.000, indemnización N/A. Verde en CI.
    - [ ] **Regresión dura del caso canónico PERIODICA** (206d, SBL 2.200.000, dos segmentos): **sigue verde** tras integrar todas las tareas del addendum. Verificación: `pytest liquidator/tests/test_canonico/ -q` retorna 100% passed.
+9. **Addendum preaviso (contrato a término fijo, Art. 46 CST) absorbido en v2.0.0** (corrección de alcance, no v2.0.1):
+   - [ ] Schema `Contrato` extendido con `preaviso_entregado`, `fecha_preaviso`, `dias_preaviso`, `fecha_vencimiento_termino_fijo` (todos opcionales). `model_validator` exige `preaviso_entregado` cuando `tipo=FIJO` y `motivo=termino_fijo_vencido`. Caso canónico (INDEFINIDO) sin campos de preaviso **sigue verde** (regresión cero). Tarea 1.C-quater cerrada (Fase 1).
+   - [ ] `calculate_indemnizacion_preaviso` implementado en `IndemnizacionCalculator` con fórmula Art. 46 CST: `(SBL / 30) × dias_faltantes`. El motor lo invoca **solo** cuando `modo=FINIQUITO AND tipo=FIJO AND motivo=termino_fijo_vencido AND preaviso_insuficiente`. Caso canónico PERIODICA (INDEFINIDO) NO genera renglón de preaviso. Tarea 2.B-cuater cerrada (Fase 2).
+   - [ ] Reglas de compliance `V_PREAVISO_TERMINO_FIJO` (CRITICAL, blocking) y `V_PREAVISO_DECLARADO` (MEDIUM, no blocking) activas. La CRITICAL bloquea si preaviso insuficiente sin renglón de indemnización preaviso en el desglose. Tarea 2.Y cerrada (Fase 2).
+   - [ ] Matriz `REQUISITOS_POR_MOTIVO` actualizada para `termino_fijo_vencido`: distingue `indemnizacion_despido` (no aplica) de `indemnizacion_preaviso` (puede aplicar). Plantilla `finiquito.j2` con bloque condicional que muestra estado del preaviso y valor de la indemnización cuando aplica. Tarea 3.H cerrada (Fase 3).
+   - [ ] **Verificación verbatim del Art. 46 CST** en SUIN (https://www.suin-juriscol.gov.co/) con `estado_verificacion: "VERIFICADO"` y URL/fecha de captura registrados en `params/normas.json` (entrada `CST_46_PREAVISO`). NO se cierra Tarea 2.B-cuater con verificación pendiente.
+   - [ ] Test golden del addendum (`test_finiquito_termino_fijo_preaviso`): SBL 2.200.000, FIJO 1 año, sin preaviso → indemnización preaviso $2.200.000. Verde en CI. Con preaviso parcial (10 días): $1.466.667. Con preaviso suficiente (30+ días): $0 (sin indemnización).
+   - [ ] **Regresión dura del caso canónico PERIODICA** (206d, SBL 2.200.000, contrato INDEFINIDO, dos segmentos): **sigue verde** tras integrar todas las tareas del addendum preaviso.
 
 ---
 
@@ -3353,6 +3969,31 @@ liquidacion --version   # 2.0.0 al cerrar Fase 4
 | Documentación de schema extendido | `Contexto/KB_LLM/04_schema_entrada.md` (Fase 1 — Tarea 1.C-ter) |
 | Documentación de plantillas | `Contexto/KB_LLM/05_plantillas.md` (Fase 3 — Tarea 3.G) |
 
+### 14.3 Archivos introducidos por el addendum preaviso (Fases 1, 2 y 3)
+
+| Propósito | Ruta |
+|---|---|
+| Addendum origen | Decisión 2026-06-13 (absorción en v2.0.0, sin addendum separado) |
+| Campos de preaviso en `Contrato` | `liquidator/contracts/input_model.py` (modificado en Fase 1 — Tarea 1.C-quater) |
+| Tests schema preaviso contrato | `liquidator/tests/test_contracts/test_preaviso_contrato.py` (Fase 1 — Tarea 1.C-quater) |
+| `calculate_indemnizacion_preaviso` (Art. 46 CST) | `liquidator/calculators/indemnizacion.py` (Fase 2 — Tarea 2.B-cuater) |
+| Hook `_calcular_indemnizacion_preaviso_si_aplica` | `liquidator/core/engine.py` (Fase 2 — Tarea 2.B-cuater) |
+| Tests unitarios indemnización preaviso | `liquidator/tests/test_calculators/test_indemnizacion_preaviso.py` (Fase 2 — Tarea 2.B-cuater) |
+| Test golden finiquito término fijo preaviso | `liquidator/tests/test_golden/test_finiquito_termino_fijo_preaviso.py` (Fase 2 — Tarea 2.B-cuater) |
+| Fixture input finiquito término fijo sin preaviso | `examples/inputs/finiquito_termino_fijo_sin_preaviso.json` (Fase 2 — Tarea 2.B-cuater) |
+| Fixture expected finiquito término fijo sin preaviso | `examples/expected/finiquito_termino_fijo_sin_preaviso_result.json` (Fase 2 — Tarea 2.B-cuater) |
+| Regla compliance `V_PREAVISO_TERMINO_FIJO` (CRITICAL) | entrada en `params/checklist.json` (Fase 2 — Tarea 2.Y) |
+| Regla compliance `V_PREAVISO_DECLARADO` (MEDIUM) | entrada en `params/checklist.json` (Fase 2 — Tarea 2.Y) |
+| Tests compliance preaviso | `liquidator/tests/test_compliance/test_preaviso_compliance.py` (Fase 2 — Tarea 2.Y) |
+| Norma `CST_46_PREAVISO` (Art. 46) | entrada en `params/normas.json` con `estado_verificacion: "VERIFICADO"` tras descarga SUIN (Fase 2 — Tarea 2.B-cuater) |
+| Matriz `REQUISITOS_POR_MOTIVO` actualizada (`termino_fijo_vencido`) | `liquidator/output/pre_render_validator.py` (Fase 3 — Tarea 3.H) |
+| Bloque condicional preaviso en `finiquito.j2` | `liquidator/templates/finiquito.j2` (Fase 3 — Tarea 3.H) |
+| Tests render preaviso | `liquidator/tests/test_output/test_preaviso_render.py` (Fase 3 — Tarea 3.H) |
+| Documentación preaviso Art. 46 CST | `Contexto/KB_LLM/01_reglas_calculo.md` (Fase 2 — Tarea 2.B-cuater) |
+| Documentación reglas compliance preaviso | `Contexto/KB_LLM/03_compliance_blocking.md` (Fase 2 — Tarea 2.Y) |
+| Documentación schema preaviso | `Contexto/KB_LLM/04_schema_entrada.md` (Fase 1 — Tarea 1.C-quater) |
+| Documentación plantilla preaviso | `Contexto/KB_LLM/05_plantillas.md` (Fase 3 — Tarea 3.H) |
+
 ---
 
 ## 15. Apéndice: decisiones validadas (de diag. §6) que el plan asume
@@ -3370,6 +4011,7 @@ liquidacion --version   # 2.0.0 al cerrar Fase 4
 | §6.9 | Mecanismos compensatorios por usuario único: tests exhaustivos, auditoría inmutable, compliance bloqueante, trazabilidad de fuentes. |
 | §6.10 | **Addendum SL2630-2024 + IPC absorbido en v2.0.0** (corrección de alcance antes del release, no v2.0.1). Distribución: Tarea 1.C-bis → Fase 1; Tarea 2.B-bis → Fase 2; Tarea 2.X → nueva Fase 2-bis. Reparos bloqueantes: (a) NO usar Art. 155 CST para prescripción — usar Art. 488 CST; (b) SL2630-2024 debe verificarse verbatim contra relatoría/SIUGJ antes de cerrar Fase 2-bis; (c) IPC modelado como índice acumulado, no como tasa anual. |
 | §6.11 | **Addendum finiquito por renuncia + vacaciones compensadas absorbido en v2.0.0** (corrección de alcance antes del release, no v2.0.1; mismo tratamiento que §6.10). Distribución: Tarea 1.C-ter → Fase 1; Tarea 2.B-ter → Fase 2; Tarea 2.Z → Fase 2; Tarea 3.G → Fase 3. NO se crea nueva fase (las tareas se anexan a fases existentes). Reparos bloqueantes: (a) **Verificar texto literal del Art. 189 CST párr. 1° en SUIN** (https://www.suin-juriscol.gov.co/) antes de cerrar Tarea 2.B-ter, registrando `estado_verificacion: "VERIFICADO"` con URL y fecha en `params/normas.json` (entrada `CST_189_VACACIONES`); (b) **El motor debe distinguir explícitamente** entre *vacaciones compensadas por acuerdo mutuo* (Art. 189, periodo vigente) y *vacaciones obligatoriamente compensadas en finiquito* (Art. 189 párr. 1° + Art. 190, terminación del contrato) — el modo `FINIQUITO` invoca `calculate_vacaciones_compensadas_finiquito` y el modo `PERIODICA` NO la invoca; (c) **Indemnización Art. 64 CST NO se implementa en v2.0** (queda referenciada y documentada en el addendum y en `Contexto/KB_LLM/01_reglas_calculo.md` para casos futuros de despido sin justa causa). **Regresión dura:** el caso canónico PERIODICA (SBL 2.200.000, 206d, dos segmentos, sin `motivo_terminacion`, sin `vacaciones`) **sigue verde** — los nuevos campos son retrocompatibles (opcionales o con default seguro). |
+| §6.12 | **Addendum preaviso (contrato a término fijo, Art. 46 CST) absorbido en v2.0.0** (corrección de alcance antes del release, no v2.0.1; mismo tratamiento que §6.10 y §6.11). Distribución: Tarea 1.C-quater → Fase 1; Tarea 2.B-cuater → Fase 2; Tarea 2.Y → Fase 2; Tarea 3.H → Fase 3. NO se crea nueva fase. Aplicación exclusiva a contratos a término fijo (Art. 46 CST): el empleador debe notificar con 30 días de anticipación si no renueva; la indemnización por preaviso insuficiente es `(SBL / 30) × dias_faltantes`. Para contratos indefinidos, por obra o labor, y prestación de servicios NO aplica. Reparos bloqueantes: (a) **Verificar texto literal del Art. 46 CST en SUIN** con `estado_verificacion: "VERIFICADO"` en `params/normas.json` (entrada `CST_46_PREAVISO`); (b) **Indemnización por preaviso modelada como renglón separado** de la indemnización por despido sin justa causa (Art. 64); (c) **Preaviso contractual (pacto > 30 días) NO se implementa** en v2.0. **Regresión dura:** el caso canónico PERIODICA (contrato INDEFINIDO, sin campos de preaviso) **sigue verde** — todos los campos nuevos son opcionales. |
 
 Si alguna de estas decisiones cambia, **el plan debe actualizarse en consecuencia** y la KB (`00_fuente_de_verdad.md` y `09_caso_canonico_usuario.md`) debe reflejarlo.
 

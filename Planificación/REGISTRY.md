@@ -27,13 +27,17 @@
 \| 1          | Estabilizar y formalizar                              | EN CURSO (Tarea 1.A cerrada S12, Tarea 1.X cerrada S13) | — | Tarea 1.A (utils) cerrada en S12 (10 símbolos). Tarea 1.X (R-OP-05 + R-OP-06) cerrada en S13: 3 collection errors params → 0, 3 runtime failures utils → 0. Plan §6.2 Tarea 1.A (pyproject.toml), 1.B (CLI) y 1.E (ParamsProvider year-aware) son los próximos hitos lógicos. |
 | 1.C-bis    | (Addendum SL2630) Schema `Salario` extendido          | NO INICIADA   | —       | Anidada en Fase 1. Aditiva retrocompatible.                    |
 | 1.C-ter    | (Addendum finiquito) Schema `Contrato` + `Vacaciones` | NO INICIADA   | —       | Anidada en Fase 1. Aditiva retrocompatible.                    |
+| 1.C-quater | (Addendum preaviso) Schema `Contrato` preaviso Art.46 | NO INICIADA   | —       | Anidada en Fase 1. Aditiva retrocompatible. Solo aplica FIJO.  |
 | 2          | Contrato legal y cálculo correcto                     | BLOQUEADA     | —       | Requiere Fase 1.                                               |
 | 2.B-bis    | (Addendum SL2630) `SalarioResolver` SBL por año       | NO INICIADA   | —       | Anidada en Fase 2.                                             |
 | 2.B-ter    | (Addendum finiquito) Vacaciones compensadas           | NO INICIADA   | —       | Anidada en Fase 2.                                             |
+| 2.B-cuater | (Addendum preaviso) Indemnización preaviso Art.46 CST | NO INICIADA   | —       | Anidada en Fase 2. Solo FINIQUITO + FIJO + vencido.            |
 | 2.Z        | (Addendum finiquito) Compliance vacaciones            | NO INICIADA   | —       | Anidada en Fase 2.                                             |
+| 2.Y        | (Addendum preaviso) Compliance preaviso Art.46 CST    | NO INICIADA   | —       | Anidada en Fase 2. V_PREAVISO_TERMINO_FIJO + V_PREAVISO_DECLARADO. |
 | 2-bis      | IPC + anualización salarial (nueva)                   | NO INICIADA   | —       | Plan §7-bis. Requiere Fase 2.                                  |
 | 3          | Documento generable robusto                           | BLOQUEADA     | —       | Requiere Fase 2.                                               |
 | 3.G        | (Addendum finiquito) PreRender por motivo             | NO INICIADA   | —       | Anidada en Fase 3.                                             |
+| 3.H        | (Addendum preaviso) PreRender + plantilla preaviso    | NO INICIADA   | —       | Anidada en Fase 3. Bloque condicional en finiquito.j2.         |
 | 4          | v2.0 release                                          | BLOQUEADA     | —       | Requiere 0-3 + 3 liquidaciones reales verificadas.            |
 | 5          | Investigación casos reales (opcional)                 | CONDICIONAL   | —       | Solo si surgen casos en Fases 0-4.                             |
 
@@ -60,6 +64,16 @@
   - (a) Verificar **Art. 189 CST párr. 1°** en SUIN (`https://www.suin-juriscol.gov.co/`) antes de cerrar 2.B-ter; registrar `estado_verificacion: "VERIFICADO"` con URL y fecha en `params/normas.json` (entrada `CST_189_VACACIONES`).
   - (b) El motor debe distinguir *vacaciones compensadas por acuerdo mutuo* (Art. 189) de *vacaciones obligatoriamente compensadas en finiquito* (Art. 189 párr. 1° + Art. 190) — modo `FINIQUITO` invoca `calculate_vacaciones_compensadas_finiquito`; modo `PERIODICA` NO.
   - (c) **Indemnización Art. 64 CST NO se implementa en v2.0** (queda referenciada en `Contexto/KB_LLM/01_reglas_calculo.md` para casos futuros).
+
+### Addendum preaviso (contrato a término fijo, Art. 46 CST)
+- **Origen:** Decisión 2026-06-13, absorbido en v2.0.0 (no addendum separado).
+- **Estado:** APROBADO CON REPAROS. Absorbido en v2.0.0.
+- **Distribución:** Tarea 1.C-quater → Fase 1; Tarea 2.B-cuater → Fase 2; Tarea 2.Y → Fase 2; Tarea 3.H → Fase 3.
+- **Alcance:** Solo contratos a término fijo. Art. 46 CST: 30 días de preaviso para no renovar. Indemnización por preaviso insuficiente: `(SBL / 30) × dias_faltantes`. NO aplica a INDEFINIDO, OBRA_LABOR ni PRESTACION.
+- **Reparos bloqueantes (cerrar antes de DoD de cada tarea):**
+  - (a) Verificar **texto literal del Art. 46 CST** en SUIN (`https://www.suin-juriscol.gov.co/`) antes de cerrar 2.B-cuater; registrar `estado_verificacion: "VERIFICADO"` con URL y fecha en `params/normas.json` (entrada `CST_46_PREAVISO`).
+  - (b) **Indemnización por preaviso = renglón separado** de la indemnización por despido sin justa causa (Art. 64). NO acumular.
+  - (c) **Preaviso contractual (pacto > 30 días) NO se implementa** en v2.0 — extensión futura.
 
 ---
 
@@ -188,6 +202,7 @@ uv run --with pytest --with python-dateutil --with jsonschema python3 -m pytest 
 | (vacío) | Tarea 1.G | R-OP-03 (schema fix: mover `plazo_pago_detalle` y `limite_detalle` a top-level) | Diferido de S11.6 | — | Fix 1 minuto. Decisión del usuario en S11.6 de diferir. |
 | (vacío) | Tarea 1.C-bis | Schema `Salario` extendido con `sbl_por_anio` + `historial_salarial` | Plan §6.2 (línea 893) | 2.B-bis | Addendum SL2630. Retrocompatible. |
 | (vacío) | Tarea 1.C-ter | Schema `Contrato` con `motivo_terminacion` + `VacacionesEstado` tipado | Plan §6.2 (línea 1012) | 2.B-ter | Addendum finiquito. Retrocompatible. |
+| (vacío) | Tarea 1.C-quater | Schema `Contrato` con preaviso Art.46 (`preaviso_entregado`, `fecha_preaviso`, `dias_preaviso`, `fecha_vencimiento_termino_fijo`) | Plan §6.2 (post Tarea 1.C-ter) | 2.B-cuater | Addendum preaviso. Retrocompatible. Solo aplica FIJO. |
 
 ### Pendientes heredados de S11 (ejecutados en S11.6 con `uv run`)
 
@@ -243,6 +258,7 @@ uv run --with pytest --with python-dateutil --with jsonschema python3 -m pytest 
   `uv run --with <pkg> python3 <script>`.
 - **R-OP-05 (RESUELTO S13):** 3 collection errors en `liquidator/params/` — CERRADO. `ParamsSource` dataclass + `ParamsError`/`ValidationError`/`HAS_JSONSCHEMA` implementados. `ParamsLoader` API unificada (compatible con test_loader.py + test_params_loader.py). Suite params: 60 collected / 51 pass / 9 fail preexistentes (R-OP-02 Causa 2).
 - **R-OP-06 (RESUELTO S13):** 3 runtime failures en `test_date_currency_utils.py` — CERRADO. 4 funciones date-aware implementadas (`parse_date`, `days_between_inclusive_date`, `business_days_between_date`, `add_business_days_date` con `holidays`). Aliases redirigidos correctamente. Suite utils: 7/7 PASS.
+- **Art. 46 CST preaviso (NUEVO S14):** addendum preaviso absorbido en v2.0.0. Solo aplica a contratos a término fijo. 30 días de preaviso para no renovar. Indemnización = `SBL / 30 × dias_faltantes`. NO aplica a INDEFINIDO, OBRA_LABOR ni PRESTACION. Verificar texto literal en SUIN antes de cerrar Tarea 2.B-cuater (reparo a). Preaviso contractual (pacto > 30d) FUERA de scope v2.0 (reparo c).
 - **Nombrado de tareas Fase 1 (NUEVO S13):** ¡Cuidado con la ambigüedad! El plan §6.2 define Tarea 1.A = pyproject.toml, pero el usuario redefinió Tarea 1.A en S12 como "fix utils exports". La 1.A del plan sigue SIN HACER. En adelante referirse a "Tarea 1.A-plan" para pyproject.toml/packaging y "Tarea 1.A-utils" para la ya cerrada en S12.
 
 ### Estado del caso canónico (KB_LLM/09)
@@ -285,7 +301,7 @@ Al cerrar la sesión, en este orden:
 
 ## Referencias
 
-- **Plan fuente:** `Planificación/plan_modernizacion_v2.0_2026-06-09.md` (3.353 líneas — consultar solo para detalle)
+- **Plan fuente:** `Planificación/plan_modernizacion_v2.0_2026-06-09.md` (~4.021 líneas — consultar solo para detalle)
 - **Diagnóstico fuente:** `Contexto/diagnostico_liquidacion_cli_2026-06-09.md`
 - **Addenda:**
   - `Planificación/addendum_sl2630_y_ipc_2026-06-09.md`
