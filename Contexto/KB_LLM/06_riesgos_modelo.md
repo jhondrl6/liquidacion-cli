@@ -256,6 +256,92 @@
   PASS en `test_utils/`; los 3 FAIL son pre-existentes y se documentan
   para resolución posterior.
 
+## R-OP-07 (NUEVO, S14) — Hardcoded `templates/` paths en 4 archivos rompen packaging
+
+- **Severidad:** BAJA-BLOQUEANTE-LEVE (rompe `pip install -e .` si el
+  usuario ejecuta desde otro directorio, y rompe la promesa de "las
+  plantillas viajan con el paquete"; sin embargo, los tests existentes
+  usan `temp_dir` aislado, por lo que el daño en suite es menor).
+- **Origen:** Tarea 1.A-plan / S14 (2026-06-13). Al diseñar el
+  packaging v2.0 (PEP 621 con `[tool.setuptools.package-data]`), se
+  descubre que las 6 plantillas viven en `templates/` (raíz del repo),
+  FUERA del paquete `liquidator/`. Setuptools `package-data` SOLO puede
+  incluir archivos DENTRO del paquete, por lo que el packaging correcto
+  requiere mover `templates/` → `liquidator/templates/`. Una vez
+  movidas, 4 archivos de código que hardcodean `"templates"` (cwd) o
+  `Path(__file__).parent.parent.parent / "templates"` (raíz) rompen su
+  resolución.
+- **Causa (4 archivos en código + 2 callers sin kwarg):**
+  1. **`liquidator/output/template_manager.py:14`** — default
+     `templates_dir: str = "templates"` (cwd-relative). FIX aplicado
+     en S14: resolución dinámica a `liquidator/templates/` vía
+     `_DEFAULT_TEMPLATES_DIR = Path(__file__).resolve().parent.parent
+     / "templates"`.
+  2. **`liquidator/output/markdown_generator.py:15`** — mismo default
+     cwd-relative. FIX aplicado en S14: misma estrategia.
+  3. **`liquidator/output/pdf_generator.py:60`** — default
+     `Path(__file__).parent.parent.parent / "templates"` (3 niveles
+     arriba = raíz del repo). FIX aplicado en S14: cambiado a
+     `Path(__file__).parent.parent / "templates"` (1 nivel arriba =
+     `liquidator/`).
+  4. **`liquidator/monitor/health_checker.py:33,68`** — `'templates'`
+     en `essential_dirs` (asumía dir operacional en cwd) y lista
+     hardcoded de `templates/comprobante_*.md`. FIX aplicado en S14:
+     `_PACKAGE_TEMPLATES_DIR` + `_PACKAGE_TEMPLATE_FILES` derivados
+     de `__file__`; `essential_dirs` ya no incluye `'templates'`.
+  5. **`liquidator/security/input_validator.py:78`** — `'templates/'`
+     en `allowed_dirs` (whitelist para validación de paths en inputs).
+     **NO TOCADO en S14** — es whitelist operacional legítima (el
+     usuario puede referenciar paths en su JSON de entrada), no ruta
+     de plantilla. Diferido a revisión de seguridad de Fase 1 si surge
+     la necesidad.
+  6. **`liquidator/tests/test_output/test_markdown_generator.py:16`**
+     — `MarkdownGenerator()` sin kwarg → ahora resuelve a
+     `liquidator/templates/` (las plantillas reales), en lugar de cwd.
+     **NO ARREGLADO en S14** — el test asume cwd-relative, ahora
+     fallaría si se ejecuta con cwd != raíz. Diferido a Fase 1.X
+     (suite stabilisation). Workaround: pasar
+     `templates_dir=self.temp_dir` explícito (como hace
+     `test_template_manager.py:43`).
+  7. **`scripts/final_validation.py:255`** — `MarkdownGenerator()` sin
+     kwarg → mismo problema. **NO ARREGLADO en S14** — es script
+     legacy de validación final, no parte del core. Si el script
+     necesita ejecutarse, ahora usa las plantillas del paquete
+     (probablemente correcto, no causa de falla).
+- **Acción aplicada en S14:** Fix 1-4 en código. Documentar 5-7 como
+  pendientes menores para Fase 1.X.
+- **Impacto en DoD de Tarea 1.A-plan:** ninguno. El packaging funciona
+  via `pip install -e .` aunque el monitor no encuentre las plantillas
+  (no es código de path crítico). Las plantillas viajen con el paquete
+  es el objetivo de packaging, no de funcionalidad operacional.
+
+## R-OP-08 (NUEVO, S14) — `markdown_generator.py:48` usa `datetime.now()` con `import datetime` (módulo)
+
+- **Severidad:** BAJA (bug latente — solo se manifiesta si se llama a
+  `MarkdownGenerator.generate_markdown()` con datos reales; los tests
+  existentes no ejercitan este path).
+- **Origen:** Pre-existente, introducido en S4 (Tarea 0.D —
+  normalización de imports `datetime`). El fix de S4 cambió
+  `from datetime import datetime` → `import datetime` en
+  `markdown_generator.py:7`, pero la línea de uso (ahora línea 48)
+  quedó como `datetime.now().strftime(...)` que solo funciona con
+  `from datetime import datetime`. LSP Pyright ahora lo reporta como
+  `reportAttributeAccessIssue`.
+- **Causa:** S4 quiso unificar el estilo de import a `import datetime`
+  (módulo) en 5 archivos, pero solo ajustó 4 de ellos en su uso. El
+  archivo `markdown_generator.py` quedó con import de módulo + uso de
+  clase, generando el mismatch.
+- **Fix mínimo:** cambiar `import datetime` → `from datetime import
+  datetime` (mantiene el patrón de S4 en otros 4 archivos? NO — los
+  otros 4 SÍ funcionan con `import datetime` porque usan
+  `datetime.now()` que es válido con el módulo vía
+  `datetime.datetime.now()`? **VERIFICAR.**). La forma idiomática es
+  `from datetime import datetime` y dejar `datetime.now()` tal cual.
+- **Asignación:** Tarea 1.X (suite stabilisation) o abrir R-OP-08-fix
+  como hot-patch de 1 línea si surge la necesidad de ejecutar
+  `generate_markdown()` antes de cerrar 1.B.
+- **Impacto en DoD de Tarea 1.A-plan:** ninguno. No bloquea packaging.
+
 ## R-LEG-07 (NUEVO, S11) — Decreto 1469/2025 suspendido provisionalmente por Consejo de Estado
 
 - **Severidad:** MEDIA (vigilar — no afecta cálculo, afecta trazabilidad).

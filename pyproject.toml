@@ -1,0 +1,101 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "liquidacion-cli"
+version = "0.2.0-dev"   # Se promoverá a 2.0.0 en Fase 4
+description = "CLI local para liquidación de nómina colombiana"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [
+  { name = "Jhond" },
+]
+keywords = [
+  "payroll", "colombia", "settlement", "social-benefits",
+  "severance", "bonus", "vacations", "legal-compliance",
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Legal Industry",
+  "Intended Audience :: Financial and Insurance Industry",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Office/Business :: Financial",
+  "Topic :: Office/Business :: Financial :: Accounting",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: Utilities",
+]
+dependencies = [
+  "pydantic>=2",
+  "PyYAML>=6",
+  "jsonschema>=4",
+  "python-dateutil>=2.8",
+  "click>=8",
+  "loguru>=0.7",
+  "markdown>=3.5",
+  "Jinja2>=3.1",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8",
+  "pytest-cov",
+  "ruff",
+  "mypy",
+  "black",
+]
+pdf = [
+  # WeasyPrint requiere binarios nativos (Pango/Cairo) — opcional
+  # para no romper la instalación base. Ver AGENTS.md y KB_LLM/06.
+  "WeasyPrint>=60",
+]
+
+[project.scripts]
+liquidacion = "liquidator.cli.main:main"
+
+[project.urls]
+"Source Code" = "https://github.com/jhondrl6/liquidacion-cli"
+"Issues" = "https://github.com/jhondrl6/liquidacion-cli/issues"
+
+[tool.setuptools.packages.find]
+include = ["liquidator*"]
+exclude = ["liquidator.tests*"]
+
+[tool.setuptools.package-data]
+liquidator = [
+  "templates/*.md",
+  "templates/partials/*.md",
+  "templates/styles/*.css",
+  "py.typed",
+]
+
+# --- Tooling ---
+
+[tool.pytest.ini_options]
+testpaths = ["liquidator/tests"]
+addopts = "-ra -q --continue-on-collection-errors"
+markers = [
+  "forensic_audit: tests del diagnóstico 2026-06-09 (no romper)",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["E501"]  # line-length manejado por formatter
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
+disallow_untyped_defs = false

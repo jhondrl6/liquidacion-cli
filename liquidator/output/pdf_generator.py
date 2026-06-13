@@ -56,8 +56,13 @@ class PDFGenerator:
             styles_dir: Directorio con estilos CSS
             fonts_dir: Directorio con fuentes personalizadas
         """
+        # Default: plantillas que viajan con el paquete (liquidator/templates/).
+        # Antes del packaging v2.0, el default era la raíz del repo
+        # (Path(__file__).parent.parent.parent / "templates"), lo cual fallaba
+        # al instalar el paquete via `pip install -e .`.
+        # Ver REGISTRY.md (S14 — Tarea 1.A-plan) y KB_LLM/06 R-OP-07.
         self.templates_dir = (
-            templates_dir or Path(__file__).parent.parent.parent / "templates"
+            templates_dir or Path(__file__).parent.parent / "templates"
         )
         self.styles_dir = styles_dir or self.templates_dir / "styles"
         self.fonts_dir = fonts_dir

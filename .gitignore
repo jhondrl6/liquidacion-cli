@@ -6,6 +6,7 @@
 # Entornos virtuales
 # ─────────────────────────────────────────────────────────────
 .venv/
+.venv-liq/  # [ADD S14] venv local usado en `uv pip install -e .` para validar packaging
 venv/
 liquidacion-env/
 env/

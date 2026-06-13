@@ -12,15 +12,23 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# Plantillas del paquete (liquidator/templates/). Ver REGISTRY.md (S14 —
+# Tarea 1.A-plan) y KB_LLM/06 R-OP-07.
+_PACKAGE_TEMPLATES_DIR = Path(__file__).resolve().parent.parent / "templates"
+_PACKAGE_TEMPLATE_FILES = [
+    _PACKAGE_TEMPLATES_DIR / "comprobante_periodica.md",
+    _PACKAGE_TEMPLATES_DIR / "comprobante_finiquito.md",
+]
+
 
 class HealthChecker:
     """Monitors system health and provides diagnostic information."""
-    
+
     def __init__(self, config: Optional[Dict] = None):
         self.config = config or {}
         self.health_file = Path("health/system_health.json")
         self.last_check = None
-        
+
     def check_component_health(self) -> Dict:
         """Check health of individual system components."""
         health_status = {
@@ -28,9 +36,12 @@ class HealthChecker:
             'overall_status': 'HEALTHY',
             'components': {}
         }
-        
-        # Check essential directories
-        essential_dirs = ['params', 'audit', 'output', 'templates']
+
+        # Check essential directories (operacionales, cwd-relative).
+        # Antes del packaging v2.0, esta lista incluía 'templates' (raíz).
+        # Ahora las plantillas viajan dentro del paquete; se chequean aparte
+        # más abajo. Ver KB_LLM/06 R-OP-07.
+        essential_dirs = ['params', 'audit', 'output']
         for dir_path in essential_dirs:
             dir_exists = Path(dir_path).exists()
             dir_writable = dir_exists and os.access(dir_path, os.W_OK)
@@ -64,14 +75,14 @@ class HealthChecker:
                 'valid_json': file_valid_json
             }
             
-        # Check templates
-        template_files = ['templates/comprobante_periodica.md', 'templates/comprobante_finiquito.md']
-        for template_file in template_files:
-            file_path = Path(template_file)
+        # Check templates (ahora viven dentro del paquete, no en cwd).
+        # Ver REGISTRY.md (S14 — Tarea 1.A-plan) y KB_LLM/06 R-OP-07.
+        for template_file in _PACKAGE_TEMPLATE_FILES:
+            file_path = template_file
             file_exists = file_path.exists()
             file_readable = file_exists and os.access(file_path, os.R_OK)
-            
-            health_status['components'][f'template_{template_file}'] = {
+
+            health_status['components'][f'template_{template_file.name}'] = {
                 'status': 'HEALTHY' if file_exists and file_readable else 'UNHEALTHY',
                 'exists': file_exists,
                 'readable': file_readable

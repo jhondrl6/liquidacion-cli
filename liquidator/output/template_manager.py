@@ -4,22 +4,32 @@ Loads and manages Markdown templates for document generation
 """
 
 import os
+from pathlib import Path
 from typing import Dict, Any, Optional
 from jinja2 import Environment, FileSystemLoader, Template
+
+
+# Default: directorio de plantillas del paquete (liquidator/templates/).
+# Antes del packaging v2.0, el default era "templates" relativo a cwd,
+# lo cual fallaba al instalar el paquete via `pip install -e .`.
+# Ver REGISTRY.md (S14 — Tarea 1.A-plan) y KB_LLM/06 R-OP-07.
+_DEFAULT_TEMPLATES_DIR = Path(__file__).resolve().parent.parent / "templates"
 
 
 class TemplateManager:
     """Manages loading and rendering of Markdown templates"""
 
-    def __init__(self, templates_dir: str = "templates"):
+    def __init__(self, templates_dir: Optional[str] = None):
         """
         Initialize the template manager
 
         Args:
-            templates_dir: Directory containing template files
+            templates_dir: Directory containing template files.
+                Si None, usa las plantillas que viajan con el paquete
+                (liquidator/templates/).
         """
-        self.templates_dir = templates_dir
-        self.env = Environment(loader=FileSystemLoader(templates_dir))
+        self.templates_dir = templates_dir or str(_DEFAULT_TEMPLATES_DIR)
+        self.env = Environment(loader=FileSystemLoader(self.templates_dir))
         self.templates = {}
         self._load_templates()
 

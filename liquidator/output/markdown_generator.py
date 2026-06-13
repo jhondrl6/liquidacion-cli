@@ -3,23 +3,32 @@ Markdown Generator Module
 Generates readable Markdown documents using templates
 """
 
-from typing import Dict, Any
+from pathlib import Path
+from typing import Dict, Any, Optional
 import datetime
 
 from .template_manager import TemplateManager
 
 
+# Default: directorio de plantillas del paquete (liquidator/templates/).
+# Ver REGISTRY.md (S14 — Tarea 1.A-plan) y KB_LLM/06 R-OP-07.
+_DEFAULT_TEMPLATES_DIR = Path(__file__).resolve().parent.parent / "templates"
+
+
 class MarkdownGenerator:
     """Generates readable Markdown documents using templates"""
 
-    def __init__(self, templates_dir: str = "templates"):
+    def __init__(self, templates_dir: Optional[str] = None):
         """
         Initialize the Markdown generator
 
         Args:
-            templates_dir: Directory containing template files
+            templates_dir: Directory containing template files.
+                Si None, usa las plantillas que viajan con el paquete
+                (liquidator/templates/).
         """
-        self.template_manager = TemplateManager(templates_dir)
+        self.templates_dir = templates_dir or str(_DEFAULT_TEMPLATES_DIR)
+        self.template_manager = TemplateManager(self.templates_dir)
 
     def generate_markdown(self, json_data: Dict[str, Any]) -> str:
         """
