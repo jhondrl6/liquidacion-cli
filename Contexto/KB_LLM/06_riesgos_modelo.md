@@ -96,14 +96,375 @@
   `data/` y `audit/` en Fase 0. Si no hay datos cifrados, basta
   documentar que el compromiso se asumió sin datos a re-cifrar.
 
-## R-OP-02 — 13 errores de colección de tests baseline (pendiente Tarea 0.J)
+## R-OP-02 — Estado de la suite al cierre de Tarea 0.J (75 issues preexistentes)
 
-- **Severidad:** MEDIA (cobertura).
-- **Origen:** diagnóstico §2.4 documenta 13 errores preexistentes de
-  colección de tests al inicio de Fase 0. Tras Tarea 0.D (corregir 5
-  SyntaxError) se redujo el número; no se re-cuenta en esta sesión.
-- **Acción:** Tarea 0.J — correr suite completa, reducir a 0 o
-  documentar cada fallo preexistente con issue → Fase 1.
+- **Severidad:** MEDIA (cobertura; 29.2 % de los 257 tests collected
+  no pasan).
+- **Origen:** Tarea 0.J ejecutada 2026-06-13 (sesión S10). Comando:
+  `PYTHONPATH=. uv run --with pytest --with python-dateutil
+  --with PyYAML --with jsonschema --with pydantic --with loguru
+  --with click --with markdown --with Jinja2 pytest liquidator/tests
+  --continue-on-collection-errors --tb=line -q` (variante del comando
+  del plan §5.2 T0.J con `--continue-on-collection-errors` para
+  visibilizar el impacto completo de las collection errors en el
+  resto de la suite).
+- **Resultado:** 257 collected, 182 passed (70.8 %), 52 failed,
+  23 errors (8 collection + 15 runtime), 1 warning. **75 issues
+  totales**. `0.A–0.I` validaron suites puntuales (test_indemnizacion,
+  test_legal, test_kb_freshness, test_audit_logger) — siguen verdes
+  62/63. Los 75 issues son **preexistentes** (anteriores a Tarea 0.J
+  o regresiones de Tarea 0.D que no se descubrieron en su momento).
+- **Decisión:** NO estabilizar la suite dentro de Fase 0. La
+  documentación cumple la rama "fallos preexistentes" del plan
+  §5.2 T0.J: "documentar cada uno en `06_riesgos_modelo.md`".
+  Las correcciones se difieren a Fase 1 (Fase 0 sólo cierra con
+  código limpio, KB en sitio y suite inventariada; NO requiere
+  verde).
+- **Acción por sub-fase de Fase 1:**
+  - **1.A/1.B (Empaquetado + CLI):** causa 1 (SalaryError no
+    exportado) y causa 2 (params_versioning datetime regression).
+  - **1.C/1.D (Schemas):** causa 7 (fixtures faltantes),
+    causa 8 (JSON/markdown generator), causa 6 (PDF generator
+    en parte).
+  - **1.E (ParamsProvider year-aware):** causa 2 (params_versioning).
+  - **1.F-1.H (Compliance + recalc):** causa 9 (engine/input_parser),
+    causa 10 (integration finiquito/periodica), causa 11
+    (calculadoras prestaciones/vacaciones), causa 12 (override).
+  - **Backlog transversal:** causa 3 (HashCalculator), causa 4
+    (TrailGenerator), causa 5 (VersioningManager), causa 6
+    (PDF), causa 13 (template_manager).
+
+### Causas raíz y tests afectados
+
+#### Causa 1 — `SalaryError` no exportado desde `liquidator.utils` (8 collection errors)
+
+- **Razón probable:** bug de código. `SalaryError` está definido en
+  `liquidator/utils/error_handler.py:16` pero el `__init__.py` del
+  paquete no lo re-exporta (sólo exporta `LiquidacionError,
+  ContractError, ParamsError, ValidationOutput, DateError`).
+  `liquidator/validators/salary_validator.py:5` hace
+  `from liquidator.utils import SalaryError` y falla en
+  `pytest --collect`.
+- **Acción propuesta:** agregar `SalaryError` al import y al
+  `__all__` de `liquidator/utils/__init__.py`. Fix de 1 línea.
+  Probablemente también `ValidationError` y `ParamsError` ya
+  exportados, verificar nombres exactos.
+- **Fase de resolución:** 1.A/1.B (cleanup imports + pytest
+  estable).
+- **Tests bloqueados (8 módulos, 0 tests corren):**
+  - `liquidator/tests/test_params/test_loader.py`
+  - `liquidator/tests/test_params/test_params_loader.py`
+  - `liquidator/tests/test_params/test_validator.py`
+  - `liquidator/tests/test_utils/test_date_currency_utils.py`
+  - `liquidator/tests/test_validators/test_contract_validator.py`
+  - `liquidator/tests/test_validators/test_date_validator.py`
+  - `liquidator/tests/test_validators/test_input_validator.py`
+  - `liquidator/tests/test_validators/test_salary_validator.py`
+
+#### Causa 2 — Regresión de `datetime` en `params_versioning.py` (9 failed)
+
+- **Razón probable:** regresión introducida por Tarea 0.D (S4).
+  S4 cambió `from datetime import datetime` →
+  `import datetime` en `liquidator/params/params_versioning.py:6`,
+  pero el archivo usa `datetime.now().astimezone().isoformat()`
+  en la línea 51 (atributo de la CLASE `datetime`, no del módulo).
+  Con `import datetime` se importa el módulo, no la clase.
+  Llamar `datetime.now()` falla con `AttributeError: module
+  'datetime' has no attribute 'now'`.
+- **Acción propuesta:** revertir la línea 6 a
+  `from datetime import datetime` (o agregar el alias). 1 línea.
+- **Fase de resolución:** 1.A/1.B (revisión del cambio de 0.D;
+  0.D corrigió 4 archivos correctamente — sólo `params_versioning.py`
+  quedó mal).
+- **Tests fallidos (9):**
+  - `test_params/test_versioning.py::TestRegisterVersion::test_register_version_basic`
+  - `test_params/test_versioning.py::TestRegisterVersion::test_register_version_with_data`
+  - `test_params/test_versioning.py::TestRegisterVersion::test_register_version_stores_in_dict`
+  - `test_params/test_versioning.py::TestGetVersion::test_get_version_exists`
+  - `test_params/test_versioning.py::TestVerifyIntegrity::test_verify_integrity_success`
+  - `test_params/test_versioning.py::TestVerifyIntegrity::test_verify_integrity_file_modified`
+  - `test_params/test_versioning.py::TestToDict::test_to_dict_single_version`
+  - `test_params/test_versioning.py::TestToDict::test_to_dict_multiple_versions`
+  - `test_params/test_versioning.py::TestIntegration::test_full_workflow`
+
+#### Causa 3 — API mismatch: `HashCalculator` no expone los métodos que usan los tests (6 failed)
+
+- **Razón probable:** tests en `test_hash_calculator.py` invocan
+  `self.hash_calculator.calculate_hash(...)`,
+  `verify_output_integrity(...)`, `generate_hash_report(...)`, pero
+  `liquidator/audit/hash_calculator.py` no define esos métodos
+  (o tienen otro nombre). Tests escritos contra una API distinta
+  a la implementada.
+- **Acción propuesta:** en Fase 1, decidir: (a) renombrar métodos
+  en `HashCalculator` para alinear con tests (preferible si los
+  tests son la fuente de verdad contractual), o (b) reescribir
+  tests. Auditar primero qué métodos SÍ existen en
+  `HashCalculator` y qué nombres usan los tests.
+- **Fase de resolución:** 1.F (compliance + recalc; `HashCalculator`
+  se usa en output de Fase 3 pero su base debe estar en Fase 1).
+- **Tests fallidos (6):**
+  - `test_audit/test_hash_calculator.py::TestHashCalculator::test_calculate_hash_string`
+  - `test_audit/test_hash_calculator.py::TestHashCalculator::test_calculate_hash_dict_deterministic`
+  - `test_audit/test_hash_calculator.py::TestHashCalculator::test_calculate_input_hash`
+  - `test_audit/test_hash_calculator.py::TestHashCalculator::test_calculate_output_hash`
+  - `test_audit/test_hash_calculator.py::TestHashCalculator::test_verify_output_integrity`
+  - `test_audit/test_hash_calculator.py::TestHashCalculator::test_generate_hash_report`
+
+#### Causa 4 — API mismatch: `TrailGenerator.__init__` no acepta `trails_directory` (5 errors)
+
+- **Razón probable:** tests instancian
+  `TrailGenerator(trails_directory=self.temp_dir)` pero la firma
+  real de `__init__` no incluye ese kwarg (`TypeError: got an
+  unexpected keyword argument 'trails_directory'`).
+- **Acción propuesta:** alinear la firma de `TrailGenerator.__init__`
+  con la convención de los tests (o ajustar los tests al kwarg
+  real, p. ej. `directory=` o `output_dir=`).
+- **Fase de resolución:** 1.F (audit/ trails).
+- **Tests con error (5):**
+  - `test_audit/test_trail_generator.py::TestTrailGenerator::test_generate_audit_trail`
+  - `test_audit/test_trail_generator.py::TestTrailGenerator::test_save_and_load_audit_trail`
+  - `test_audit/test_trail_generator.py::TestTrailGenerator::test_search_audit_trails`
+  - `test_audit/test_trail_generator.py::TestTrailGenerator::test_generate_audit_summary_report`
+  - `test_audit/test_trail_generator.py::TestTrailGenerator::test_search_with_date_range`
+
+#### Causa 5 — API mismatch: `VersioningManager.__init__` no acepta `version_file` (6 errors)
+
+- **Razón probable:** tests instancian
+  `VersioningManager(version_file=str(self.version_file))` pero
+  la firma real no acepta ese kwarg
+  (`TypeError: got an unexpected keyword argument 'version_file'`).
+- **Acción propuesta:** alinear firma de `VersioningManager.__init__`
+  con la convención de los tests.
+- **Fase de resolución:** 1.F.
+- **Tests con error (6):**
+  - `test_audit/test_versioning_manager.py::TestVersioningManager::test_register_generator_version`
+  - `test_audit/test_versioning_manager.py::TestVersioningManager::test_register_params_version`
+  - `test_audit/test_versioning_manager.py::TestVersioningManager::test_validate_version_compatibility_valid`
+  - `test_audit/test_versioning_manager.py::TestVersioningManager::test_validate_version_compatibility_invalid`
+  - `test_audit/test_versioning_manager.py::TestVersioningManager::test_generate_version_report`
+  - `test_audit/test_versioning_manager.py::TestVersioningManager::test_persistence`
+
+#### Causa 6 — `PDFGenerator`: markdown module es `None` + formato de fecha + asserts de plantilla (13 failed)
+
+- **Razón probable (3 sub-fallos):**
+  - 6a. `liquidator.output.pdf_generator:602/603` — `'NoneType' object
+    has no attribute 'Markdown'`. El módulo `markdown` (PyPI
+    `Markdown`) no está disponible en el runtime de pytest
+    (no instalado en el venv efímero de `uv run`), o el import
+    local devuelve `None`. Cuando funcione, los tests
+    `test_markdown_to_html` y `test_generate_pdf_from_markdown`
+    pueden pasar.
+  - 6b. `test_generate_footer_content` — assert sobre fecha
+    `'2025-11-16T12:00:00'` no encontrada en footer; el motor
+    genera `2026-06-13 09:15:08` (otro formato, otro día).
+    El test usa una fecha fija y el motor usa `datetime.now()`.
+  - 6c. Tests `TestComplexCases` (4) — asserts sobre datos del
+    template que no se renderizan (p. ej. `'3000000' not found`,
+    `'Indemnización' not found`): la indemnización Art. 64 NO
+    está implementada (R-LEG-01) y el output es `null`; los
+    tests fueron escritos asumiendo indemnización. El test
+    `test_process_template` también depende de
+    `process_template` y del path de salida `.pdf` vs `.txt`.
+  - 6d. `TestErrorHandling::test_dependencies_missing` — el test
+    espera que `PDFGeneratorError` se levante cuando faltan
+    dependencias, pero el motor actual no lo hace (markdown
+    está como `None` no como ausente).
+- **Acción propuesta:**
+  - 6a: agregar `markdown` (PyPI) a deps de `pyproject.toml` o
+    investigar por qué el import retorna `None`.
+  - 6b: revisar contrato del footer (fecha fija vs. actual).
+  - 6c: actualizar tests para reflejar que indemnización es
+    `null` en v2.0 (consistente con R-LEG-01).
+  - 6d: ajustar `PDFGenerator` para levantar `PDFGeneratorError`
+    si markdown es `None`, o ajustar el test.
+- **Fase de resolución:** 1.D (output schemas) + 1.F (compliance).
+- **Tests fallidos (13):**
+  - `test_output/test_pdf_generator.py::TestPDFGenerator::test_generate_footer_content`
+  - `test_output/test_pdf_generator.py::TestPDFGenerator::test_generate_pdf_from_markdown`
+  - `test_output/test_pdf_generator.py::TestPDFGenerator::test_generate_pdf_with_missing_template`
+  - `test_output/test_pdf_generator.py::TestPDFGenerator::test_generate_prestaciones_table`
+  - `test_output/test_pdf_generator.py::TestPDFGenerator::test_markdown_to_html`
+  - `test_output/test_pdf_generator.py::TestPDFGenerator::test_process_template`
+  - `test_output/test_pdf_generator.py::TestPDFGenerator::test_validate_pdf_output_small_file`
+  - `test_output/test_pdf_generator.py::TestConvenienceFunction::test_generate_liquidacion_pdf`
+  - `test_output/test_pdf_generator.py::TestErrorHandling::test_dependencies_missing`
+  - `test_output/test_pdf_generator.py::TestComplexCases::test_complete_trabajador_info`
+  - `test_output/test_pdf_generator.py::TestComplexCases::test_complex_data_processing`
+  - `test_output/test_pdf_generator.py::TestComplexCases::test_full_prestations_table`
+  - `test_output/test_pdf_generator.py::TestComplexCases::test_generate_complex_pdf`
+
+#### Causa 7 — Edge cases integration: fixtures faltantes (4 errors + 2 failed = 6)
+
+- **Razón probable:** tests en `test_edge_cases.py` referencian
+  fixtures JSON que NO existen en
+  `liquidator/tests/fixtures/edge_cases/`:
+  - `multiples_componentes.json`
+  - `contrato_1_dia.json` (y presumiblemente `contrato_365_dias.json`,
+    `salario_limite_auxilio.json`, `periodo_recargo_dominical.json`).
+  `FileNotFoundError: Input file not found` en
+  `liquidator/core/input_parser.py:20`.
+- **Acción propuesta:** crear los fixtures JSON faltantes en
+  `liquidator/tests/fixtures/edge_cases/`. Para los 2 failed
+  (no error de fixture), revisar el resultado del cálculo: los
+  casos borde asumidos por el test pueden no coincidir con la
+  implementación actual del motor.
+- **Fase de resolución:** 1.C (Forma 2 segmentada + fixtures).
+- **Tests con error (4):**
+  - `test_integration/test_edge_cases.py::TestEdgeCasesIntegration::test_contrato_1_dia`
+  - `test_integration/test_edge_cases.py::TestEdgeCasesIntegration::test_contrato_365_dias`
+  - `test_integration/test_edge_cases.py::TestEdgeCasesIntegration::test_salario_limite_auxilio`
+  - `test_integration/test_edge_cases.py::TestEdgeCasesIntegration::test_periodo_recargo_dominical`
+- **Tests fallidos (2):**
+  - `test_integration/test_edge_cases.py::TestEdgeCasesIntegration::test_multiples_componentes_salariales`
+  - `test_integration/test_edge_cases.py::TestEdgeCasesIntegration::test_todos_casos_borde_juntos`
+
+#### Causa 8 — JSON/markdown generators: fallos en generación de output (7 failed)
+
+- **Razón probable:** cascada desde causas 3, 4, 5 (HashCalculator
+  y audit managers con API rota). Los generadores probablemente
+  llaman a `HashCalculator.calculate_hash` o instancian
+  `TrailGenerator` / `VersioningManager` con kwargs no aceptados.
+  Verificar import en `liquidator/output/json_generator.py` y
+  `markdown_generator.py`.
+- **Acción propuesta:** una vez resueltas causas 3, 4, 5, re-correr
+  estos tests. Si persisten, investigar firmas específicas.
+- **Fase de resolución:** 1.D (output schemas) — tras 1.F.
+- **Tests fallidos (7):**
+  - `test_output/test_json_generator.py::TestJSONGenerator::test_generate_json`
+  - `test_output/test_json_generator.py::TestJSONGenerator::test_generate_json_finiquito`
+  - `test_output/test_json_generator.py::TestJSONGenerator::test_hash_calculation`
+  - `test_output/test_json_generator.py::TestJSONGenerator::test_save_json`
+  - `test_output/test_markdown_generator.py::TestMarkdownGenerator::test_generate_markdown_finiquito`
+  - `test_output/test_markdown_generator.py::TestMarkdownGenerator::test_generate_markdown_periodica`
+  - `test_output/test_markdown_generator.py::TestMarkdownGenerator::test_save_markdown`
+
+#### Causa 9 — Engine / input parser / workflow orchestrator: fallos en núcleo (4 failed)
+
+- **Razón probable:** motor central no estabilizado. Posibles
+  causas: (a) input parser con validaciones no implementadas,
+  (b) workflow orchestrator no encuentra el caso canónico
+  esperado, (c) engine asume un input shape que no coincide con
+  los tests.
+- **Acción propuesta:** tras Fase 1.D (schemas formales Pydantic),
+  re-correr. Estos tests son los más sensibles a la Forma 1 vs
+  Forma 2 del input.
+- **Fase de resolución:** 1.B-1.D (empaquetado + schemas).
+- **Tests fallidos (4):**
+  - `test_core/test_engine.py::test_engine_process_input_generates_output`
+  - `test_core/test_input_parser.py::test_parse_input_file_normalizes_fields`
+  - `test_core/test_input_parser.py::test_input_parser_applies_validation`
+  - `test_core/test_workflow_orchestrator.py::test_workflow_orchestrator_generates_expected_desglose`
+
+#### Causa 10 — Integration finiquito/periodica: motor no estabilizado (5 failed)
+
+- **Razón probable:** tests de integración de extremo a extremo
+  dependen del motor completo. En particular
+  `test_calculo_indemnizacion` asume indemnización Art. 64
+  implementada (R-LEG-01 dice que NO lo está en v2.0). Los
+  demás (finiquito_completo, finca_rural_completo,
+  salario_variable_completo, validacion_compliance_completa)
+  asumen motor estabilizado que aún no existe.
+- **Acción propuesta:** una vez estabilizado el motor en Fase 1,
+  reevaluar. Para `test_calculo_indemnizacion` específicamente:
+  ajustar test a `assert indemnizacion is None` (consistente con
+  R-LEG-01) o marcar como `expectedFailure`.
+- **Fase de resolución:** 1.F-1.H (compliance + recalc).
+- **Tests fallidos (5):**
+  - `test_integration/test_finiquito.py::TestFiniquitoIntegration::test_finiquito_completo`
+  - `test_integration/test_finiquito.py::TestFiniquitoIntegration::test_calculo_indemnizacion`
+  - `test_integration/test_periodica.py::TestPeriodicaIntegration::test_finca_rural_completo`
+  - `test_integration/test_periodica.py::TestPeriodicaIntegration::test_salario_variable_completo`
+  - `test_integration/test_periodica.py::TestPeriodicaIntegration::test_validacion_compliance_completa`
+
+#### Causa 11 — Calculadoras prestaciones / vacaciones: casos borde (4 failed)
+
+- **Razón probable:** cálculos de prima de servicios y vacaciones
+  no estabilizados para todos los casos. En particular:
+  - `test_primer_semestre_completo`: cálculo de prima del primer
+    semestre del año (1 Ene - 30 Jun) puede no coincidir con
+    expected.
+  - `test_casos_parametrizados[caso1-expected1]`: el caso 1 del
+    set parametrizado tiene un expected value posiblemente
+    desactualizado.
+  - `test_año_bisiesto_completo`: 366 días puede no manejarse
+    correctamente.
+  - `test_calculate_vacaciones_completas_finiquito`: modo FINIQUITO
+    con vacaciones compensadas (Art. 189 párr. 1°) — pendiente
+    verificación SUIN (R-LEG-04).
+- **Acción propuesta:** revisar valores esperados contra cálculo
+  manual; puede ser (a) motor con bug, o (b) test con expected
+  desactualizado. Caso 11d (vacaciones finiquito) bloqueado por
+  R-LEG-04 (verificación Art. 189 SUIN).
+- **Fase de resolución:** 1.F (cálculos de Fase 1 estabilizados);
+  11d también requiere Fase 2-B-ter.
+- **Tests fallidos (4):**
+  - `test_calculators/test_prestaciones.py::TestCalculatePrima::test_primer_semestre_completo`
+  - `test_calculators/test_prestaciones.py::TestValidacionCasosConocidos::test_casos_parametrizados[caso1-expected1]`
+  - `test_calculators/test_prestaciones.py::TestCasosBorde::test_año_bisiesto_completo`
+  - `test_calculators/test_vacaciones.py::TestVacacionesCalculator::test_calculate_vacaciones_completas_finiquito`
+
+#### Causa 12 — Compliance override: flujo de override no implementado (1 failed)
+
+- **Razón probable:** `TestOverrideManager::test_apply_override_to_compliance_report`
+  asume un comportamiento del override que no está implementado,
+  o el motor de compliance no soporta el flujo completo de
+  `apply_override`. KB nota 03 describe `OverrideRecord` pero la
+  mecánica completa puede no estar en el código.
+- **Acción propuesta:** revisar `liquidator/compliance/override.py`
+  y `liquidator/compliance/checker.py`. Probable causa: motor
+  de compliance incompleto. Resolver en Fase 1.F.
+- **Fase de resolución:** 1.F.
+- **Tests fallidos (1):**
+  - `test_compliance/test_override.py::TestOverrideManager::test_apply_override_to_compliance_report`
+
+#### Causa 13 — Template manager: `format_currency` (1 failed)
+
+- **Razón probable:** `TestTemplateManager::test_format_currency`
+  asume un formato de moneda que el template manager no produce,
+  o el helper `format_currency` no está donde el test lo busca.
+  También podría ser que el template manager esté usando
+  `round_currency` (exportado de utils) en lugar de
+  `format_currency` (también exportado).
+- **Acción propuesta:** auditar `liquidator/output/template_manager.py`
+  y `liquidator/utils/currency_utils.py`. Resolver en Fase 1.D.
+- **Fase de resolución:** 1.D (output schemas).
+- **Tests fallidos (1):**
+  - `test_output/test_template_manager.py::TestTemplateManager::test_format_currency`
+
+### Resumen cuantitativo
+
+| Categoría                     | Count |
+|-------------------------------|-------|
+| Collection errors             | 8     |
+| Runtime errors                | 15    |
+| Failed (assertions/exceptions)| 52    |
+| **Total issues**              | **75**|
+| Passed                        | 182   |
+| Tests collected               | 257   |
+| Suites 100 % verdes           | 5 (test_indemnizacion, test_legal/, test_kb_freshness, test_audit_logger, test_compliance normativos) |
+
+### Asignación por fase
+
+| Fase     | Issues a resolver                                       | Count aprox. |
+|----------|---------------------------------------------------------|--------------|
+| 1.A-1.B  | Causa 1 (SalaryError), Causa 2 (datetime regression)   | 8+9 = 17     |
+| 1.C-1.D  | Causa 7 (fixtures), Causa 6 (PDF), Causa 8 (JSON/MD), Causa 13 (template) | 6+13+7+1 = 27 |
+| 1.E      | Causa 2 (params_versioning) ya cubierta en 1.A          | (0 nuevos)   |
+| 1.F-1.H  | Causa 3 (HashCalc), 4 (TrailGen), 5 (VersionMgr), 9 (engine), 10 (integration), 11 (calculators), 12 (override) | 6+5+6+4+5+4+1 = 31 |
+| Backlog  | Cualquiera que persista tras 1.H                        | TBD          |
+
+**Total asignado a Fase 1:** 75 / 75 (100 %).
+
+### Última validación contra código
+
+- **Fecha:** 2026-06-13 (sesión S10, Tarea 0.J).
+- **Verificado:** comando del plan §5.2 T0.J corrido
+  efectivamente (con `--continue-on-collection-errors` para
+  visibilizar impacto). 75 issues listados, 13 causas raíz
+  identificadas con tests específicos. Suites que cerraron
+  en 0.A-0.I re-corridas: 62/63 verde (sólo `test_apply_override_to_compliance_report` falla, ya documentado como Causa 12).
+- **NO verificado:** comportamiento del motor real
+  (cálculo numérico) — eso es Fase 1.
 
 ## R-OP-03 — Inconsistencias de esquema en `auxilio_conectividad`
 

@@ -27,13 +27,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `prompt_generacion_liquidacion.md` (171 líneas) — workflow A/B/C (pre-cálculo, cálculo, post-cálculo) + jerarquía de verdad + 10 reglas inamovibles + formato de respuesta obligatorio.
   - `prompt_auditoria_antes_de_responder.md` (176 líneas) — 5 pasos de auditoría, formato con evidencia verbatim (archivo:línea), lista de "lo que NUNCA debés hacer" (no inventar URLs SUIN, no aceptar doc como verdad, etc.).
   - `prompt_plan_modernizacion.md` (234 líneas) — verificación contra disco, decisión "1 fase por sesión" como máximo, decisiones vigentes de los 2 addendas + 11 trampas conocidas.
+- **`scripts/check_kb_freshness.py`** + **`liquidator/tests/test_kb_freshness.py`** (S8 — Tarea 0.H): script year-aware (157 líneas) + suite de 6 tests (189 líneas) que verifican que `params/<año>.json` y KB_LLM/02_parametros_vigentes.md estén sincronizados para cualquier año.
+- **`AGENTS.md`** ya en raíz (S7 — Tarea 0.G).
+- **`git init`** + commit inicial `f04d639` con 200 archivos / 43.477 insertions (S9 — Tarea 0.I). Working tree clean except 3 untracked intencionales (logs pre-2026 + `.env.backup_pre_rotation_2026-06-12`).
+- **Suite `pytest` inventariada (S10 — Tarea 0.J)**: comando del plan §5.2 T0.J corrido en WSL con `uv run --with pytest ...`. Resultado: 257 collected, 182 passed (70.8%), 52 failed, 23 errors (8 collection + 15 runtime), 1 warning. **75 issues preexistentes** documentados en `Contexto/KB_LLM/06_riesgos_modelo.md` §R-OP-02 agrupados en 13 causas raíz. Asignación 100% a Fase 1 (17 a 1.A-1.B, 27 a 1.C-1.D, 31 a 1.F-1.H). Suites de 0.A-0.I re-validadas: 62/63 verde.
 
 ### Pending (próximas sesiones de Fase 0)
-- 0.G: `AGENTS.md` en raíz.
-- 0.H: `scripts/check_kb_freshness.py` + test.
-- 0.I: `git init` + commit inicial (orden estricto: 0.A → 0.B → ... → 0.I).
-- 0.J: suite 100% o fallos preexistentes documentados.
-- 0.K: `params/2026.json` activo en motor (ParamsProvider year-aware, Tarea 1.E).
+- 0.K: `KB_LLM/02_parametros_vigentes.md` con tabla comparativa 2025 vs 2026 (deja KB y `params/` listos; cambio REAL del motor a `ParamsProvider` year-aware es Tarea 1.E de Fase 1).
 
 ---
 
