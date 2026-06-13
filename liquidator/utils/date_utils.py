@@ -129,3 +129,59 @@ def days_in_semester(d: date) -> int:
     """Return the number of days in the semester that contains ``d``."""
     start, end = get_semester_bounds(d)
     return (end - start).days + 1
+
+
+# ---------------------------------------------------------------------------
+# Date-object helpers — used by tests/test_utils/test_date_currency_utils.py
+# These accept/return ``datetime.date`` (NOT strings), matching the test
+# contract that the old aliases in ``__init__.py`` failed to provide.
+# ---------------------------------------------------------------------------
+
+
+def parse_date(value: str) -> date:
+    """Parse a ``YYYY-MM-DD`` string into a ``datetime.date``."""
+    return datetime.strptime(value, "%Y-%m-%d").date()
+
+
+def days_between_inclusive_date(start: date, end: date) -> int:
+    """Return the inclusive day count between two ``date`` objects.
+
+    ``days_between_inclusive_date(date(2025,1,1), date(2025,1,31)) → 31``
+    """
+    if end < start:
+        raise ValueError("End date must be after start date")
+    return (end - start).days + 1
+
+
+def business_days_between_date(
+    start: date, end: date, holidays: set[date] | None = None
+) -> int:
+    """Count business days (Mon–Fri, excl. holidays) between *start* and *end*.
+
+    Both bounds are inclusive.
+    """
+    holidays = holidays or set()
+    if end < start:
+        return 0
+    current = start
+    count = 0
+    while current <= end:
+        if current.weekday() < 5 and current not in holidays:
+            count += 1
+        current += timedelta(days=1)
+    return count
+
+
+def add_business_days_date(
+    start: date, days: int, holidays: set[date] | None = None
+) -> date:
+    """Return the date *days* business days after *start*, skipping weekends
+    and any dates in *holidays*."""
+    holidays = holidays or set()
+    current = start
+    added = 0
+    while added < days:
+        current += timedelta(days=1)
+        if current.weekday() < 5 and current not in holidays:
+            added += 1
+    return current
