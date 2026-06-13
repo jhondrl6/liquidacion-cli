@@ -190,3 +190,45 @@ A partir del JSON se generan (en Fase 3, no en v2.0 base):
   del caso canónico). El motor debe popular `referencias_normativas`
   automáticamente a partir de los `params_ref` por segmento + normas
   efectivamente aplicadas.
+
+## Schema Pydantic formal (S16 — Tarea 1.C, plan §6.2)
+
+A partir de la sesión S16 (2026-06-13, commit `6a58f08`), este shape
+está modelado con Pydantic v2 en
+`liquidator/contracts/output_model.py`:
+
+- `LiquidacionResult` (top-level) — ensambla todos los sub-modelos.
+- `MetaLiquidacion` — modo, fecha_generacion, motor_version,
+  input_hash, output_hash (`None` en v2.0, se llena en Fase 3),
+  parametros_por_segmento (dict de `SegmentoParams`),
+  plantilla_version (`None` hasta Fase 3),
+  compliance_status (`Literal["GO", "WARN", "NO_GO",
+  "OVERRIDE_APPROVED"]`), referencias_normativas (lista de IDs de
+  `params/normas.json`).
+- `SegmentoParams` — params_version, rango (`"YYYY-MM-DD →
+  YYYY-MM-DD"`), dias (`Field(ge=0)`), params_ref (path relativo).
+- `Desglose` — wrapper dict-like sobre
+  `dict[str, DesgloseConcepto]`, con claves = años calendario.
+- `DesgloseConcepto` — 6 conceptos: `cesantias`, `intereses_cesantias`,
+  `prima`, `vacaciones`, `indemnizacion` (SIEMPRE `None` en v2.0,
+  R-LEG-01), `recargo_dominical` (todos `Decimal | None`).
+- Re-exports: `Trabajador`, `Empleador` (de `input_model.py`).
+- `total_liquidacion: Decimal` con `Field(ge=0)`.
+- `parametros`, `validaciones_y_alertas`, `compliance_report` se
+  modelan como `dict` libre en la base 1.C (se endurecen en Tarea 1.D
+  o 1.F).
+- `normas_aplicadas: list[str]` (compatibilidad con motor histórico
+  que emite array de strings, no objetos).
+
+Reglas de canonización en tests (12/12 PASS en
+`liquidator/tests/test_contracts/test_output_model.py`):
+
+- R-LEG-07 canonizado: `test_meta_referencias_normativas_incluye_159_2026`
+  exige TANTO `DECRETO_1469_2025` COMO `DECRETO_159_2026`.
+- R-LEG-01 canonizado: `test_desglose_concepto_indemnizacion_siempre_none`
+  verifica que `indemnizacion is None` por defecto (Art. 64 NO
+  implementado).
+- Regla dura: `test_result_total_negativo_falla` rechaza
+  `total_liquidacion < 0`.
+- Roundtrip: `test_result_serialization_roundtrip` verifica que
+  `model_dump_json` → `model_validate_json` no pierde información.

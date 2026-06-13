@@ -121,3 +121,49 @@ Campos adicionales respecto a Forma 1:
   derivación a Forma 2. La forma 2 está documentada en el plan y en
   `workflow_orchestrator.py` pero NO fue leída en detalle en esta
   sesión. Re-validar en Tarea 0.J.
+
+## Schema Pydantic formal (S16 — Tarea 1.C, plan §6.2)
+
+A partir de la sesión S16 (2026-06-13, commit `6a58f08`), el contrato
+de entrada tiene modelo Pydantic v2 en
+`liquidator/contracts/input_model.py`:
+
+- `LiquidacionInput` (top-level)
+- `Trabajador` (sub-modelo: `nombre`, `documento`)
+- `Empleador` (sub-modelo: `nombre`, `documento`)
+- `Contrato` (sub-modelo: `fecha_ingreso`, `fecha_corte`, `tipo`,
+  `motivo_terminacion: str | None = None`)
+- `Salario` (sub-modelo: `SBL: Decimal` con `Field(gt=0)`,
+  `auxilio_transporte: bool = False`, `variable: bool = False`,
+  `dias_trabajados: int | None = None`)
+
+Validaciones implementadas en la base 1.C:
+
+- `field_validator("contrato")` garantiza `fecha_corte >= fecha_ingreso`
+  (lanza `ValueError` claro si se invierte).
+- `modo` es `Literal["PERIODICA", "FINIQUITO", "VACACIONES"]`.
+- `contrato.tipo` es `Literal["INDEFINIDO", "FIJO", "OBRA_LABOR",
+  "PRESTACION"]` (MAYÚSCULAS obligatorias).
+- `SBL` se valida con `Field(gt=0)` — rechaza 0 y negativos.
+- Forma 1 (plana) NO es rechazada por el schema (porque NO es entrada
+  del schema formal); sigue entrando vía `InputParser` legacy hasta
+  Tarea 1.D.
+
+Extensiones planificadas (no en 1.C base, son tareas separadas
+anidadas en Fase 1):
+
+- **1.C-bis** (addendum SL2630-2024): `Salario.sbl_por_anio:
+  dict[int, Decimal] | None`, `Salario.historial_salarial:
+  list[MesValor] | None`, `model_validator` rechaza
+  `variable=True` sin historial.
+- **1.C-ter** (addendum finiquito/vacaciones):
+  `Contrato.motivo_terminacion: MotivoTerminacion` (enum Arts. 45-49
+  CST), `VacacionesEstado` tipado (reemplaza `vacaciones: dict`).
+- **1.C-quater** (addendum preaviso):
+  `Contrato.preaviso_entregado: bool | None`,
+  `Contrato.fecha_preaviso: date | None`,
+  `Contrato.dias_preaviso: int | None`,
+  `Contrato.fecha_vencimiento_termino_fijo: date | None`.
+
+**Validación contra tests:** 17/17 PASS en
+`liquidator/tests/test_contracts/test_input_model.py` (S16).
