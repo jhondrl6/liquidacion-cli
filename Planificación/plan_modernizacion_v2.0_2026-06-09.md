@@ -140,7 +140,7 @@ liquidacion_cli/
 | Segmento | Rango | Días (incl.) | Params que aplica | Normas |
 |---|---|---|---|---|
 | 2025-H2 (cerrado) | 2025-11-16 → 2025-12-31 | 46 | `params/2025.json` (Decreto 1572/2024 SMMLV 1.423.500; Decreto 1573/2024 aux_trans 200.000) | Ley 50/1990, CST 249-308 |
-| 2026-H1 (en curso) | 2026-01-01 → 2026-06-09 | 160 | `params/2026.json` (Decreto 1469/2025 SMMLV 1.750.905; Decreto 1470/2025 aux_trans 249.095) | Ley 50/1990, CST 249-308, Ley 2466/2025 (recargo dominical gradual) |
+| 2026-H1 (en curso) | 2026-01-01 → 2026-06-09 | 160 | `params/2026.json` (Decreto 1469/2025 SMMLV 1.750.905 — **SUSPENDIDO provisionalmente, ver D. 159/2026**; Decreto 1470/2025 aux_trans 249.095) | Ley 50/1990, CST 249-308, Ley 2466/2025 (recargo dominical gradual) |
 | **Total** | 2025-11-16 → 2026-06-09 | **206** | (convención día-a-día inclusiva; alternativamente 205 con fin exclusivo, a fijar en Fase 1 con el motor) | |
 
 | Concepto | Valor esperado | Cálculo |
@@ -589,6 +589,31 @@ PYTHONPATH=. uv run --with pytest --with jsonschema pytest liquidator/tests -q
 ```
 
 **No-DoD hasta ejecutar Tarea 0.K:** el motor seguirá usando `params/2025.json` (hardcodeado en `liquidator/params/` y próximamente en `ParamsProvider`). Cualquier cálculo con `fecha_corte >= 2026-01-01` dará resultados incorrectos hasta que ParamsProvider (Tarea 1.E) se haga year-aware. La auditoría inmutable (Fase 3) registrará este desfase.
+
+> **⚠ Nota post-S11 (2026-06-13) — Hallazgo legal durante ejecución de 0.K:**
+> El **Decreto 1469/2025 (SMMLV 2026 = $1.750.905)** fue **suspendido
+> provisionalmente** por el **Consejo de Estado** (Sec. Segunda,
+> Subsección A, Auto del 2026-02-12, **Exp. 11001-03-25-000-2026-00004-00**)
+> y **re-fijado transitoriamente** por el **Decreto 159/2026** del
+> **2026-02-19** con **el mismo valor** ($1.750.905). El SMMLV 2026
+> **sigue vigente**; solo cambia el acto administrativo que lo fija.
+> El motor **NO requiere cambios** (valor idéntico), pero el output
+> de cada liquidación con `fecha_corte >= 2026-01-01` debe listar
+> **ambos decretos** (`DECRETO_1469_2025` + `DECRETO_159_2026`) en
+> `meta.referencias_normativas` para trazabilidad legal (ver
+> `Contexto/KB_LLM/05_schema_salida.md` y R-LEG-07 en
+> `Contexto/KB_LLM/06_riesgos_modelo.md`). Vigilar nulidad pendiente
+> antes de v2.0 release. Esta nota **corrige** la línea 501 de este
+> plan, que no mencionaba la suspensión (el plan fue escrito
+> 2026-06-09, después de la suspensión pero antes del hallazgo en S11).
+>
+> **⚠ Otro hallazgo post-S11 (R-LEG-06, bloqueante):** la atribución
+> de este plan (línea 501) al "Art. 64 de la Ley 2466/2025" para
+> pago mensual de intereses sobre cesantías es **incorrecta**.
+> Verificación SUIN del 2026-06-13 muestra que Art. 64 = "Régimen
+> simple laboral", NO pago mensual de intereses. El motor NO debe
+> implementar pago mensual de intereses hasta verificar el artículo
+> literal exacto.
 
 ---
 

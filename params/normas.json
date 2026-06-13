@@ -93,9 +93,9 @@
     },
     {
       "id": "LEY_2466_2025",
-      "nombre": "Ley 2466 de 2025",
-      "descripcion": "Recargo dominical y festivo (implementacion gradual)",
-      "texto_relevante": "Modifica el recargo dominical y festivo, estableciendo que por el trabajo en dias de descanso obligatorio se reconocera un recargo no inferior al ochenta por ciento (80%) del valor del salario ordinario, con implementacion gradual hasta alcanzar el 100% en julio de 2027.",
+      "nombre": "Ley 2466 de 2025 (Reforma Laboral)",
+      "descripcion": "Recargo dominical y festivo (implementacion gradual) + otras reformas laborales",
+      "texto_relevante": "Modifica el recargo dominical y festivo, estableciendo que por el trabajo en dias de descanso obligatorio se reconocera un recargo no inferior al ochenta por ciento (80%) del valor del salario ordinario, con implementacion gradual hasta alcanzar el 100% en julio de 2027. Ademas reforma los Arts. 5, 6, 7, 10, 11, 13, 14, 15 y otros del CST.",
       "factor_recargo": 0.80,
       "fecha_aplicacion": "2025-07-01",
       "cronograma": [
@@ -104,36 +104,61 @@
         {"desde": "2026-07-01", "hasta": "2027-06-30", "factor_recargo": 0.90, "nota": "Segunda fase de la Ley 2466/2025"},
         {"desde": "2027-07-01", "hasta": null,        "factor_recargo": 1.00, "nota": "Tope pleno de la Ley 2466/2025"}
       ],
-      "url": "https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=124567",
+      "url": "https://www.suin-juriscol.gov.co/viewDocument.asp?id=30055086",
+      "url_alcaldia_bogota": "https://www.alcaldiabogota.gov.co/sisjur/normas/Norma1.jsp?i=181933&dt=S",
+      "estado_verificacion": "VERIFICADO",
+      "fecha_verificacion": "2026-06-13",
       "vigencia": "temporal"
     },
     {
       "id": "DECRETO_1469_2025",
-      "nombre": "Decreto 1469 de 2025",
+      "nombre": "Decreto 1469 de 2025 (SMMLV 2026)",
       "descripcion": "Salario Minimo Legal Mensual Vigente 2026",
       "texto_relevante": "Establece el Salario Minimo Legal Mensual Vigente para el ano 2026 en la suma de $1.750.905 (un millon setecientos cincuenta mil novecientos cinco pesos), vigente desde el 1 de enero de 2026.",
       "valor": 1750905,
-      "url": "https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=XXXXXX",
+      "url": "https://www.suin-juriscol.gov.co/viewDocument.asp?id=30055940",
+      "url_alcaldia_bogota": "https://www.alcaldiabogota.gov.co/sisjur/normas/Norma1.jsp?i=191925&dt=S",
+      "estado_verificacion": "SUSPENDIDO_PROVISIONALMENTE",
+      "fecha_verificacion": "2026-06-13",
+      "nota_estado": "Decreto 1469/2025 suspendido provisionalmente por Auto del Consejo de Estado (Sec. Segunda, Subseccion A) del 2026-02-12 (Exp. 11001-03-25-000-2026-00004-00). Valor de $1.750.905 fue re-fijado transitoriamente por el Decreto 159 de 2026 del 2026-02-19 (mismo valor, distinto acto administrativo) hasta sentencia de nulidad. El SMMLV $1.750.905 SIGUE VIGENTE; solo cambia el acto que lo fija.",
       "vigencia": "2026"
     },
     {
       "id": "DECRETO_1470_2025",
-      "nombre": "Decreto 1470 de 2025",
+      "nombre": "Decreto 1470 de 2025 (Auxilio de transporte 2026)",
       "descripcion": "Auxilio de transporte 2026",
-      "texto_relevante": "Establece el valor del auxilio de transporte para el ano 2026 en la suma de $249.095 (doscientos cuarenta y nueve mil noventa y cinco pesos) mensuales para trabajadores que devenguen hasta dos (2) Salarios Minimos Mensuales Legales Vigentes, vigente desde el 1 de enero de 2026.",
+      "texto_relevante": "Establece el valor del auxilio de transporte para el ano 2026 en la suma de $249.095 (doscientos cuarenta y nueve mil noventa y cinco pesos) mensuales para trabajadores que devenguen hasta dos (2) Salarios Minimos Mensuales Legales Vigentes, vigente desde el 1 de enero de 2026. Deroga el Decreto 1573 de 2024.",
       "valor": 249095,
-      "url": "https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=XXXXXX",
+      "url": "https://www.suin-juriscol.gov.co/viewDocument.asp?id=30055941",
+      "url_alcaldia_bogota": "https://www.alcaldiabogota.gov.co/sisjur/normas/Norma1.jsp?i=191926&dt=S",
+      "estado_verificacion": "VERIFICADO",
+      "fecha_verificacion": "2026-06-13",
+      "vigencia": "2026"
+    },
+    {
+      "id": "DECRETO_159_2026",
+      "nombre": "Decreto 159 de 2026 (SMMLV 2026 transitorio)",
+      "descripcion": "Re-fijacion transitoria del SMMLV 2026 tras suspension del Decreto 1469/2025",
+      "texto_relevante": "Fija transitoriamente a partir de su publicacion (2026-02-19) como Salario Minimo Legal Mensual para el ano 2026 la suma de $1.750.905 (mismo valor del Decreto 1469/2025 suspendido). Vigente hasta sentencia de nulidad del Exp. 11001-03-25-000-2026-00004-00.",
+      "valor": 1750905,
+      "url": "https://www.alcaldiabogota.gov.co/sisjur/normas/Norma1.jsp?i=192181&dt=S",
+      "url_normograma": "https://normograma.com/documentospdf/idea/v_ico/compilacion/docs/decreto_0159_2026.htm",
+      "estado_verificacion": "VERIFICADO",
+      "fecha_verificacion": "2026-06-13",
       "vigencia": "2026"
     },
     {
       "id": "LEY_2466_2025_INTERESES_MENSUALES",
-      "nombre": "Ley 2466 de 2025 Art. 64 (pago mensual opcional de intereses sobre cesantias)",
-      "descripcion": "Opcion de pago mensual de intereses sobre cesantias",
-      "texto_relevante": "El empleador y el trabajador podran acordar por escrito el pago mensual de los intereses sobre las cesantias, equivalente al uno por ciento (1%) del salario base de liquidacion mensual, en lugar del pago anual unico previsto en la Ley 50 de 1990. La tasa anual nominal sigue siendo del 12% (1% mensual nominal = 12% anual nominal). Solo aplica si hay acuerdo escrito entre las partes.",
+      "nombre": "Ley 2466 de 2025 — Pago mensual opcional de intereses sobre cesantias (NO VERIFICADO)",
+      "descripcion": "Issue pendiente: el plan v2.0 atribuyo esta disposicion al Art. 64 de la Ley 2466/2025. Verificacion del SUIN (2026-06-13) muestra que el Art. 64 de la Ley 2466/2025 es 'Regimen simple laboral', NO pago mensual de intereses sobre cesantias. La atribucion es probablemente incorrecta o el articulo es distinto al 64.",
+      "texto_relevante": "ATENCION: NO USAR esta entrada hasta verificar el articulo literal. El plan v2.0 linea 552-559 afirma: 'El empleador y el trabajador podran acordar por escrito el pago mensual de los intereses sobre las cesantias, equivalente al uno por ciento (1%) del salario base de liquidacion mensual'. Pero SUIN muestra que Art. 64 = 'Regimen simple laboral'. El motor NO debe aplicar pago mensual de intereses hasta que la cita legal este verificada verbatim.",
       "factor_recargo": 0.01,
       "fecha_aplicacion": "2026-01-01",
-      "url": "https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=XXXXXX",
-      "vigencia": "2026"
+      "url": "https://www.suin-juriscol.gov.co/viewDocument.asp?id=30055086",
+      "estado_verificacion": "PENDIENTE_TEXTO_LITERAL",
+      "fecha_verificacion": "2026-06-13",
+      "issue_bloqueante": "R-LEG-NUEVO-01: atribucion al Art. 64 de la Ley 2466/2025 contradice verificacion SUIN. NO implementar pago mensual de intereses sobre cesantias en el motor hasta verificar el articulo literal exacto.",
+      "vigencia": "temporal"
     },
     {
       "id": "CST_161",
@@ -230,9 +255,9 @@
     }
   },
   "metadata": {
-    "version": "2026-06-09",
-    "fecha_actualizacion": "2026-06-09",
-    "fuente": "Ministerio del Trabajo - Colombia (Decretos 1469/2025 y 1470/2025; Ley 2466/2025; Ley 50/1990; CST)",
-    "notas": "Este archivo contiene la normatividad vigente para liquidacion de nomina en Colombia. Los valores monetarios y tasas reflejan la actualizacion anual segun decretos expedidos. Tras la adicion de Tarea 0.K (2026-06-09) incluye: Decreto 1469/2025 (SMMLV 2026), Decreto 1470/2025 (aux_trans 2026), Ley 2466/2025 Art. 64 (pago mensual opcional de intereses sobre cesantias), y cronograma gradual del recargo dominical actualizado."
+    "version": "2026-06-13",
+    "fecha_actualizacion": "2026-06-13",
+    "fuente": "SUIN-Juriscol (verificadas) + Ministerio del Trabajo - Colombia (Decretos 1469/2025, 1470/2025, 159/2026; Ley 2466/2025; Ley 50/1990; CST)",
+    "notas": "Este archivo contiene la normatividad vigente para liquidacion de nomina en Colombia. Los valores monetarios y tasas reflejan la actualizacion anual segun decretos expedidos. Tras Tarea 0.K (S11, 2026-06-13) incluye: Decreto 1469/2025 (SMMLV 2026, SUSPENDIDO provisionalmente por Consejo de Estado 2026-02-12), Decreto 159/2026 (re-fijacion transitoria del SMMLV 2026 con mismo valor), Decreto 1470/2025 (aux_trans 2026), Ley 2466/2025 (verificada SUIN). URLs reales verificadas en SUIN y Alcaldia de Bogota. ISSUE R-LEG-NUEVO-01: la entrada LEY_2466_2025_INTERESES_MENSUALES (pago mensual de intereses sobre cesantias) del plan v2.0 esta atribuida al Art. 64, pero SUIN muestra que Art. 64 = 'Regimen simple laboral'. NO implementar pago mensual de intereses en motor hasta verificar el articulo literal exacto."
   }
 }

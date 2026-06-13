@@ -9,5 +9,5 @@
   "TOPE_INDEMNIZACION_SMMLV": 20,
   "FECHA_APLICACION_RECARGO_DOMINICAL": "2026-07-01",
   "version": "2026-06-09",
-  "referencia": "Decreto 1469 de 2025 (SMMLV 2026), Decreto 1470 de 2025 (aux_trans 2026), Ley 2466 de 2025 (recargo dominical gradual + Art. 64 opcion pago mensual intereses), Ley 50 de 1990 (intereses cesantias)"
+  "referencia": "Decreto 1469 de 2025 (SMMLV 2026, SUSPENDIDO provisionalmente por Consejo de Estado 2026-02-12 — Exp. 11001-03-25-000-2026-00004-00) + Decreto 159 de 2026 (re-fijacion transitoria del SMMLV 2026, mismo valor $1.750.905, vigente desde 2026-02-19 hasta sentencia de nulidad); Decreto 1470 de 2025 (aux_trans 2026); Ley 2466 de 2025 (recargo dominical gradual); Ley 50 de 1990 (intereses cesantias). Ver params/normas.json:DECRETO_1469_2025.nota_estado y DECRETO_159_2026 para trazabilidad legal completa."
 }

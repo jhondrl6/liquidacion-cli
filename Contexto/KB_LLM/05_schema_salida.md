@@ -35,6 +35,7 @@ Campos esperados:
 | `parametros_por_segmento`          | object | **Crítico para auditoría multi-año.** Ver abajo.        |
 | `plantilla_version`                | str    | Versión de la plantilla Jinja usada (Fase 3).          |
 | `compliance_status`                | str    | `GO` \| `WARN` \| `NO_GO` \| `OVERRIDE_APPROVED`.       |
+| `referencias_normativas`           | array  | IDs de `params/normas.json` citados (NUEVO post-S11, R-LEG-07). Ver abajo. |
 
 `parametros_por_segmento` debe verse así para el caso canónico:
 
@@ -43,7 +44,12 @@ Campos esperados:
   "parametros_por_segmento": {
     "2025": {"params_version": "2025-10-31", "rango": "2025-11-16 → 2025-12-31", "dias": 46, "params_ref": "params/2025.json"},
     "2026": {"params_version": "2026-06-09", "rango": "2026-01-01 → 2026-06-09", "dias": 160, "params_ref": "params/2026.json"}
-  }
+  },
+  "referencias_normativas": [
+    "DECRETO_1572_2024", "DECRETO_1573_2024",
+    "DECRETO_1469_2025", "DECRETO_159_2026", "DECRETO_1470_2025",
+    "LEY_2466_2025", "LEY50_99", "CST_249_252", "CST_306_308", "CST_186_192"
+  ]
 }
 ```
 
@@ -51,6 +57,16 @@ Campos esperados:
 > su `params_version` por separado. El bug clásico es reportar solo
 > el último `params_version` aplicado, perdiendo la trazabilidad del
 > segmento 2025.
+>
+> `referencias_normativas` (NUEVO post-S11, R-LEG-07): lista de IDs de
+> `params/normas.json` citados en la liquidación. **Crítico** listar
+> tanto `DECRETO_1469_2025` (suspendido provisionalmente por Consejo
+> de Estado 2026-02-12) como `DECRETO_159_2026` (re-fijación transitoria
+> del SMMLV 2026 con mismo valor) para que la liquidación sea
+> legalmente trazable aunque el D. 1469/2025 sea anulado
+> retroactivamente. El motor debe popular este campo automáticamente
+> a partir de los `params_ref` de cada segmento + las normas
+> efectivamente aplicadas (e.g. Ley 50/1990 para intereses).
 
 ## `trabajador` — Eco del input (anonimizado en KB y logs)
 
@@ -134,7 +150,7 @@ mínimas son:
 - `CST_306_308` (prima).
 - `CST_186_192` (vacaciones, base).
 - `DECRETO_1572_2024`, `DECRETO_1573_2024` (params 2025).
-- `DECRETO_1469_2025`, `DECRETO_1470_2025` (params 2026).
+- `DECRETO_1469_2025`, `DECRETO_159_2026`, `DECRETO_1470_2025` (params 2026 — **listar siempre D. 1469 + D. 159** para trazabilidad de la suspensión, ver R-LEG-07).
 - `LEY_2466_2025` (recargo dominical fase vigente).
 
 ## `compliance_report` — Eco del `compliance_engine.py::run`
@@ -158,12 +174,19 @@ A partir del JSON se generan (en Fase 3, no en v2.0 base):
 
 ## Última validación contra código
 
-- **Fecha:** 2026-06-13 (sesión S5, Tarea 0.E).
-- **Verificado:** shape documentado en plan §3 línea 156 y nombres
+- **Fecha:** 2026-06-13 (sesión S11.5 — 2do sweep post-Tarea 0.K, R-LEG-07).
+- **Verificado (NUEVO):** `meta.referencias_normativas` agregado al
+  schema de salida. Caso canónico debe listar **D. 1469/2025 + D. 159/2026**
+  para trazabilidad de la suspensión. `normas_aplicadas` actualizado
+  con `DECRETO_159_2026`.
+- **Verificado (S5):** shape documentado en plan §3 línea 156 y nombres
   de campo en `output/_legacy/liquidacion_pedro_franco.json` y
   `compensacion_pedro_franco.json` (no leídos en detalle en esta
   sesión; existencia verificada en Tarea 0.C, S3).
 - **NO verificado:** que el código actual (`liquidator/core/engine.py`
-  o `workflow_orchestrator.py`) produzca exactamente este shape. La
-  auditoría del shape se hace en Fase 1, Tarea 1.B (golden test del
-  caso canónico).
+  o `workflow_orchestrator.py`) produzca exactamente este shape, ni
+  que `meta.referencias_normativas` sea popularizado por el motor.
+  La auditoría del shape se hace en Fase 1, Tarea 1.B (golden test
+  del caso canónico). El motor debe popular `referencias_normativas`
+  automáticamente a partir de los `params_ref` por segmento + normas
+  efectivamente aplicadas.

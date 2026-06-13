@@ -137,6 +137,26 @@ motor fallan.
     pida de nuevo.
 14. **Un agente que dice "no sé, falta verificar" es más valioso
     que uno que inventa una respuesta coherente.**
+15. **SMMLV 2026 ($1.750.905) está vigente por Decreto 159/2026**
+    (transitorio, re-fijación del 2026-02-19), NO directamente por
+    el Decreto 1469/2025 (suspendido provisionalmente por Auto del
+    Consejo de Estado del 2026-02-12, Exp. 11001-03-25-000-2026-00004-00).
+    El valor es el mismo en ambos actos, así que **el motor no
+    necesita cambios**; pero el output de cualquier liquidación con
+    `fecha_corte >= 2026-01-01` debe listar **ambos decretos** en
+    `meta.referencias_normativas` (ver `Contexto/KB_LLM/05_schema_salida.md`).
+    Vigilar nulidad del Decreto 1469/2025 antes de v2.0 release (R-LEG-07);
+    si la nulidad prospera, el SMMLV 2026 vuelve a 1.423.500 con
+    retroactivo.
+16. **No aplicar la entrada `LEY_2466_2025_INTERESES_MENSUALES`** de
+    `params/normas.json` para cálculo de pago mensual de intereses
+    sobre cesantías hasta que se verifique el artículo literal exacto
+    de la Ley 2466/2025. Verificación SUIN del 2026-06-13 muestra
+    que el Art. 64 de la Ley 2466/2025 es "Régimen simple laboral",
+    NO pago mensual de intereses (R-LEG-06, bloqueante). Mientras
+    tanto, usar la regla vigente (Ley 50/1990 Art. 99): pago
+    **anual** único el 31 de enero, tasa 12% sobre cesantías al
+    31 de diciembre del año anterior.
 
 ## Cierre de sesión (5 pasos, en este orden)
 

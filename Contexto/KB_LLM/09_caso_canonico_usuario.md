@@ -41,7 +41,7 @@ contrato, no afectada por cambios de SMMLV).
 | Segmento | Rango | Días (inclusivo) | Params                                       | Normas relevantes                         |
 |----------|-------|------------------|----------------------------------------------|-------------------------------------------|
 | 2025-H2  | 2025-11-16 → 2025-12-31 | 46 | `params/2025.json` (SMMLV 1.423.500; aux 200.000) | Ley 50/1990, CST 249-308                  |
-| 2026-H1  | 2026-01-01 → 2026-06-09 | 160 | `params/2026.json` (SMMLV 1.750.905; aux 249.095) | Ley 50/1990, CST 249-308, Ley 2466/2025   |
+| 2026-H1  | 2026-01-01 → 2026-06-09 | 160 | `params/2026.json` (SMMLV 1.750.905; aux 249.095) | Ley 50/1990, CST 249-308, Ley 2466/2025, **D. 1469/2025 + D. 159/2026 (transitorio, ver R-LEG-07)** |
 | **Total**| 2025-11-16 → 2026-06-09 | **206** | (convención día-a-día inclusiva) |  |
 
 > **Convención de días:** inclusiva en ambos extremos. Alternativa
@@ -82,6 +82,12 @@ contrato, no afectada por cambios de SMMLV).
 `meta.parametros_por_segmento` debe registrar **ambos** `params_version`:
 - Segmento 2025 → `"2025-10-31"` (versión de `params/2025.json`).
 - Segmento 2026 → `"2026-06-09"` (versión de `params/2026.json`).
+
+**Adicional (post-S11, R-LEG-07):** para el segmento 2026, el output
+debe incluir `meta.referencias_normativas: ["DECRETO_1469_2025",
+"DECRETO_159_2026"]` para trazabilidad de la suspensión provisional
+del D. 1469/2025 (Consejo de Estado, 2026-02-12). Ver
+`Contexto/KB_LLM/05_schema_salida.md` y `AGENTS.md` regla #15.
 
 ## Cómo reproducir el caso
 
