@@ -1,0 +1,32 @@
+# Compliance policies - Defines behavior for compliance failures
+
+policies:
+  lenient:
+    description: "Lenient policy - Allows continuation with warnings"
+    rules:
+      CRITICAL: "WARN"   # Only warns, doesn't block
+      HIGH: "WARN"
+      MEDIUM: "WARN"
+      LOW: "IGNORE"
+    allow_human_override: true
+    require_approval_for_override: false
+    
+  standard:
+    description: "Standard policy - Blocks for CRITICAL, warns for others"
+    rules:
+      CRITICAL: "BLOCK"  # Stops the process
+      HIGH: "WARN"
+      MEDIUM: "WARN"
+      LOW: "IGNORE"
+    allow_human_override: true
+    require_approval_for_override: true
+    
+  strict:
+    description: "Strict policy - Blocks for CRITICAL and HIGH"
+    rules:
+      CRITICAL: "BLOCK"  # Stops the process
+      HIGH: "BLOCK"
+      MEDIUM: "WARN"
+      LOW: "WARN"
+    allow_human_override: false
+    # No overrides allowed in strict mode

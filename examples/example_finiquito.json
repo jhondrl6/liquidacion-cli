@@ -1,0 +1,40 @@
+{
+  "modo": "FINIQUITO",
+  "fecha_ingreso": "2023-03-15",
+  "fecha_corte": "2025-11-15",
+  "salario_mensual": 2500000,
+  "salarios_historicos": [
+    {"mes": "2023-11", "valor": 2300000},
+    {"mes": "2023-12", "valor": 2300000},
+    {"mes": "2024-01", "valor": 2400000},
+    {"mes": "2024-02", "valor": 2400000},
+    {"mes": "2024-03", "valor": 2450000},
+    {"mes": "2024-04", "valor": 2450000},
+    {"mes": "2024-05", "valor": 2500000},
+    {"mes": "2024-06", "valor": 2500000},
+    {"mes": "2024-07", "valor": 2500000},
+    {"mes": "2024-08", "valor": 2500000},
+    {"mes": "2024-09", "valor": 2500000},
+    {"mes": "2024-10", "valor": 2500000}
+  ],
+  "comisiones_promedio_mensual": 200000,
+  "horas_extras_promedio_mensual": 150000,
+  "bonificaciones_promedio_mensual": 100000,
+  "reside_en_lugar_trabajo": false,
+  "auxilio_transporte": 0,
+  "dias_vacaciones_pendientes": 15,
+  "tipo_contrato": "indefinido",
+  "motivo_terminacion": "sin_justa_causa",
+  "salario_pendiente": 833333,
+  "salario_pendiente_dias": 10,
+  "enforce-compliance": true,
+  "compliance-policy": "strict",
+  "trabajador": {
+    "nombre": "Luis Hernández",
+    "documento": "1056789012"
+  },
+  "empleador": {
+    "nombre": "Industrias Modernas S.A.",
+    "nit": "800123456-5"
+  }
+}

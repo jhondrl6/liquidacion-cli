@@ -1,0 +1,666 @@
+/*
+ * Estilos CSS para PDF de Liquidación de Nómina
+ * Colombia - Sistema de Liquidación 2025
+ * 
+ * Características:
+ * - Diseño profesional y corporativo
+ * - Formato optimizado para impresión
+ * - Tablas legibles y bien estructuradas
+ * - Tipografía clara y tamaños apropiados
+ * - Colores institucionales
+ */
+
+/* ============================================
+   VARIABLES Y CONFIGURACIÓN GENERAL
+============================================ */
+
+:root {
+    /* Colores corporativos */
+    --color-primary: #2c3e50;
+    --color-secondary: #34495e;
+    --color-accent: #3498db;
+    --color-success: #27ae60;
+    --color-warning: #f39c12;
+    --color-danger: #e74c3c;
+    --color-light: #ecf0f1;
+    --color-dark: #2c3e50;
+    --color-gray: #7f8c8d;
+    --color-border: #bdc3c7;
+    
+    /* Tipografía */
+    --font-family-primary: 'Arial', 'Helvetica', sans-serif;
+    --font-family-monospace: 'Courier New', monospace;
+    
+    /* Tamaños de fuente */
+    --font-size-xs: 8pt;
+    --font-size-sm: 9pt;
+    --font-size-base: 11pt;
+    --font-size-lg: 14pt;
+    --font-size-xl: 18pt;
+    --font-size-xxl: 24pt;
+    
+    /* Espaciado */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-base: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    
+    /* Bordes */
+    --border-width: 1px;
+    --border-radius: 3px;
+}
+
+/* ============================================
+   RESET Y CONFIGURACIÓN BASE
+============================================ */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: var(--font-size-base);
+    line-height: 1.6;
+}
+
+body {
+    font-family: var(--font-family-primary);
+    color: var(--color-dark);
+    background-color: #ffffff;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100vh;
+}
+
+/* ============================================
+   ESTRUCTURA DEL DOCUMENTO
+============================================ */
+
+.document-content {
+    max-width: 216mm; /* Letter width */
+    margin: 0 auto;
+    padding: var(--spacing-lg);
+    background-color: #ffffff;
+}
+
+/* ============================================
+   ENCABEZADOS
+============================================ */
+
+h1 {
+    font-size: var(--font-size-xxl);
+    font-weight: bold;
+    color: var(--color-primary);
+    text-align: center;
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-base);
+    border-bottom: 3px solid var(--color-primary);
+    page-break-after: avoid;
+}
+
+h2 {
+    font-size: var(--font-size-xl);
+    font-weight: bold;
+    color: var(--color-secondary);
+    margin-top: var(--spacing-xl);
+    margin-bottom: var(--spacing-base);
+    page-break-after: avoid;
+}
+
+h3 {
+    font-size: var(--font-size-lg);
+    font-weight: bold;
+    color: var(--color-secondary);
+    margin-top: var(--spacing-lg);
+    margin-bottom: var(--spacing-sm);
+    page-break-after: avoid;
+}
+
+h4 {
+    font-size: var(--font-size-base);
+    font-weight: bold;
+    color: var(--color-dark);
+    margin-top: var(--spacing-base);
+    margin-bottom: var(--spacing-sm);
+    page-break-after: avoid;
+}
+
+/* ============================================
+   PÁRRAFOS Y TEXTO
+============================================ */
+
+p {
+    margin-bottom: var(--spacing-base);
+    text-align: justify;
+    line-height: 1.5;
+}
+
+strong {
+    font-weight: bold;
+    color: var(--color-dark);
+}
+
+em {
+    font-style: italic;
+    color: var(--color-secondary);
+}
+
+.small {
+    font-size: var(--font-size-sm);
+    color: var(--color-gray);
+}
+
+.large {
+    font-size: var(--font-size-lg);
+    font-weight: bold;
+}
+
+/* ============================================
+   LISTAS
+============================================ */
+
+ul, ol {
+    margin-bottom: var(--spacing-base);
+    padding-left: var(--spacing-lg);
+}
+
+li {
+    margin-bottom: var(--spacing-xs);
+    line-height: 1.4;
+}
+
+/* ============================================
+   TABLAS - PRESTACIONES PRINCIPALES
+============================================ */
+
+.prestaciones-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: var(--spacing-lg) 0;
+    font-size: var(--font-size-sm);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    page-break-inside: avoid;
+}
+
+.prestaciones-table th {
+    background-color: var(--color-primary);
+    color: white;
+    padding: var(--spacing-base);
+    text-align: left;
+    font-weight: bold;
+    border: var(--border-width) solid var(--color-border);
+    font-size: var(--font-size-sm);
+}
+
+.prestaciones-table td {
+    padding: var(--spacing-sm) var(--spacing-base);
+    border: var(--border-width) solid var(--color-border);
+    vertical-align: top;
+}
+
+.prestaciones-table tbody tr:nth-child(even) {
+    background-color: var(--color-light);
+}
+
+.prestaciones-table tbody tr:hover {
+    background-color: rgba(52, 152, 219, 0.1);
+}
+
+/* Tablas generales */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: var(--spacing-base) 0;
+    page-break-inside: avoid;
+}
+
+table th {
+    background-color: var(--color-secondary);
+    color: white;
+    padding: var(--spacing-sm);
+    text-align: left;
+    font-weight: bold;
+    border: var(--border-width) solid var(--color-border);
+}
+
+table td {
+    padding: var(--spacing-sm);
+    border: var(--border-width) solid var(--color-border);
+}
+
+table tbody tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+/* ============================================
+   INFORMACIÓN DEL TRABAJADOR
+============================================ */
+
+.trabajador-info {
+    background-color: #f8f9fa;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-base);
+    margin: var(--spacing-base) 0;
+    page-break-inside: avoid;
+}
+
+.trabajador-info p {
+    margin-bottom: var(--spacing-xs);
+    font-size: var(--font-size-base);
+}
+
+.trabajador-info strong {
+    color: var(--color-primary);
+    min-width: 120px;
+    display: inline-block;
+}
+
+/* ============================================
+   RESUMEN Y TOTALES
+============================================ */
+
+.resumen-total {
+    background-color: var(--color-primary);
+    color: white;
+    padding: var(--spacing-lg);
+    margin: var(--spacing-xl) 0;
+    border-radius: var(--border-radius);
+    text-align: center;
+    page-break-inside: avoid;
+}
+
+.resumen-total h3 {
+    color: white;
+    margin-top: 0;
+    font-size: var(--font-size-xl);
+}
+
+.resumen-total .monto-total {
+    font-size: var(--font-size-xxl);
+    font-weight: bold;
+    margin: var(--spacing-base) 0;
+}
+
+/* ============================================
+   ALERTAS Y ADVERTENCIAS
+============================================ */
+
+.alerta {
+    padding: var(--spacing-base);
+    margin: var(--spacing-base) 0;
+    border-radius: var(--border-radius);
+    border-left: 4px solid;
+    page-break-inside: avoid;
+}
+
+.alerta-info {
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
+    color: #0c5460;
+}
+
+.alerta-warning {
+    background-color: #fff3cd;
+    border-color: #ffeaa7;
+    color: #856404;
+}
+
+.alerta-success {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    color: #155724;
+}
+
+.alerta-danger {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+}
+
+.alerta h4 {
+    margin-top: 0;
+    margin-bottom: var(--spacing-sm);
+}
+
+/* ============================================
+   SECCIONES ESPECIALES
+============================================ */
+
+.seccion {
+    margin: var(--spacing-xl) 0;
+    page-break-inside: avoid;
+}
+
+.seccion-header {
+    background-color: var(--color-light);
+    padding: var(--spacing-base);
+    border-left: 4px solid var(--color-accent);
+    margin-bottom: var(--spacing-base);
+}
+
+.seccion-content {
+    padding: var(--spacing-base) 0;
+}
+
+/* ============================================
+   PLAZOS Y FECHAS LEGALES
+============================================ */
+
+.plazos-legales {
+    background-color: #f8f9fa;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-base);
+    margin: var(--spacing-base) 0;
+    page-break-inside: avoid;
+}
+
+.plazos-legales h4 {
+    color: var(--color-primary);
+    margin-top: 0;
+    margin-bottom: var(--spacing-base);
+}
+
+.plazo-item {
+    margin-bottom: var(--spacing-sm);
+    padding-left: var(--spacing-base);
+    border-left: 2px solid var(--color-accent);
+}
+
+.plazo-concepto {
+    font-weight: bold;
+    color: var(--color-secondary);
+}
+
+.plazo-fecha {
+    color: var(--color-danger);
+    font-weight: bold;
+}
+
+/* ============================================
+   DECLARACIONES LEGALES
+============================================ */
+
+.declaracion-legal {
+    background-color: #f8f9fa;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-lg);
+    margin: var(--spacing-xl) 0;
+    font-style: italic;
+    text-align: justify;
+    page-break-inside: avoid;
+}
+
+.declaracion-legal h4 {
+    color: var(--color-primary);
+    text-align: center;
+    margin-bottom: var(--spacing-base);
+}
+
+/* ============================================
+   FIRMAS
+============================================ */
+
+.firmas {
+    margin: var(--spacing-xl) 0;
+    page-break-inside: avoid;
+}
+
+.firma-row {
+    display: table;
+    width: 100%;
+    margin-bottom: var(--spacing-xl);
+}
+
+.firma-col {
+    display: table-cell;
+    width: 50%;
+    vertical-align: top;
+    padding: 0 var(--spacing-base);
+}
+
+.firma-line {
+    border-bottom: 1px solid var(--color-dark);
+    height: 60px;
+    margin-bottom: var(--spacing-sm);
+}
+
+.firma-label {
+    text-align: center;
+    font-weight: bold;
+    color: var(--color-secondary);
+    font-size: var(--font-size-sm);
+}
+
+.firma-fecha {
+    text-align: center;
+    font-size: var(--font-size-xs);
+    color: var(--color-gray);
+    margin-top: var(--spacing-sm);
+}
+
+/* ============================================
+   ENCABEZADO Y PIE DE PÁGINA
+============================================ */
+
+.header-content {
+    text-align: center;
+}
+
+.company-info h2 {
+    margin: 0;
+    font-size: var(--font-size-lg);
+    color: var(--color-primary);
+}
+
+.company-info p {
+    margin: var(--spacing-xs) 0 0 0;
+    font-size: var(--font-size-sm);
+    color: var(--color-gray);
+}
+
+.footer-content {
+    text-align: center;
+}
+
+.footer-content p {
+    margin: var(--spacing-xs) 0;
+    font-size: var(--font-size-xs);
+    color: var(--color-gray);
+}
+
+/* ============================================
+   UTILIDADES
+============================================ */
+
+.text-center {
+    text-align: center;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.text-left {
+    text-align: left;
+}
+
+.font-bold {
+    font-weight: bold;
+}
+
+.font-italic {
+    font-style: italic;
+}
+
+.text-primary {
+    color: var(--color-primary);
+}
+
+.text-secondary {
+    color: var(--color-secondary);
+}
+
+.text-success {
+    color: var(--color-success);
+}
+
+.text-warning {
+    color: var(--color-warning);
+}
+
+.text-danger {
+    color: var(--color-danger);
+}
+
+.mb-0 { margin-bottom: 0; }
+.mb-1 { margin-bottom: var(--spacing-xs); }
+.mb-2 { margin-bottom: var(--spacing-sm); }
+.mb-3 { margin-bottom: var(--spacing-base); }
+.mb-4 { margin-bottom: var(--spacing-lg); }
+.mb-5 { margin-bottom: var(--spacing-xl); }
+
+.mt-0 { margin-top: 0; }
+.mt-1 { margin-top: var(--spacing-xs); }
+.mt-2 { margin-top: var(--spacing-sm); }
+.mt-3 { margin-top: var(--spacing-base); }
+.mt-4 { margin-top: var(--spacing-lg); }
+.mt-5 { margin-top: var(--spacing-xl); }
+
+/* ============================================
+   REGLAS DE IMPRESIÓN
+============================================ */
+
+@page {
+    size: Letter;
+    margin: 2cm 1.5cm;
+    
+    @top-center {
+        content: element(header);
+    }
+    
+    @bottom-center {
+        content: element(footer);
+    }
+}
+
+/* Evitar saltos de página en secciones importantes */
+.no-break {
+    page-break-inside: avoid;
+}
+
+.break-before {
+    page-break-before: always;
+}
+
+.break-after {
+    page-break-after: always;
+}
+
+/* ============================================
+   RESPONSIVE PARA DIFERENTES TAMAÑOS
+============================================ */
+
+@media print {
+    body {
+        font-size: var(--font-size-base);
+        line-height: 1.4;
+    }
+    
+    .document-content {
+        padding: 0;
+        max-width: none;
+    }
+    
+    /* Ocultar elementos innecesarios en impresión */
+    .no-print {
+        display: none;
+    }
+    
+    /* Asegurar que las tablas no se corten */
+    table {
+        page-break-inside: avoid;
+    }
+    
+    /* Mejorar legibilidad en impresión */
+    h1, h2, h3, h4, h5, h6 {
+        page-break-after: avoid;
+    }
+    
+    .prestaciones-table {
+        font-size: var(--font-size-xs);
+    }
+    
+    .prestaciones-table th,
+    .prestaciones-table td {
+        padding: var(--spacing-xs);
+    }
+}
+
+/* ============================================
+   ESTILOS ESPECÍFICOS PARA NÓMINA
+============================================ */
+
+.monto {
+    font-family: var(--font-family-monospace);
+    font-weight: bold;
+    text-align: right;
+}
+
+.concepto-legal {
+    font-size: var(--font-size-xs);
+    color: var(--color-gray);
+    font-style: italic;
+}
+
+.dias-liquidacion {
+    text-align: center;
+    font-weight: bold;
+    color: var(--color-primary);
+}
+
+.plazo-pago {
+    text-align: center;
+    font-weight: bold;
+    color: var(--color-danger);
+}
+
+/* Estados de validación */
+.validacion-pass {
+    color: var(--color-success);
+    font-weight: bold;
+}
+
+.validacion-warn {
+    color: var(--color-warning);
+    font-weight: bold;
+}
+
+.validacion-fail {
+    color: var(--color-danger);
+    font-weight: bold;
+}
+
+/* ============================================
+   ANIMACIONES Y TRANSICIONES (solo para pantalla)
+============================================ */
+
+@media screen {
+    .prestaciones-table tbody tr:hover {
+        transition: background-color 0.2s ease;
+    }
+    
+    .alerta {
+        transition: all 0.2s ease;
+    }
+    
+    .seccion {
+        transition: all 0.2s ease;
+    }
+}

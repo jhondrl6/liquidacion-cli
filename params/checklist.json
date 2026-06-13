@@ -1,0 +1,65 @@
+{
+  "version": "2025-10-31",
+  "rules": [
+    {
+      "id": "V001",
+      "description": "Parámetros oficiales 2025 presentes y consistentes",
+      "severity": "CRITICAL",
+      "rule_ref": ["Decreto 1572/2024"]
+    },
+    {
+      "id": "V002",
+      "description": "Contrato válido para liquidación de prestaciones",
+      "severity": "CRITICAL",
+      "rule_ref": ["Art. 23 CST"]
+    },
+    {
+      "id": "V003",
+      "description": "Auxilio transporte aplicado correctamente",
+      "severity": "HIGH",
+      "rule_ref": ["Checklist Auxilio Transporte Finca Rural"]
+    },
+    {
+      "id": "V004",
+      "description": "Fórmulas de cesantías correctas",
+      "severity": "CRITICAL",
+      "rule_ref": ["Art.249-250 CST"]
+    },
+    {
+      "id": "V005",
+      "description": "Intereses de cesantías con tasa legal vigente",
+      "severity": "CRITICAL",
+      "rule_ref": ["Ley 50/1990 Art.99"]
+    },
+    {
+      "id": "V006",
+      "description": "Prima semestre proporcional validada",
+      "severity": "MEDIUM",
+      "rule_ref": ["Art.306-308 CST"]
+    },
+    {
+      "id": "V007",
+      "description": "Vacaciones manejadas según modo de liquidación",
+      "severity": "CRITICAL",
+      "rule_ref": ["Arts.186-192 CST"]
+    },
+    {
+      "id": "V008",
+      "description": "Plazos de pago documentados",
+      "severity": "HIGH",
+      "rule_ref": ["Art.65 CST", "Ley 50/1990 Art.99"]
+    },
+    {
+      "id": "V009",
+      "description": "Sustento legal presente por concepto",
+      "severity": "HIGH",
+      "rule_ref": ["Checklist: Sustento Legal"]
+    },
+    {
+      "id": "V010",
+      "description": "Hashes y versionamiento registrados",
+      "severity": "HIGH",
+      "rule_ref": ["Checklist: Trazabilidad"]
+    }
+  ]
+}

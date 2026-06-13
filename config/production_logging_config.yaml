@@ -1,0 +1,144 @@
+# Production Logging Configuration - Colombia Payroll Settlement System 2025
+# Enhanced for production with security, performance monitoring, and compliance
+
+version: 1
+disable_existing_loggers: false
+
+formatters:
+  basic:
+    format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    datefmt: '%Y-%m-%d %H:%M:%S'
+  
+  detailed:
+    format: '%(asctime)s - %(name)s - %(levelname)s - %(module)s - %(funcName)s:%(lineno)d - %(message)s'
+    datefmt: '%Y-%m-%d %H:%M:%S'
+    
+  json:
+    format: '{"timestamp": "%(asctime)s", "logger": "%(name)s", "level": "%(levelname)s", "module": "%(module)s", "function": "%(funcName)s", "line": %(lineno)d, "message": "%(message)s"}'
+    datefmt: '%Y-%m-%dT%H:%M:%S'
+    
+  production_json:
+    format: '{"timestamp": "%(asctime)sZ", "level": "%(levelname)s", "service": "liquidacion-cli", "version": "1.0.0", "module": "%(module)s", "function": "%(funcName)s", "line": %(lineno)d, "session_id": "%(session_id)s", "input_hash": "%(input_hash)s", "message": "%(message)s", "error_code": "%(error_code)s"}'
+    datefmt: '%Y-%m-%dT%H:%M:%S'
+    
+  security_json:
+    format: '{"timestamp": "%(asctime)sZ", "level": "%(levelname)s", "service": "liquidacion-cli", "category": "SECURITY", "event_type": "%(event_type)s", "source_ip": "%(source_ip)s", "user_id": "%(user_id)s", "session_id": "%(session_id)s", "message": "%(message)s"}'
+    datefmt: '%Y-%m-%dT%H:%M:%S'
+    
+  performance_json:
+    format: '{"timestamp": "%(asctime)sZ", "level": "%(levelname)s", "service": "liquidacion-cli", "category": "PERFORMANCE", "operation": "%(operation)s", "duration_ms": %(duration_ms)s, "input_size_kb": %(input_size_kb)s, "memory_usage_mb": %(memory_usage_mb)s, "message": "%(message)s"}'
+    datefmt: '%Y-%m-%dT%H:%M:%S'
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: WARNING  # Only warnings and errors in production console
+    formatter: basic
+    stream: ext://sys.stdout
+    
+  production_file:
+    class: logging.handlers.RotatingFileHandler
+    level: INFO
+    formatter: production_json
+    filename: logs/production.log
+    maxBytes: 104857600  # 100MB
+    backupCount: 30
+    encoding: utf-8
+    
+  security_file:
+    class: logging.handlers.RotatingFileHandler
+    level: WARNING
+    formatter: security_json
+    filename: logs/security.log
+    maxBytes: 52428800  # 50MB
+    backupCount: 90
+    encoding: utf-8
+    
+  audit_file:
+    class: logging.handlers.RotatingFileHandler
+    level: INFO
+    formatter: production_json
+    filename: audit/logs/compliance_audit.log
+    maxBytes: 104857600  # 100MB
+    backupCount: 365  # Daily logs for 1 year
+    encoding: utf-8
+    
+  performance_file:
+    class: logging.handlers.RotatingFileHandler
+    level: INFO
+    formatter: performance_json
+    filename: logs/performance.log
+    maxBytes: 104857600  # 100MB
+    backupCount: 30
+    encoding: utf-8
+    
+  error_file:
+    class: logging.handlers.RotatingFileHandler
+    level: ERROR
+    formatter: production_json
+    filename: logs/errors.log
+    maxBytes: 104857600  # 100MB
+    backupCount: 90
+    encoding: utf-8
+    
+  compliance_file:
+    class: logging.handlers.RotatingFileHandler
+    level: INFO
+    formatter: production_json
+    filename: audit/logs/compliance_events.log
+    maxBytes: 52428800  # 50MB
+    backupCount: 365
+    encoding: utf-8
+
+loggers:
+  liquidator:
+    level: INFO
+    handlers: [console, production_file]
+    propagate: false
+    
+  liquidator.audit:
+    level: INFO
+    handlers: [audit_file, production_file, compliance_file]
+    propagate: false
+    
+  liquidator.compliance:
+    level: INFO
+    handlers: [audit_file, production_file, compliance_file]
+    propagate: false
+    
+  liquidator.security:
+    level: WARNING
+    handlers: [security_file, production_file]
+    propagate: false
+    
+  liquidator.performance:
+    level: INFO
+    handlers: [performance_file, production_file]
+    propagate: false
+    
+  liquidator.core:
+    level: INFO
+    handlers: [production_file]
+    propagate: false
+    
+  liquidator.calculators:
+    level: INFO
+    handlers: [production_file, error_file]
+    propagate: false
+    
+  liquidator.validators:
+    level: INFO
+    handlers: [production_file]
+    propagate: false
+
+root:
+  level: WARNING
+  handlers: [console, production_file]
+
+# Production logging best practices:
+# 1. Use structured JSON logging for log analysis tools
+# 2. Separate logs by category (security, performance, compliance)
+# 3. Set appropriate retention periods based on legal requirements
+# 4. Include session IDs and input hashes for traceability
+# 5. Monitor error rates and performance metrics
+# 6. Log security events separately with enhanced metadata

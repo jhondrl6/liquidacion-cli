@@ -1,0 +1,24 @@
+{
+  "version": "1.0",
+  "year": 2025,
+  "metadata": {
+    "descripcion": "Parametros de prueba para tests unitarios",
+    "fecha_creacion": "2025-01-01",
+    "fuente": "Test fixture"
+  },
+  "salario_minimo": 1423500,
+  "auxilio_transporte": 200000,
+  "auxilio_conectividad_max": 2847000,
+  "tasa_interes_cesantias": 0.12,
+  "smmlv_tope_indemnizacion": 20,
+  "smmlv_limite_auxilio": 2,
+  "recargo_dominical_2025": {
+    "antes_jul_01": 0.75,
+    "desde_jul_01": 0.80
+  },
+  "dias_base": {
+    "cesantias": 360,
+    "vacaciones": 720,
+    "prima": 360
+  }
+}

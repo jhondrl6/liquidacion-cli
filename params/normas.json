@@ -1,0 +1,238 @@
+{
+  "normas": [
+    {
+      "id": "CST_249_252",
+      "nombre": "Código Sustantivo del Trabajo Arts. 249-252",
+      "descripcion": "Cesantías - Régimen de liquidación y pago",
+      "texto_relevante": "Todo empleador está obligado a pagar al trabajador, al terminar el contrato de trabajo, un mes de salario por cada año de servicios y proporcionalmente por fracciones de año. El pago deberá hacerse efectivo en el momento de la terminación del contrato.",
+      "url": "https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=2809",
+      "vigencia": "permanente"
+    },
+    {
+      "id": "LEY50_99",
+      "nombre": "Ley 50 de 1990 Art. 99",
+      "descripcion": "Intereses sobre cesantías",
+      "texto_relevante": "El empleador pagará al trabajador intereses a la tasa del doce por ciento (12%) anual sobre el valor de las cesantías causadas al 31 de diciembre de cada año, los cuales se liquidarán y pagarán en el mes de enero del año siguiente.",
+      "tasa": 0.12,
+      "url": "https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=2809",
+      "vigencia": "permanente"
+    },
+    {
+      "id": "CST_306_308",
+      "nombre": "Código Sustantivo del Trabajo Arts. 306-308",
+      "descripcion": "Prima de servicios - Liquidación y pago",
+      "texto_relevante": "Todo trabajador tiene derecho a una prima de servicios que se pagará por mitades: la primera mitad el 30 de junio y la segunda el 20 de diciembre de cada año.",
+      "url": "https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=2809",
+      "vigencia": "permanente"
+    },
+    {
+      "id": "CST_186_192",
+      "nombre": "Código Sustantivo del Trabajo Arts. 186-192",
+      "descripcion": "Vacaciones - Derecho y liquidación",
+      "texto_relevante": "Todo trabajador tiene derecho a un período anual de vacaciones pagadas de quince (15) días hábiles continuos. Las vacaciones se liquidarán con el salario ordinario que devengue el trabajador al iniciarse el período de descanso.",
+      "url": "https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=2809",
+      "vigencia": "permanente"
+    },
+    {
+      "id": "VAC_COMP_ACUERDO",
+      "nombre": "Código Sustantivo del Trabajo Art. 189",
+      "descripcion": "Compensación en dinero de vacaciones",
+      "texto_relevante": "Empleador y trabajador podrán acordar por escrito, previa solicitud del trabajador, que se pague en dinero hasta la mitad de las vacaciones.",
+      "url": "https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=2809",
+      "vigencia": "permanente"
+    },
+    {
+      "id": "CST_64",
+      "nombre": "Código Sustantivo del Trabajo Art. 64",
+      "descripcion": "Indemnización por despido sin justa causa",
+      "texto_relevante": "La indemnización por años de servicio será equivalente a treinta (30) días de salario por el primer año y veinte (20) días por cada año subsiguiente. En ningún caso la indemnización excederá de veinte (20) meses de salario.",
+      "url": "https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=2809",
+      "vigencia": "permanente"
+    },
+    {
+      "id": "CST_65",
+      "nombre": "Código Sustantivo del Trabajo Art. 65",
+      "descripcion": "Plazos de pago en terminación del contrato",
+      "texto_relevante": "En caso de terminación del contrato de trabajo, el empleador deberá pagar al trabajador en la fecha de terminación del contrato las sumas que le adeude por concepto de salarios, prima de servicios, cesantías, intereses sobre cesantías y vacaciones.",
+      "url": "https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=2809",
+      "vigencia": "permanente"
+    },
+    {
+      "id": "CST_23",
+      "nombre": "Código Sustantivo del Trabajo Art. 23",
+      "descripcion": "Tipos de contratos laborales",
+      "texto_relevante": "Se presume que todo contrato de trabajo es a término indefinido, salvo que se estipule expresamente lo contrario. Los contratos a término fijo deben constar por escrito.",
+      "url": "https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=2809",
+      "vigencia": "permanente"
+    },
+    {
+      "id": "DECRETO_1072_2015",
+      "nombre": "Decreto 1072 de 2015",
+      "descripcion": "Reglamentación cesantías e intereses",
+      "texto_relevante": "Reglamenta el procedimiento para el pago de cesantías e intereses sobre cesantías, estableciendo obligaciones de los empleadores y derechos de los trabajadores.",
+      "url": "https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=6493",
+      "vigencia": "permanente"
+    },
+    {
+      "id": "DECRETO_1572_2024",
+      "nombre": "Decreto 1572 de 2024",
+      "descripcion": "Salario Mínimo Legal Mensual Vigente 2025",
+      "texto_relevante": "Establece el Salario Mínimo Legal Mensual Vigente para el año 2025 en la suma de $1.423.500 (un millón cuatrocientos veintitrés mil quinientos pesos).",
+      "valor": 1423500,
+      "url": "https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=124565",
+      "vigencia": "2025"
+    },
+    {
+      "id": "DECRETO_1573_2024",
+      "nombre": "Decreto 1573 de 2024",
+      "descripcion": "Auxilio de transporte 2025",
+      "texto_relevante": "Establece el valor del auxilio de transporte para el año 2025 en la suma de $200.000 (doscientos mil pesos) mensuales para trabajadores que devenguen hasta dos (2) Salarios Mínimos Mensuales Legales Vigentes.",
+      "valor": 200000,
+      "url": "https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=124566",
+      "vigencia": "2025"
+    },
+    {
+      "id": "LEY_2466_2025",
+      "nombre": "Ley 2466 de 2025",
+      "descripcion": "Recargo dominical y festivo (implementacion gradual)",
+      "texto_relevante": "Modifica el recargo dominical y festivo, estableciendo que por el trabajo en dias de descanso obligatorio se reconocera un recargo no inferior al ochenta por ciento (80%) del valor del salario ordinario, con implementacion gradual hasta alcanzar el 100% en julio de 2027.",
+      "factor_recargo": 0.80,
+      "fecha_aplicacion": "2025-07-01",
+      "cronograma": [
+        {"desde": "2024-07-01", "hasta": "2025-06-30", "factor_recargo": 0.75, "nota": "Regimen anterior (Decreto 374/2024)"},
+        {"desde": "2025-07-01", "hasta": "2026-06-30", "factor_recargo": 0.80, "nota": "Primera fase de la Ley 2466/2025"},
+        {"desde": "2026-07-01", "hasta": "2027-06-30", "factor_recargo": 0.90, "nota": "Segunda fase de la Ley 2466/2025"},
+        {"desde": "2027-07-01", "hasta": null,        "factor_recargo": 1.00, "nota": "Tope pleno de la Ley 2466/2025"}
+      ],
+      "url": "https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=124567",
+      "vigencia": "temporal"
+    },
+    {
+      "id": "DECRETO_1469_2025",
+      "nombre": "Decreto 1469 de 2025",
+      "descripcion": "Salario Minimo Legal Mensual Vigente 2026",
+      "texto_relevante": "Establece el Salario Minimo Legal Mensual Vigente para el ano 2026 en la suma de $1.750.905 (un millon setecientos cincuenta mil novecientos cinco pesos), vigente desde el 1 de enero de 2026.",
+      "valor": 1750905,
+      "url": "https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=XXXXXX",
+      "vigencia": "2026"
+    },
+    {
+      "id": "DECRETO_1470_2025",
+      "nombre": "Decreto 1470 de 2025",
+      "descripcion": "Auxilio de transporte 2026",
+      "texto_relevante": "Establece el valor del auxilio de transporte para el ano 2026 en la suma de $249.095 (doscientos cuarenta y nueve mil noventa y cinco pesos) mensuales para trabajadores que devenguen hasta dos (2) Salarios Minimos Mensuales Legales Vigentes, vigente desde el 1 de enero de 2026.",
+      "valor": 249095,
+      "url": "https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=XXXXXX",
+      "vigencia": "2026"
+    },
+    {
+      "id": "LEY_2466_2025_INTERESES_MENSUALES",
+      "nombre": "Ley 2466 de 2025 Art. 64 (pago mensual opcional de intereses sobre cesantias)",
+      "descripcion": "Opcion de pago mensual de intereses sobre cesantias",
+      "texto_relevante": "El empleador y el trabajador podran acordar por escrito el pago mensual de los intereses sobre las cesantias, equivalente al uno por ciento (1%) del salario base de liquidacion mensual, en lugar del pago anual unico previsto en la Ley 50 de 1990. La tasa anual nominal sigue siendo del 12% (1% mensual nominal = 12% anual nominal). Solo aplica si hay acuerdo escrito entre las partes.",
+      "factor_recargo": 0.01,
+      "fecha_aplicacion": "2026-01-01",
+      "url": "https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=XXXXXX",
+      "vigencia": "2026"
+    },
+    {
+      "id": "CST_161",
+      "nombre": "Código Sustantivo del Trabajo Art. 161",
+      "descripcion": "Trabajadores de finca rural - Auxilio de transporte",
+      "texto_relevante": "No tendrán derecho al auxilio de transporte los trabajadores que residan en el lugar de trabajo, especialmente en fincas rurales, ya que no tienen gastos de transporte.",
+      "url": "https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=2809",
+      "vigencia": "permanente"
+    },
+    {
+      "id": "CST_128",
+      "nombre": "Código Sustantivo del Trabajo Art. 128",
+      "descripcion": "Horas extras y recargos",
+      "texto_relevante": "El trabajo suplementario o de horas extras no podrá exceder de dos horas diarias ni de doce semanales. Por el trabajo suplementario se reconocerá un recargo del 25% sobre el valor de la hora ordinaria.",
+      "url": "https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=2809",
+      "vigencia": "permanente"
+    }
+  ],
+  "plazos_pago": {
+    "cesantias": {
+      "dia": 14,
+      "mes": 2,
+      "descripcion": "14 de febrero del año siguiente",
+      "norma_ref": "CST_249_252",
+      "tipo_plazo": "consignacion"
+    },
+    "intereses_cesantias": {
+      "dia": 31,
+      "mes": 1,
+      "descripcion": "31 de enero del año siguiente",
+      "norma_ref": "LEY50_99",
+      "tipo_plazo": "pago_directo"
+    },
+    "prima_junio": {
+      "dia": 30,
+      "mes": 6,
+      "descripcion": "30 de junio",
+      "norma_ref": "CST_306_308",
+      "tipo_plazo": "pago_directo"
+    },
+    "prima_diciembre": {
+      "dia": 20,
+      "mes": 12,
+      "descripcion": "20 de diciembre",
+      "norma_ref": "CST_306_308",
+      "tipo_plazo": "pago_directo"
+    },
+    "vacaciones": {
+      "dia": 0,
+      "mes": 0,
+      "descripcion": "Inmediato en caso de finiquito (Art. 65 CST)",
+      "norma_ref": "CST_65",
+      "tipo_plazo": "pago_inmediato"
+    },
+    "indemnizacion": {
+      "dia": 0,
+      "mes": 0,
+      "descripcion": "Inmediato en caso de finiquito (Art. 65 CST)",
+      "norma_ref": "CST_65",
+      "tipo_plazo": "pago_inmediato"
+    }
+  },
+  "limites_legales": {
+    "tope_indemnizacion_smmlv": {
+      "valor": 20,
+      "descripcion": "Tope máximo de indemnización en SMMLV",
+      "norma_ref": "CST_64"
+    },
+    "limite_auxilio_transporte_smmlv": {
+      "valor": 2,
+      "descripcion": "Límite de salario para aplicar auxilio de transporte (2 SMMLV)",
+      "norma_ref": "DECRETO_1573_2024"
+    },
+    "base_dias_prestaciones": {
+      "valor": 360,
+      "descripcion": "Base de días para cálculo de cesantías, intereses y prima",
+      "norma_ref": "DECRETO_1072_2015"
+    },
+    "base_dias_vacaciones": {
+      "valor": 720,
+      "descripcion": "Base de días para cálculo de vacaciones (720 días para 15 días vacaciones)",
+      "norma_ref": "CST_186_192"
+    }
+  },
+  "sanciones_mora": {
+    "intereses_mora_cesantias": {
+      "descripcion": "1 día de salario por día de retraso en el pago de intereses sobre cesantías",
+      "norma_ref": "LEY50_99"
+    },
+    "tope_indemnizacion_moratoria": {
+      "meses": 24,
+      "descripcion": "Tope máximo de indemnización moratoria",
+      "norma_ref": "CST_65"
+    }
+  },
+  "metadata": {
+    "version": "2026-06-09",
+    "fecha_actualizacion": "2026-06-09",
+    "fuente": "Ministerio del Trabajo - Colombia (Decretos 1469/2025 y 1470/2025; Ley 2466/2025; Ley 50/1990; CST)",
+    "notas": "Este archivo contiene la normatividad vigente para liquidacion de nomina en Colombia. Los valores monetarios y tasas reflejan la actualizacion anual segun decretos expedidos. Tras la adicion de Tarea 0.K (2026-06-09) incluye: Decreto 1469/2025 (SMMLV 2026), Decreto 1470/2025 (aux_trans 2026), Ley 2466/2025 Art. 64 (pago mensual opcional de intereses sobre cesantias), y cronograma gradual del recargo dominical actualizado."
+  }
+}

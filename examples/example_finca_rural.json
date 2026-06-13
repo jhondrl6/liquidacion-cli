@@ -1,0 +1,37 @@
+{
+  "modo": "PERIODICA",
+  "fecha_ingreso": "2024-11-16",
+  "fecha_corte": "2025-11-15",
+  "salario_mensual": 1500000,
+  "salarios_historicos": [
+    {"mes": "2023-11", "valor": 1800000},
+    {"mes": "2023-12", "valor": 1850000},
+    {"mes": "2024-01", "valor": 1900000},
+    {"mes": "2024-02", "valor": 1900000},
+    {"mes": "2024-03", "valor": 1950000},
+    {"mes": "2024-04", "valor": 1950000},
+    {"mes": "2024-05", "valor": 2000000},
+    {"mes": "2024-06", "valor": 2000000},
+    {"mes": "2024-07", "valor": 2000000},
+    {"mes": "2024-08", "valor": 2000000},
+    {"mes": "2024-09", "valor": 2000000},
+    {"mes": "2024-10", "valor": 2000000}
+  ],
+  "comisiones_promedio_mensual": 0,
+  "horas_extras_promedio_mensual": 0,
+  "bonificaciones_promedio_mensual": 0,
+  "reside_en_lugar_trabajo": true,
+  "auxilio_transporte": 200000,
+  "dias_vacaciones_pendientes": 0,
+  "tipo_contrato": "indefinido",
+  "enforce-compliance": true,
+  "compliance-policy": "standard",
+  "trabajador": {
+    "nombre": "Pedro Luis Franco",
+    "documento": "10.140.782"
+  },
+  "empleador": {
+    "nombre": "Empresa Rural S.A.S.",
+    "nit": "901234567-8"
+  }
+}

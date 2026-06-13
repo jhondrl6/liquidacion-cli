@@ -1,0 +1,136 @@
+{
+  "timestamp": "2025-11-04T14:35:10.283031",
+  "last_check": "2025-11-04T14:35:10.281757",
+  "overall_status": "UNHEALTHY",
+  "issues": [
+    "Component issues: 10"
+  ],
+  "components": {
+    "timestamp": "2025-11-04T14:35:10.281760",
+    "overall_status": "UNHEALTHY",
+    "components": {
+      "directory_params": {
+        "status": "UNHEALTHY",
+        "exists": false,
+        "writable": false
+      },
+      "directory_audit": {
+        "status": "HEALTHY",
+        "exists": true,
+        "writable": true
+      },
+      "directory_output": {
+        "status": "UNHEALTHY",
+        "exists": false,
+        "writable": false
+      },
+      "directory_templates": {
+        "status": "UNHEALTHY",
+        "exists": false,
+        "writable": false
+      },
+      "param_file_params/2025.json": {
+        "status": "UNHEALTHY",
+        "exists": false,
+        "readable": false,
+        "valid_json": false
+      },
+      "param_file_params/normas.json": {
+        "status": "UNHEALTHY",
+        "exists": false,
+        "readable": false,
+        "valid_json": false
+      },
+      "param_file_params/plazos.json": {
+        "status": "UNHEALTHY",
+        "exists": false,
+        "readable": false,
+        "valid_json": false
+      },
+      "template_templates/comprobante_periodica.md": {
+        "status": "UNHEALTHY",
+        "exists": false,
+        "readable": false
+      },
+      "template_templates/comprobante_finiquito.md": {
+        "status": "UNHEALTHY",
+        "exists": false,
+        "readable": false
+      },
+      "config_config/default_config.yaml": {
+        "status": "UNHEALTHY",
+        "exists": false,
+        "readable": false
+      },
+      "config_config/logging_config.yaml": {
+        "status": "UNHEALTHY",
+        "exists": false,
+        "readable": false
+      }
+    },
+    "unhealthy_components": [
+      "directory_params",
+      "directory_output",
+      "directory_templates",
+      "param_file_params/2025.json",
+      "param_file_params/normas.json",
+      "param_file_params/plazos.json",
+      "template_templates/comprobante_periodica.md",
+      "template_templates/comprobante_finiquito.md",
+      "config_config/default_config.yaml",
+      "config_config/logging_config.yaml"
+    ]
+  },
+  "dependencies": {
+    "timestamp": "2025-11-04T14:35:10.282164",
+    "python_version": "3.13.3",
+    "dependencies": {
+      "jsonschema": {
+        "installed": true,
+        "version": "4.23.0",
+        "minimum_required": "4.19.0",
+        "status": "HEALTHY"
+      },
+      "yaml": {
+        "installed": true,
+        "version": "6.0.1",
+        "minimum_required": "6.0",
+        "status": "HEALTHY"
+      },
+      "markdown": {
+        "installed": true,
+        "version": "3.8.2",
+        "minimum_required": "3.4.0",
+        "status": "HEALTHY"
+      },
+      "dateutil": {
+        "installed": true,
+        "version": "2.9.0.post0",
+        "minimum_required": "2.8.0",
+        "status": "HEALTHY"
+      },
+      "psutil": {
+        "installed": true,
+        "version": "7.0.0",
+        "minimum_required": "5.9.0",
+        "status": "HEALTHY"
+      }
+    }
+  },
+  "disk_space": {
+    "timestamp": "2025-11-04T14:35:10.282971",
+    "free_space_gb": 743.25,
+    "total_space_gb": 951.65,
+    "used_space_gb": 208.39,
+    "percent_used": 21.9,
+    "threshold_gb": 1.0,
+    "status": "HEALTHY",
+    "alert_message": null
+  },
+  "recent_errors": {
+    "timestamp": "2025-11-04T14:35:10.283023",
+    "status": "HEALTHY",
+    "recent_errors": 0,
+    "message": "No error log file found"
+  }
+}

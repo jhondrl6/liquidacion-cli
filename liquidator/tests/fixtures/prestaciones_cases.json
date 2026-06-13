@@ -1,0 +1,363 @@
+{
+  "description": "Casos de prueba documentados para validación de prestaciones sociales",
+  "version": "1.0.0",
+  "fecha_creacion": "2025-11-03",
+  "casos": [
+    {
+      "id": "CASO_001",
+      "nombre": "Finca rural - año completo",
+      "descripcion": "Trabajador de finca rural con salario 2.200.000, año completo de servicio",
+      "input": {
+        "fecha_ingreso": "2024-11-16",
+        "fecha_corte": "2025-11-15",
+        "sbl_general": 2200000,
+        "sbl_prima": 2200000,
+        "sbl_vacaciones": 2000000
+      },
+      "expected": {
+        "dias_servicio": 365,
+        "cesantias": {
+          "valor": 2200000,
+          "formula": "(2.200.000 × 365) / 360",
+          "plazo_pago": "2026-02-14"
+        },
+        "intereses_cesantias": {
+          "valor": 264000,
+          "formula": "(2.200.000 × 365 × 0.12) / 360",
+          "plazo_pago": "2026-01-31"
+        },
+        "prima": {
+          "valor": 843333,
+          "dias_liquidados": 138,
+          "semestre": "segundo_semestre",
+          "formula": "(2.200.000 × 138) / 360",
+          "plazo_pago": "2025-12-20"
+        },
+        "total": 3307333
+      },
+      "notas": [
+        "SBL_GENERAL incluye auxilio de conectividad",
+        "SBL_VACACIONES excluye auxilio de conectividad",
+        "Prima corresponde al segundo semestre 2025 (138 días)"
+      ]
+    },
+    {
+      "id": "CASO_002",
+      "nombre": "Medio año - primer semestre completo",
+      "descripcion": "Trabajador con 6 meses exactos en primer semestre",
+      "input": {
+        "fecha_ingreso": "2025-01-01",
+        "fecha_corte": "2025-06-30",
+        "sbl_general": 1500000,
+        "sbl_prima": 1500000,
+        "sbl_vacaciones": 1500000
+      },
+      "expected": {
+        "dias_servicio": 181,
+        "cesantias": {
+          "valor": 754167,
+          "formula": "(1.500.000 × 181) / 360"
+        },
+        "intereses_cesantias": {
+          "valor": 45250,
+          "formula": "(754.167 × 181 × 0.12) / 360"
+        },
+        "prima": {
+          "valor": 754167,
+          "dias_liquidados": 181,
+          "semestre": "primer_semestre"
+        }
+      },
+      "notas": [
+        "Semestre completo trabajado",
+        "Prima corresponde a todo el primer semestre"
+      ]
+    },
+    {
+      "id": "CASO_003",
+      "nombre": "Periodo parcial - 90 días",
+      "descripcion": "Trabajador con 90 días exactos (un cuarto de año)",
+      "input": {
+        "fecha_ingreso": "2025-01-01",
+        "fecha_corte": "2025-03-31",
+        "sbl_general": 2000000,
+        "sbl_prima": 2000000,
+        "sbl_vacaciones": 2000000
+      },
+      "expected": {
+        "dias_servicio": 90,
+        "cesantias": {
+          "valor": 500000,
+          "formula": "(2.000.000 × 90) / 360"
+        },
+        "intereses_cesantias": {
+          "valor": 15000,
+          "formula": "(500.000 × 90 × 0.12) / 360"
+        },
+        "prima": {
+          "valor": 500000,
+          "dias_liquidados": 90,
+          "semestre": "primer_semestre"
+        }
+      },
+      "notas": [
+        "Valores exactos sin decimales",
+        "Primer cuarto del año"
+      ]
+    },
+    {
+      "id": "CASO_004",
+      "nombre": "Salario mínimo - año completo",
+      "descripcion": "Trabajador con SMMLV 2025 durante año completo",
+      "input": {
+        "fecha_ingreso": "2025-01-01",
+        "fecha_corte": "2025-12-31",
+        "sbl_general": 1423500,
+        "sbl_prima": 1423500,
+        "sbl_vacaciones": 1423500
+      },
+      "expected": {
+        "dias_servicio": 365,
+        "cesantias": {
+          "valor": 1442021,
+          "formula": "(1.423.500 × 365) / 360"
+        },
+        "intereses_cesantias": {
+          "valor": 173042,
+          "formula": "(1.442.021 × 365 × 0.12) / 360"
+        }
+      },
+      "notas": [
+        "SMMLV 2025 = 1.423.500",
+        "Caso común de trabajador con salario mínimo"
+      ]
+    },
+    {
+      "id": "CASO_005",
+      "nombre": "Un día de trabajo",
+      "descripcion": "Caso extremo: un solo día trabajado",
+      "input": {
+        "fecha_ingreso": "2025-01-01",
+        "fecha_corte": "2025-01-01",
+        "sbl_general": 1500000,
+        "sbl_prima": 1500000,
+        "sbl_vacaciones": 1500000
+      },
+      "expected": {
+        "dias_servicio": 1,
+        "cesantias": {
+          "valor": 4167,
+          "formula": "(1.500.000 × 1) / 360",
+          "tolerancia": 1
+        },
+        "intereses_cesantias": {
+          "valor": 1,
+          "formula": "(4.167 × 1 × 0.12) / 360",
+          "tolerancia": 1
+        },
+        "prima": {
+          "valor": 4167,
+          "dias_liquidados": 1,
+          "tolerancia": 1
+        }
+      },
+      "notas": [
+        "Caso de borde con redondeos",
+        "Tolerancia de ±1 peso por redondeo"
+      ]
+    },
+    {
+      "id": "CASO_006",
+      "nombre": "Año bisiesto completo",
+      "descripcion": "366 días en año bisiesto (2024)",
+      "input": {
+        "fecha_ingreso": "2024-01-01",
+        "fecha_corte": "2024-12-31",
+        "sbl_general": 2000000,
+        "sbl_prima": 2000000,
+        "sbl_vacaciones": 2000000
+      },
+      "expected": {
+        "dias_servicio": 366,
+        "cesantias": {
+          "valor": 2033333,
+          "formula": "(2.000.000 × 366) / 360",
+          "tolerancia": 1
+        },
+        "intereses_cesantias": {
+          "valor": 244000,
+          "formula": "(2.033.333 × 366 × 0.12) / 360",
+          "tolerancia": 1
+        }
+      },
+      "notas": [
+        "Año bisiesto 2024 con 366 días",
+        "Cesantías ligeramente mayores que año normal"
+      ]
+    },
+    {
+      "id": "CASO_007",
+      "nombre": "Ingreso mitad de semestre",
+      "descripcion": "Ingreso el 15 de marzo, corte 30 de junio",
+      "input": {
+        "fecha_ingreso": "2025-03-15",
+        "fecha_corte": "2025-06-30",
+        "sbl_general": 1800000,
+        "sbl_prima": 1800000,
+        "sbl_vacaciones": 1800000
+      },
+      "expected": {
+        "dias_servicio": 108,
+        "cesantias": {
+          "valor": 540000,
+          "formula": "(1.800.000 × 108) / 360"
+        },
+        "intereses_cesantias": {
+          "valor": 19440,
+          "formula": "(540.000 × 108 × 0.12) / 360"
+        },
+        "prima": {
+          "valor": 540000,
+          "dias_liquidados": 108,
+          "semestre": "primer_semestre"
+        }
+      },
+      "notas": [
+        "Prima proporcional al primer semestre",
+        "108 días trabajados de 181 posibles"
+      ]
+    },
+    {
+      "id": "CASO_008",
+      "nombre": "Salario alto - ejecutivo",
+      "descripcion": "Ejecutivo con salario alto (20 SMMLV)",
+      "input": {
+        "fecha_ingreso": "2025-01-01",
+        "fecha_corte": "2025-12-31",
+        "sbl_general": 28470000,
+        "sbl_prima": 28470000,
+        "sbl_vacaciones": 28470000
+      },
+      "expected": {
+        "dias_servicio": 365,
+        "cesantias": {
+          "valor": 28843750,
+          "formula": "(28.470.000 × 365) / 360"
+        },
+        "intereses_cesantias": {
+          "valor": 3461250,
+          "formula": "(28.843.750 × 365 × 0.12) / 360"
+        }
+      },
+      "notas": [
+        "20 SMMLV = 28.470.000",
+        "Salario ejecutivo típico"
+      ]
+    },
+    {
+      "id": "CASO_009",
+      "nombre": "Dos días de trabajo",
+      "descripcion": "Caso mínimo realista: dos días trabajados",
+      "input": {
+        "fecha_ingreso": "2025-12-30",
+        "fecha_corte": "2025-12-31",
+        "sbl_general": 1423500,
+        "sbl_prima": 1423500,
+        "sbl_vacaciones": 1423500
+      },
+      "expected": {
+        "dias_servicio": 2,
+        "cesantias": {
+          "valor": 7908,
+          "formula": "(1.423.500 × 2) / 360",
+          "tolerancia": 1
+        },
+        "intereses_cesantias": {
+          "valor": 5,
+          "formula": "(7.908 × 2 × 0.12) / 360",
+          "tolerancia": 1
+        },
+        "prima": {
+          "valor": 7908,
+          "dias_liquidados": 2,
+          "semestre": "segundo_semestre",
+          "tolerancia": 1
+        }
+      },
+      "notas": [
+        "Caso extremo con redondeos significativos",
+        "Útil para validar precisión decimal"
+      ]
+    },
+    {
+      "id": "CASO_010",
+      "nombre": "Periodo que cruza año",
+      "descripcion": "Ingreso en diciembre, corte en enero siguiente",
+      "input": {
+        "fecha_ingreso": "2024-12-15",
+        "fecha_corte": "2025-01-15",
+        "sbl_general": 2000000,
+        "sbl_prima": 2000000,
+        "sbl_vacaciones": 2000000
+      },
+      "expected": {
+        "dias_servicio": 32,
+        "cesantias": {
+          "valor": 177778,
+          "formula": "(2.000.000 × 32) / 360",
+          "tolerancia": 1
+        },
+        "intereses_cesantias": {
+          "valor": 2133,
+          "formula": "(177.778 × 32 × 0.12) / 360",
+          "tolerancia": 1
+        },
+        "prima": {
+          "valor": 177778,
+          "dias_liquidados": 16,
+          "semestre": "primer_semestre",
+          "nota": "Solo cuenta días de enero (16 días)"
+        }
+      },
+      "notas": [
+        "Cruza cambio de año",
+        "Prima solo cuenta días del semestre de corte"
+      ]
+    }
+  ],
+  "parametros_2025": {
+    "SMMLV": 1423500,
+    "AUXILIO_TRANS": 200000,
+    "DIAS_BASE": 360.0,
+    "TASA_INT_CESANTIAS": 0.12,
+    "REDONDEO": 0
+  },
+  "validaciones": {
+    "tolerancia_redondeo": 1,
+    "descripcion": "Tolerancia de ±1 peso para casos con decimales significativos"
+  },
+  "referencias_legales": [
+    {
+      "concepto": "Cesantías",
+      "norma": "Art. 249-250 CST",
+      "formula": "(SBL × días) / 360",
+      "plazo_consignacion": "14 de febrero año siguiente"
+    },
+    {
+      "concepto": "Intereses cesantías",
+      "norma": "Ley 50/1990 Art. 99",
+      "formula": "(Cesantías × días × 0.12) / 360",
+      "plazo_pago": "31 de enero año siguiente",
+      "tasa_legal": 0.12
+    },
+    {
+      "concepto": "Prima de servicios",
+      "norma": "Art. 306-308 CST",
+      "formula": "(SBL × días_semestre) / 360",
+      "plazos_pago": [
+        "30 de junio (primer semestre)",
+        "20 de diciembre (segundo semestre)"
+      ]
+    }
+  ]
+}

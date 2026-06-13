@@ -1,0 +1,13 @@
+{
+  "SMMLV": 1750905,
+  "AUXILIO_TRANS": 249095,
+  "LIMITE_AUXILIO": 3501810,
+  "TASA_INT_CESANTIAS": 0.12,
+  "DIAS_BASE": 360.0,
+  "VACACIONES_DENOM": 720.0,
+  "REDONDEO": 0,
+  "TOPE_INDEMNIZACION_SMMLV": 20,
+  "FECHA_APLICACION_RECARGO_DOMINICAL": "2026-07-01",
+  "version": "2026-06-09",
+  "referencia": "Decreto 1469 de 2025 (SMMLV 2026), Decreto 1470 de 2025 (aux_trans 2026), Ley 2466 de 2025 (recargo dominical gradual + Art. 64 opcion pago mensual intereses), Ley 50 de 1990 (intereses cesantias)"
+}

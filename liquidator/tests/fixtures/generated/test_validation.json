@@ -1,0 +1,78 @@
+{
+  "metadata": {
+    "generated_at": "2025-11-04T10:54:34.205434",
+    "generator_version": "1.0.0",
+    "description": "Suite de pruebas generada automáticamente para el sistema de liquidación"
+  },
+  "test_cases": [
+    {
+      "modo": "PERIODICA",
+      "fecha_ingreso": "2025-05-11",
+      "fecha_corte": "2025-12-31",
+      "salario_mensual": 3000000,
+      "tipo_contrato": "termino_fijo",
+      "comisiones_promedio_mensual": 1460555.725572984,
+      "horas_extras_promedio_mensual": 787163.2824688099,
+      "reside_en_lugar_trabajo": false,
+      "case_id": "random_1",
+      "category": "random",
+      "expected_behavior": "standard"
+    },
+    {
+      "modo": "PERIODICA",
+      "fecha_ingreso": "2025-12-15",
+      "fecha_corte": "2025-12-31",
+      "salario_mensual": 2500000,
+      "tipo_contrato": "termino_fijo",
+      "comisiones_promedio_mensual": 984518.2268411112,
+      "horas_extras_promedio_mensual": 125147.19645742505,
+      "auxilio_transporte": 200000,
+      "reside_en_lugar_trabajo": false,
+      "case_id": "random_2",
+      "category": "random",
+      "expected_behavior": "standard"
+    },
+    {
+      "modo": "PERIODICA",
+      "fecha_ingreso": "2022-03-07",
+      "fecha_corte": "2025-12-31",
+      "salario_mensual": 8539783,
+      "tipo_contrato": "indefinido",
+      "horas_extras_promedio_mensual": 1472103.6502268738,
+      "auxilio_conectividad": 100000,
+      "reside_en_lugar_trabajo": true,
+      "case_id": "random_3",
+      "category": "random",
+      "expected_behavior": "standard"
+    },
+    {
+      "modo": "FINIQUITO",
+      "fecha_ingreso": "2024-02-06",
+      "fecha_corte": "2025-10-19",
+      "salario_mensual": 2847000,
+      "tipo_contrato": "termino_fijo",
+      "dias_vacaciones_pendientes": 13,
+      "razon_terminacion": "con_justa_causa",
+      "reside_en_lugar_trabajo": true,
+      "case_id": "random_4",
+      "category": "random",
+      "expected_behavior": "standard"
+    },
+    {
+      "modo": "FINIQUITO",
+      "fecha_ingreso": "2020-09-22",
+      "fecha_corte": "2023-01-30",
+      "salario_mensual": 6786566,
+      "tipo_contrato": "obra_o_labor",
+      "comisiones_promedio_mensual": 2221496.0573201175,
+      "horas_extras_promedio_mensual": 553141.2850226169,
+      "bonificaciones_promedio_mensual": 1074249.1517294138,
+      "dias_vacaciones_pendientes": 2,
+      "razon_terminacion": "con_justa_causa",
+      "reside_en_lugar_trabajo": false,
+      "case_id": "random_5",
+      "category": "random",
+      "expected_behavior": "standard"
+    }
+  ]
+}

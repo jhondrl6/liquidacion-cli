@@ -1,0 +1,81 @@
+{
+  "plazos_pago": {
+    "cesantias": {
+      "tipo_plazo": "consignacion",
+      "dia": 14,
+      "mes": 2,
+      "descripcion": "Consignar en fondo de cesantías antes del 14 de febrero del año siguiente",
+      "norma_ref": "CST_249_252",
+      "aplica_a": ["PERIODICA", "FINIQUITO"],
+      "sancion_mora": "1 día de salario por cada día de retraso (Art. 99 Ley 50/90)",
+      "calcula_fecha_limite": true
+    },
+    "intereses_cesantias": {
+      "tipo_plazo": "pago_directo",
+      "dia": 31,
+      "mes": 1,
+      "descripcion": "Pago directo al trabajador antes del 31 de enero del año siguiente",
+      "norma_ref": "LEY50_99",
+      "aplica_a": ["PERIODICA", "FINIQUITO"],
+      "sancion_mora": "1 día de salario por cada día de retraso (Art. 99 Ley 50/90)",
+      "calcula_fecha_limite": true
+    },
+    "prima_junio": {
+      "tipo_plazo": "pago_directo",
+      "dia": 30,
+      "mes": 6,
+      "descripcion": "Pago de prima primer semestre antes del 30 de junio",
+      "norma_ref": "CST_306_308",
+      "aplica_a": ["PERIODICA", "FINIQUITO"],
+      "sancion_mora": "Intereses de mora según Art. 65 CST",
+      "calcula_fecha_limite": false
+    },
+    "prima_diciembre": {
+      "tipo_plazo": "pago_directo",
+      "dia": 20,
+      "mes": 12,
+      "descripcion": "Pago de prima segundo semestre antes del 20 de diciembre",
+      "norma_ref": "CST_306_308",
+      "aplica_a": ["PERIODICA", "FINIQUITO"],
+      "sancion_mora": "Intereses de mora según Art. 65 CST",
+      "calcula_fecha_limite": false
+    },
+    "vacaciones": {
+      "tipo_plazo": "pago_inmediato",
+      "dia": 0,
+      "mes": 0,
+      "descripcion": "Pago inmediato en caso de finiquito (no aplica en modo periódica)",
+      "norma_ref": "CST_65",
+      "aplica_a": ["FINIQUITO"],
+      "sancion_mora": "Indemnización moratoria según Art. 65 CST",
+      "calcula_fecha_limite": false
+    },
+    "indemnizacion": {
+      "tipo_plazo": "pago_inmediato",
+      "dia": 0,
+      "mes": 0,
+      "descripcion": "Pago inmediato en caso de finiquito (no aplica en modo periódica)",
+      "norma_ref": "CST_65",
+      "aplica_a": ["FINIQUITO"],
+      "sancion_mora": "Indemnización moratoria según Art. 65 CST",
+      "calcula_fecha_limite": false,
+      "tope_indemnizacion_moratoria": "24 meses"
+    },
+    "salario_pendiente": {
+      "tipo_plazo": "pago_inmediato",
+      "dia": 0,
+      "mes": 0,
+      "descripcion": "Pago inmediato en caso de finiquito (no aplica en modo periódica)",
+      "norma_ref": "CST_65",
+      "aplica_a": ["FINIQUITO"],
+      "sancion_mora": "Indemnización moratoria según Art. 65 CST",
+      "calcula_fecha_limite": false
+    }
+  },
+  "metadatos": {
+    "version": "2025-10-31",
+    "fuente": "Ministerio del Trabajo - Colombia",
+    "notas": "Los plazos para cesantías e intereses calculan fecha límite del año siguiente automáticamente. Los plazos de prima son fijos en el mismo año.",
+    "actualizacion": "Basado en Ley 50/1990, Código Sustantivo del Trabajo y Decretos 1572-1573/2024"
+  }
+}

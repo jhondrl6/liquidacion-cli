@@ -1,0 +1,329 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Esquema de Validación General para el Directorio de Parámetros de Liquidación Laboral Colombia",
+  "description": "Esquema de validación que define la estructura y reglas de validación para todos los archivos de parámetros del sistema de liquidación laboral colombiano",
+  "oneOf": [
+    {
+      "title": "Parámetros Anuales (2025.json, etc.)",
+      "$ref": "#/definitions/parametros_anuales"
+    },
+    {
+      "title": "Normas Laborales (normas.json)",
+      "$ref": "#/definitions/normas_laborales"
+    },
+    {
+      "title": "Plazos de Pago (plazos.json)",
+      "$ref": "#/definitions/plazos_pago"
+    }
+  ],
+  "definitions": {
+    "parametros_anuales": {
+      "type": "object",
+      "properties": {
+        "SMMLV": {
+          "type": "integer",
+          "description": "Salario Mínimo Legal Mensual Vigente",
+          "minimum": 1000000,
+          "maximum": 2000000
+        },
+        "AUXILIO_TRANS": {
+          "type": "integer",
+          "description": "Valor del auxilio de transporte",
+          "minimum": 100000,
+          "maximum": 500000
+        },
+        "LIMITE_AUXILIO": {
+          "type": "integer",
+          "description": "Límite para recibir auxilio de transporte",
+          "minimum": 2000000,
+          "maximum": 4000000
+        },
+        "TASA_INT_CESANTIAS": {
+          "type": "number",
+          "description": "Tasa de interés sobre cesantías",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "DIAS_BASE": {
+          "type": "number",
+          "description": "Días base para cálculo de prestaciones sociales",
+          "minimum": 300,
+          "maximum": 400
+        },
+        "VACACIONES_DENOM": {
+          "type": "number",
+          "description": "Denominador para cálculo de vacaciones (720 días para 15 días)",
+          "minimum": 700,
+          "maximum": 750
+        },
+        "REDONDEO": {
+          "type": "integer",
+          "description": "Nivel de redondeo para cálculos",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "TOPE_INDEMNIZACION_SMMLV": {
+          "type": "integer",
+          "description": "Tope máximo de indemnización en SMMLV",
+          "minimum": 10,
+          "maximum": 50
+        },
+        "FECHA_APLICACION_RECARGO_DOMINICAL": {
+          "type": "string",
+          "description": "Fecha de aplicación del recargo dominical (formato ISO 8601)",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "version": {
+          "type": "string",
+          "description": "Versión de los parámetros",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "referencia": {
+          "type": "string",
+          "description": "Referencia normativa de los parámetros",
+          "minLength": 10
+        }
+      },
+      "required": [
+        "SMMLV",
+        "AUXILIO_TRANS",
+        "LIMITE_AUXILIO",
+        "TASA_INT_CESANTIAS",
+        "DIAS_BASE",
+        "VACACIONES_DENOM",
+        "REDONDEO",
+        "TOPE_INDEMNIZACION_SMMLV",
+        "version",
+        "referencia"
+      ],
+      "additionalProperties": false
+    },
+    "normas_laborales": {
+      "type": "object",
+      "properties": {
+        "normas": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 20
+              },
+              "nombre": {
+                "type": "string",
+                "minLength": 10
+              },
+              "descripcion": {
+                "type": "string",
+                "minLength": 5
+              },
+              "texto_relevante": {
+                "type": "string",
+                "minLength": 10
+              },
+              "url": {
+                "type": "string",
+                "pattern": "^https?://.*"
+              },
+              "vigencia": {
+                "type": "string",
+                "enum": ["permanente", "2025", "2024", "2023", "2026", "temporal"]
+              },
+              "tasa": {
+                "type": "number",
+                "minimum": 0.0,
+                "maximum": 1.0
+              },
+              "valor": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "factor_recargo": {
+                "type": "number",
+                "minimum": 0.0,
+                "maximum": 1.0
+              },
+              "fecha_aplicacion": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+              }
+            },
+            "required": ["id", "nombre", "descripcion", "texto_relevante", "url", "vigencia"],
+            "additionalProperties": true
+          }
+        },
+        "plazos_pago": {
+          "type": "object",
+          "properties": {
+            "cesantias": { "$ref": "#/definitions/plazo_pago_detalle" },
+            "intereses_cesantias": { "$ref": "#/definitions/plazo_pago_detalle" },
+            "prima_junio": { "$ref": "#/definitions/plazo_pago_detalle" },
+            "prima_diciembre": { "$ref": "#/definitions/plazo_pago_detalle" },
+            "vacaciones": { "$ref": "#/definitions/plazo_pago_detalle" },
+            "indemnizacion": { "$ref": "#/definitions/plazo_pago_detalle" }
+          }
+        },
+        "limites_legales": {
+          "type": "object",
+          "properties": {
+            "tope_indemnizacion_smmlv": { "$ref": "#/definitions/limite_detalle" },
+            "limite_auxilio_transporte_smmlv": { "$ref": "#/definitions/limite_detalle" },
+            "base_dias_prestaciones": { "$ref": "#/definitions/limite_detalle" },
+            "base_dias_vacaciones": { "$ref": "#/definitions/limite_detalle" }
+          }
+        },
+        "sanciones_mora": {
+          "type": "object",
+          "properties": {
+            "intereses_mora_cesantias": {
+              "type": "object",
+              "properties": {
+                "descripcion": { "type": "string" },
+                "norma_ref": { "type": "string" }
+              },
+              "required": ["descripcion", "norma_ref"]
+            },
+            "tope_indemnizacion_moratoria": {
+              "type": "object",
+              "properties": {
+                "meses": { "type": "integer", "minimum": 1, "maximum": 36 },
+                "descripcion": { "type": "string" },
+                "norma_ref": { "type": "string" }
+              },
+              "required": ["meses", "descripcion", "norma_ref"]
+            }
+          }
+        },
+        "metadata": {
+          "type": "object",
+          "properties": {
+            "version": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+            "fecha_actualizacion": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+            "fuente": { "type": "string" },
+            "notas": { "type": "string" }
+          },
+          "required": ["version", "fecha_actualizacion", "fuente", "notas"]
+        }
+      },
+      "required": ["normas", "plazos_pago", "limites_legales", "sanciones_mora", "metadata"],
+      "additionalProperties": false
+    },
+    "plazos_pago": {
+      "type": "object",
+      "properties": {
+        "plazos_pago": {
+          "type": "object",
+          "properties": {
+            "cesantias": { "$ref": "#/definitions/plazo_pago_detalle" },
+            "intereses_cesantias": { "$ref": "#/definitions/plazo_pago_detalle" },
+            "prima_junio": { "$ref": "#/definitions/plazo_pago_detalle" },
+            "prima_diciembre": { "$ref": "#/definitions/plazo_pago_detalle" },
+            "vacaciones": { "$ref": "#/definitions/plazo_pago_detalle" },
+            "indemnizacion": { "$ref": "#/definitions/plazo_pago_detalle" },
+            "salario_pendiente": { "$ref": "#/definitions/plazo_pago_detalle" }
+          },
+          "required": [
+            "cesantias",
+            "intereses_cesantias",
+            "prima_junio",
+            "prima_diciembre",
+            "vacaciones",
+            "indemnizacion",
+            "salario_pendiente"
+          ],
+          "additionalProperties": false
+        },
+        "metadatos": {
+          "type": "object",
+          "properties": {
+            "version": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            "fuente": {
+              "type": "string"
+            },
+            "notas": {
+              "type": "string"
+            },
+            "actualizacion": {
+              "type": "string"
+            }
+          },
+          "required": ["version", "fuente", "notas", "actualizacion"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["plazos_pago", "metadatos"],
+      "additionalProperties": false
+    },
+    "plazo_pago_detalle": {
+      "type": "object",
+      "properties": {
+        "tipo_plazo": {
+          "type": "string",
+          "enum": ["consignacion", "pago_directo", "pago_inmediato"]
+        },
+        "dia": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 31
+        },
+        "mes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 12
+        },
+        "descripcion": {
+          "type": "string",
+          "minLength": 10
+        },
+        "norma_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "aplica_a": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["PERIODICA", "FINIQUITO"]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "sancion_mora": {
+          "type": "string",
+          "minLength": 5
+        },
+        "calcula_fecha_limite": {
+          "type": "boolean"
+        },
+        "tope_indemnizacion_moratoria": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "tipo_plazo",
+        "dia",
+        "mes",
+        "descripcion",
+        "norma_ref",
+        "aplica_a",
+        "sancion_mora",
+        "calcula_fecha_limite"
+      ],
+      "additionalProperties": false
+    },
+    "limite_detalle": {
+      "type": "object",
+      "properties": {
+        "valor": { "type": ["number", "integer"] },
+        "descripcion": { "type": "string" },
+        "norma_ref": { "type": "string" }
+      },
+      "required": ["valor", "descripcion", "norma_ref"]
+    }
+  }
+}

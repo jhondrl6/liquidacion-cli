@@ -1,0 +1,32 @@
+{
+  "modo": "PERIODICA",
+  "fecha_ingreso": "2025-04-15",
+  "fecha_corte": "2025-11-15",
+  "salario_mensual": 1800000,
+  "salarios_historicos": [
+    {"mes": "2025-04", "valor": 1800000},
+    {"mes": "2025-05", "valor": 1800000},
+    {"mes": "2025-06", "valor": 1800000},
+    {"mes": "2025-07", "valor": 1800000},
+    {"mes": "2025-08", "valor": 1800000},
+    {"mes": "2025-09", "valor": 1800000},
+    {"mes": "2025-10", "valor": 1800000}
+  ],
+  "comisiones_promedio_mensual": 100000,
+  "horas_extras_promedio_mensual": 50000,
+  "bonificaciones_promedio_mensual": 30000,
+  "reside_en_lugar_trabajo": false,
+  "auxilio_transporte": 0,
+  "dias_vacaciones_pendientes": 0,
+  "tipo_contrato": "indefinido",
+  "enforce-compliance": true,
+  "compliance-policy": "standard",
+  "trabajador": {
+    "nombre": "María López",
+    "documento": "1078901234"
+  },
+  "empleador": {
+    "nombre": "Servicios Profesionales S.A.S.",
+    "nit": "900987654-3"
+  }
+}

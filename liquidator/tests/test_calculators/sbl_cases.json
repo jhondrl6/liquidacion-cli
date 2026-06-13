@@ -1,0 +1,262 @@
+{
+  "casos_prueba_sbl": [
+    {
+      "id": "caso_001_finca_rural",
+      "descripcion": "Trabajador de finca rural - excluye auxilio transporte",
+      "input": {
+        "salario_mensual": 2000000,
+        "comisiones_promedio_mensual": 0,
+        "horas_extras_promedio_mensual": 0,
+        "bonificaciones_promedio_mensual": 0,
+        "auxilio_transporte": 200000,
+        "auxilio_conectividad": 200000,
+        "reside_en_lugar_trabajo": true,
+        "auxilio_conectividad_pactado": true
+      },
+      "expected_output": {
+        "sbl_general": 2200000,
+        "sbl_vacaciones": 2000000,
+        "sbl_prima": 2200000,
+        "alertas_esperadas": [
+          {
+            "tipo": "EXCLUSION",
+            "concepto": "auxilio_transporte",
+            "contiene_texto": "Finca Rural"
+          },
+          {
+            "tipo": "INFO",
+            "concepto": "auxilio_conectividad",
+            "contiene_texto": "pactado como salario"
+          }
+        ]
+      },
+      "notas": "Caso base del ejemplo de planificación. El auxilio de transporte NO aplica por residencia en finca."
+    },
+    {
+      "id": "caso_002_salario_variable",
+      "descripcion": "Trabajador con salario variable - promediación 12 meses",
+      "input": {
+        "salario_mensual": 0,
+        "salarios_historicos": [
+          {"periodo": "2024-01", "valor": 1800000},
+          {"periodo": "2024-02", "valor": 2100000},
+          {"periodo": "2024-03", "valor": 1950000},
+          {"periodo": "2024-04", "valor": 2200000},
+          {"periodo": "2024-05", "valor": 2050000},
+          {"periodo": "2024-06", "valor": 1900000},
+          {"periodo": "2024-07", "valor": 2150000},
+          {"periodo": "2024-08", "valor": 2300000},
+          {"periodo": "2024-09", "valor": 2400000},
+          {"periodo": "2024-10", "valor": 2100000},
+          {"periodo": "2024-11", "valor": 2200000},
+          {"periodo": "2024-12", "valor": 2250000}
+        ],
+        "comisiones_promedio_mensual": 300000,
+        "auxilio_transporte": 200000,
+        "reside_en_lugar_trabajo": false
+      },
+      "expected_output": {
+        "promedio_salario_variable": 2116667,
+        "sbl_general": 2616667,
+        "comentario": "Promedio de 12 meses + comisiones + auxilio"
+      },
+      "notas": "Caso de salario variable con promediación según jurisprudencia CSJ 2025."
+    },
+    {
+      "id": "caso_003_limite_2_smmlv",
+      "descripcion": "Salario excede 2 SMMLV - no aplica auxilio",
+      "input": {
+        "salario_mensual": 3000000,
+        "comisiones_promedio_mensual": 0,
+        "auxilio_transporte": 200000,
+        "reside_en_lugar_trabajo": false
+      },
+      "expected_output": {
+        "sbl_general": 3000000,
+        "sbl_vacaciones": 3000000,
+        "alertas_esperadas": [
+          {
+            "tipo": "EXCLUSION",
+            "concepto": "auxilio_transporte",
+            "contiene_texto": "2 SMMLV"
+          }
+        ]
+      },
+      "notas": "Salario > 2,847,000 (2 SMMLV 2025) - auxilio excluido por límite legal."
+    },
+    {
+      "id": "caso_004_auxilio_conectividad_no_pactado",
+      "descripcion": "Auxilio de conectividad NO pactado - debe excluirse",
+      "input": {
+        "salario_mensual": 2000000,
+        "auxilio_conectividad": 200000,
+        "auxilio_conectividad_pactado": false,
+        "reside_en_lugar_trabajo": false
+      },
+      "expected_output": {
+        "sbl_general": 2000000,
+        "alertas_esperadas": [
+          {
+            "tipo": "WARNING",
+            "concepto": "auxilio_conectividad",
+            "contiene_texto": "NO está explícitamente pactado"
+          }
+        ]
+      },
+      "notas": "El auxilio de conectividad solo se incluye si está pactado como salario habitual."
+    },
+    {
+      "id": "caso_005_todos_componentes",
+      "descripcion": "Trabajador con todos los componentes salariales",
+      "input": {
+        "salario_mensual": 1800000,
+        "comisiones_promedio_mensual": 400000,
+        "horas_extras_promedio_mensual": 300000,
+        "bonificaciones_promedio_mensual": 200000,
+        "auxilio_transporte": 200000,
+        "reside_en_lugar_trabajo": false
+      },
+      "expected_output": {
+        "sbl_general": 2900000,
+        "sbl_vacaciones": 2200000,
+        "sbl_prima": 2900000,
+        "comentario": "SBL_VACACIONES excluye horas extras y auxilio"
+      },
+      "notas": "Caso completo con todos los componentes. Verifica exclusiones correctas en SBL_VACACIONES."
+    },
+    {
+      "id": "caso_006_periodo_parcial_6_meses",
+      "descripcion": "Trabajador con 6 meses de histórico - promedio incompleto",
+      "input": {
+        "salarios_historicos": [
+          {"periodo": "2024-07", "valor": 2000000},
+          {"periodo": "2024-08", "valor": 2100000},
+          {"periodo": "2024-09", "valor": 2050000},
+          {"periodo": "2024-10", "valor": 2200000},
+          {"periodo": "2024-11", "valor": 2150000},
+          {"periodo": "2024-12", "valor": 2000000}
+        ],
+        "comisiones_promedio_mensual": 0,
+        "auxilio_transporte": 200000,
+        "reside_en_lugar_trabajo": false
+      },
+      "expected_output": {
+        "promedio_salario_variable": 2083333,
+        "sbl_general": 2283333,
+        "alertas_esperadas": [
+          {
+            "tipo": "WARNING",
+            "concepto": "promedio_variable",
+            "contiene_texto": "6 meses disponibles"
+          }
+        ]
+      },
+      "notas": "Período incompleto - debe promediar los meses disponibles y generar alerta."
+    },
+    {
+      "id": "caso_007_exactamente_2_smmlv",
+      "descripcion": "Salario exactamente 2 SMMLV - caso límite",
+      "input": {
+        "salario_mensual": 2847000,
+        "auxilio_transporte": 200000,
+        "reside_en_lugar_trabajo": false
+      },
+      "expected_output": {
+        "sbl_general": 2847000,
+        "comentario": "En el límite exacto NO aplica auxilio"
+      },
+      "notas": "Caso de borde: 2,847,000 = 2 * 1,423,500. Auxilio NO debe aplicar."
+    },
+    {
+      "id": "caso_008_justo_debajo_2_smmlv",
+      "descripcion": "Salario 1 peso debajo de 2 SMMLV",
+      "input": {
+        "salario_mensual": 2846999,
+        "auxilio_transporte": 200000,
+        "reside_en_lugar_trabajo": false
+      },
+      "expected_output": {
+        "sbl_general": 3046999,
+        "comentario": "1 peso menos que el límite - auxilio SÍ aplica"
+      },
+      "notas": "Caso de borde: justo debajo del límite, auxilio debe incluirse."
+    },
+    {
+      "id": "caso_009_solo_salario_base",
+      "descripcion": "Caso mínimo - solo salario base",
+      "input": {
+        "salario_mensual": 1423500,
+        "comisiones_promedio_mensual": 0,
+        "horas_extras_promedio_mensual": 0,
+        "bonificaciones_promedio_mensual": 0,
+        "auxilio_transporte": 0,
+        "reside_en_lugar_trabajo": false
+      },
+      "expected_output": {
+        "sbl_general": 1423500,
+        "sbl_vacaciones": 1423500,
+        "sbl_prima": 1423500
+      },
+      "notas": "Caso mínimo: 1 SMMLV sin componentes adicionales."
+    },
+    {
+      "id": "caso_010_combinacion_exclusiones",
+      "descripcion": "Finca rural + auxilio conectividad no pactado",
+      "input": {
+        "salario_mensual": 2000000,
+        "auxilio_transporte": 200000,
+        "auxilio_conectividad": 200000,
+        "reside_en_lugar_trabajo": true,
+        "auxilio_conectividad_pactado": false
+      },
+      "expected_output": {
+        "sbl_general": 2000000,
+        "alertas_esperadas": [
+          {
+            "tipo": "EXCLUSION",
+            "concepto": "auxilio_transporte",
+            "contiene_texto": "Finca Rural"
+          },
+          {
+            "tipo": "WARNING",
+            "concepto": "auxilio_conectividad",
+            "contiene_texto": "NO está explícitamente pactado"
+          }
+        ]
+      },
+      "notas": "Caso complejo: ambos auxilios excluidos por diferentes razones."
+    }
+  ],
+  "parametros_referencia": {
+    "SMMLV_2025": 1423500,
+    "AUXILIO_TRANS_2025": 200000,
+    "LIMITE_AUXILIO": 2847000,
+    "TASA_INT_CESANTIAS": 0.12,
+    "DIAS_BASE": 360,
+    "VACACIONES_DENOM": 720,
+    "REDONDEO": 0
+  },
+  "normas_aplicadas": [
+    {
+      "id": "Art_128_CST",
+      "titulo": "Factor Salarial",
+      "descripcion": "Define qué constituye salario"
+    },
+    {
+      "id": "Ley_1_1963_Art_7",
+      "titulo": "Auxilio de Transporte",
+      "descripcion": "Límite de 2 SMMLV para auxilio de transporte",
+      "modificado_por": "Ley 2101 de 2021"
+    },
+    {
+      "id": "Arts_186_192_CST",
+      "titulo": "Vacaciones",
+      "descripcion": "Base de cálculo para vacaciones"
+    },
+    {
+      "id": "Jurisprudencia_CSJ_2025",
+      "titulo": "Salario Variable",
+      "descripcion": "Promediación de salarios variables últimos 12 meses"
+    }
+  ]
+}
