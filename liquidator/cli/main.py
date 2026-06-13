@@ -7,7 +7,8 @@ Implementa el entry point declarado en pyproject.toml:
     liquidacion = "liquidator.cli.main:main"
 
 Fase 1.B — esqueleto funcional. El motor (LiquidacionEngine) tiene issues
-de init preexistentes (Fase 1) y ParamsProvider year-aware es Tarea 1.E.
+de init preexistentes (Fase 1). ParamsProvider year-aware (Tarea 1.E)
+implementado — los comandos usan ParamsProvider.for_year().
 Los comandos degradan gracefulmente cuando una dependencia no está lista.
 """
 
@@ -20,24 +21,18 @@ import click
 
 from liquidator import __version__
 from liquidator.core.input_parser import InputParser
+from liquidator.core.params_provider import ParamsProvider
 from liquidator.validators.input_validator import validate_input
 
 # --- Helpers ------------------------------------------------------------------
 
 def _load_params(year: int) -> Dict[str, Any]:
-    """Carga params/<year>.json como diccionario.
-
-    Fallback hasta que ParamsProvider (Tarea 1.E) esté implementado.
-    """
-    repo_root = Path(__file__).resolve().parents[2]
-    params_path = repo_root / "params" / f"{year}.json"
-    if not params_path.exists():
-        raise click.ClickException(
-            f"No existe params/{year}.json. "
-            f"ParamsProvider year-aware es Tarea 1.E (pendiente)."
-        )
-    with open(params_path, "r", encoding="utf-8") as f:
-        return json.load(f)
+    """Carga params/<year>.json via ParamsProvider (Tarea 1.E)."""
+    try:
+        provider = ParamsProvider.for_year(year)
+        return provider.to_dict()
+    except FileNotFoundError as exc:
+        raise click.ClickException(str(exc))
 
 
 def _resolve_input(input_path: Path) -> Dict[str, Any]:
@@ -137,9 +132,8 @@ def liquidar(
             f"  Fecha ingreso:  {fecha_ingreso}\n"
             f"  Fecha corte:    {fecha_corte}\n"
             f"  Causa:          {exc}\n"
-            f"\n  Tareas pendientes que desbloquean el motor:\n"
-            f"    - Tarea 1.C  (schemas Pydantic de entrada/salida)\n"
-            f"    - Tarea 1.E  (ParamsProvider year-aware)\n"
+            f"  Tareas pendientes que desbloquean el motor:\n"
+            f"    - Tarea 1.D  (JSONGenerator con schema_path)\n"
             f"    - Tarea 1.G  (R-OP-03: fix schema refs rotas)\n"
             f"  Ver REGISTRY.md para el estado actual.\n",
             err=True,
@@ -242,8 +236,7 @@ def info(year: Optional[int]) -> None:
     Sin --year: muestra parametros de 2025 y 2026.
     Con --year: muestra solo el anio indicado.
 
-    Nota: ParamsProvider year-aware (seleccion automatica por fecha de
-    corte) es Tarea 1.E — pendiente.
+    Usa ParamsProvider.for_year() — Tarea 1.E completada.
     """
     years = [year] if year else [2025, 2026]
 
@@ -271,9 +264,10 @@ def info(year: Optional[int]) -> None:
     click.echo(f"    R-OP-05 (params):      RESUELTO (S13) — 0 collection errors")
     click.echo(f"    R-OP-06 (utils):       RESUELTO (S13) — 7/7 tests verdes")
     click.echo(f"    R-OP-02 Causa 2:       PENDIENTE (9 fails en test_versioning.py)")
-    click.echo(f"\n  Pendientes Fase 1:")
-    click.echo(f"    Tarea 1.C  — Schemas Pydantic de entrada/salida")
-    click.echo(f"    Tarea 1.E  — ParamsProvider year-aware (prerequisito real)")
+    click.echo(f"\\n  Pendientes Fase 1:")
+    click.echo(f"    Tarea 1.C  — Schemas Pydantic de entrada/salida (CERRADA S16)")
+    click.echo(f"    Tarea 1.D  — JSONGenerator con schema_path")
+    click.echo(f"    Tarea 1.E  — ParamsProvider year-aware (CERRADA — este comando lo usa)")
     click.echo(f"    Tarea 1.G  — R-OP-03 schema fix (1 minuto)")
     click.echo(f"\n  Ver REGISTRY.md para trazabilidad completa.")
 
