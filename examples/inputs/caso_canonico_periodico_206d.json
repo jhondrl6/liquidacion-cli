@@ -1,0 +1,16 @@
+{
+  "trabajador": {"nombre": "[ANONIMIZADO]", "documento": "[ANONIMIZADO]"},
+  "empleador":  {"nombre": "[ANONIMIZADO]", "documento": "[ANONIMIZADO]"},
+  "contrato":   {
+    "fecha_ingreso": "2025-11-16",
+    "fecha_corte": "2026-06-09",
+    "tipo": "INDEFINIDO",
+    "fecha_terminacion_real": null
+  },
+  "salario":    {"SBL": 2200000, "auxilio_transporte": false, "variable": false},
+  "modo":       "PERIODICA",
+  "segmentos": [
+    {"anio": 2025, "desde": "2025-11-16", "hasta": "2025-12-31", "params_ref": "params/2025.json"},
+    {"anio": 2026, "desde": "2026-01-01", "hasta": "2026-06-09", "params_ref": "params/2026.json"}
+  ]
+}
