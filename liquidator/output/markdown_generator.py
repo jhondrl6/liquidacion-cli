@@ -236,6 +236,11 @@ class MarkdownGenerator:
                     getattr(motivo, "value", motivo)
                 )
 
+            # Campos de preaviso (Tarea 3.H, addendum preaviso Art. 46 CST)
+            context["preaviso_entregado"] = contrato.get("preaviso_entregado")
+            context["fecha_preaviso"] = contrato.get("fecha_preaviso") or ""
+            context["dias_preaviso"] = contrato.get("dias_preaviso") or 0
+
         # Pasar compliance status para advertencias condicionales
         context["compliance_status"] = status
 

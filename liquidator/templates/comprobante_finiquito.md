@@ -32,6 +32,31 @@
 ### TOTAL LIQUIDACIÓN POR FINIQUITO
 **{{ format_currency(total) }} COP**
 
+{% if tipo_contrato == "fijo" and motivo_terminacion == "termino_fijo_vencido" %}
+## Preaviso (Art. 46 CST)
+{% if preaviso_entregado %}
+Preaviso entregado: **SÍ**{% if fecha_preaviso %} ({{ fecha_preaviso }}{% endif %}{% if dias_preaviso %}, {{ dias_preaviso }} días antes del vencimiento{% endif %}).
+{% if desglose is defined and desglose.preaviso_indemnizacion is defined and desglose.preaviso_indemnizacion.valor is defined and desglose.preaviso_indemnizacion.valor > 0 %}
+**Preaviso insuficiente** (menos de 30 días). Indemnización por preaviso:
+**{{ format_currency(desglose.preaviso_indemnizacion.valor) }}**
+Fórmula: SBL / 30 × {{ desglose.preaviso_indemnizacion.dias_faltantes|default(0) }} días faltantes.
+Base legal: Art. 46 CST.
+{% else %}
+Preaviso con anticipación suficiente (≥ 30 días). No aplica indemnización por preaviso.
+{% endif %}
+{% else %}
+Preaviso entregado: **NO**.
+{% if desglose is defined and desglose.preaviso_indemnizacion is defined and desglose.preaviso_indemnizacion.valor is defined %}
+**Indemnización por falta de preaviso (30 días):**
+**{{ format_currency(desglose.preaviso_indemnizacion.valor) }}**
+Fórmula: SBL / 30 × 30.
+{% endif %}
+Base legal: Art. 46 CST.
+**Nota:** El empleador debió notificar por escrito al trabajador con al menos 30 días
+de anticipación al vencimiento del contrato sobre su decisión de no renovarlo.
+{% endif %}
+{% endif %}
+
 {% if motivo_terminacion == "renuncia_voluntaria" %}
 ## Indemnización
 **NO APLICA** — El trabajador {{ nombre }} renunció
