@@ -86,6 +86,25 @@
       "blocking": false,
       "rule_ref": ["Art. 46 CST"],
       "nota": "Si preaviso_entregado=True, fecha_preaviso debe estar presente. Si preaviso_entregado=False en termino_fijo_vencido, indemnización será 30 días completos. Defensa en profundidad: el schema Pydantic (1.C-quater) ya valida esto a nivel de parse, pero esta regla captura drift en datos que bypasean el schema."
+    },
+    {
+      "id": "V014",
+      "description": "En finiquito, si hay vacaciones pendientes causadas, deben pagarse obligatoriamente (Art. 189-190 CST). La ausencia del renglón vacaciones compensadas en el desglose cuando vacaciones.dias_pendientes > 0 es fallo CRITICAL.",
+      "severity": "CRITICAL",
+      "blocking": true,
+      "rule_ref": ["Art. 189-190 CST"],
+      "formula": "SBL / 30 × días_pendientes",
+      "aplica_si": "modo == FINIQUITO AND vacaciones.dias_pendientes > 0",
+      "excepcion": "Si vacaciones.dias_pendientes == 0 (todas disfrutadas), regla N/A"
+    },
+    {
+      "id": "V015",
+      "description": "En FINIQUITO se RECOMIENDA declarar vacaciones.dias_pendientes. Si no se declara (vacaciones is None), se emite WARNING (severidad MEDIUM). Si dias_pendientes == 0, NO se advierte (declaración válida de que todas se disfrutaron).",
+      "severity": "MEDIUM",
+      "blocking": false,
+      "rule_ref": ["Art. 186 CST (causación)"],
+      "aplica_si": "modo == FINIQUITO AND vacaciones IS NULL",
+      "excepcion": "Si vacaciones.dias_pendientes == 0 explícito, NO se advierte"
     }
   ]
 }

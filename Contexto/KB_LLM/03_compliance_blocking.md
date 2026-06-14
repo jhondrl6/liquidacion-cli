@@ -42,7 +42,7 @@
 | V009  | (no leído en esta nota)                                   | ...        | ...                              |
 || V010  | (no leído en esta nota)                                   | ...        | ...                              |
 
-> El archivo `params/checklist.json` tiene 13 reglas V001-V013. Esta
+> El archivo `params/checklist.json` tiene 15 reglas V001-V015. Esta
 > tabla es extracto parcial; leer el archivo completo antes de
 > modificar el motor.
 
@@ -53,6 +53,25 @@ Reglas V011-V013 (Fase 2):
 | V011  | Indexación IPC para prestaciones no pagadas              | MEDIUM     | SL2630-2024, Art. 488 CST        |
 | V012  | Preaviso Art. 46 CST: FIJO vencido datos cálculo         | MEDIUM     | Art. 46 CST                      |
 | V013  | Preaviso declarado: consistencia en FIJO                 | MEDIUM     | Art. 46 CST                      |
+
+Reglas V014-V015 (Fase 2, Tarea 2.Z — addendum finiquito/vacaciones):
+
+| ID    | Descripción                                              | Severity   | Blocking | Norma ref                       |
+|-------|----------------------------------------------------------|------------|----------|----------------------------------|
+| V014  | Vacaciones obligatorias en finiquito (Art. 189-190 CST) | CRITICAL   | **SÍ**   | Art. 189-190 CST                 |
+| V015  | Declaración de vacaciones en finiquito                   | MEDIUM     | NO       | Art. 186 CST (causación)         |
+
+**V014 — `V_VACACIONES_FINIQUITO`:** En modo FINIQUITO, si
+`vacaciones.dias_pendientes > 0`, el desglose DEBE contener el renglón
+`vacaciones_compensadas_finiquito` con valor > 0. Si no, `NO_GO`.
+**Excepción:** `dias_pendientes == 0` (todas disfrutadas) → regla N/A.
+Si `vacaciones` no está declarado → N/A (V015 advierte separadamente).
+
+**V015 — `V_VACACIONES_DECLARADAS_FINIQUITO`:** En modo FINIQUITO, si
+`vacaciones` es `None` (no declarado), se emite WARNING MEDIUM
+recomendando declarar explícitamente. Si `dias_pendientes == 0`,
+NO se advierte (declaración válida de que todas se disfrutaron).
+No es bloqueante.
 
 ## Mecánica de ejecución (código vivo)
 
@@ -99,11 +118,10 @@ generar el documento, dejando **registro inmutable** de auditoría.
 
 ## Última validación contra código
 
-- **Fecha:** 2026-06-13 (sesión S5, Tarea 0.E).
-- **Verificado:** lectura de `liquidator/compliance/compliance_engine.py`
-  (61 líneas, mecánica documentada) y `liquidator/compliance/override_manager.py`
-  (≥80 líneas, dataclass `OverrideRecord` documentada). Extracto de
-  `params/checklist.json` (primeras ~50 líneas).
-- **NO verificado:** el contenido completo de V009 y V010 ni el
-  `checklist.json` versión 2025-10-31 al completo. Re-validar en
-  Tarea 0.J o Fase 1.
+- **Fecha:** 2026-06-14 (sesión S33, Tarea 2.Z).
+- **Verificado:** lectura de `liquidator/compliance/rule_evaluator.py`
+  (funciones V014 `_v014_vacaciones_finiquito` y V015
+  `_v015_vacaciones_declaradas` — Tarea 2.Z S33).
+- **Verificado:** `params/checklist.json` 15 reglas V001-V015.
+- **NO verificado:** el contenido completo de V009 y V010.
+  Re-validar en Fase 4.

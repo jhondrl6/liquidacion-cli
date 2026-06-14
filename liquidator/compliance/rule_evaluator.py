@@ -5,6 +5,7 @@ Cada función recibe (input_data, result, params) y retorna
 """
 
 from datetime import datetime
+from decimal import Decimal
 from typing import Dict, Any, Callable
 
 
@@ -26,6 +27,8 @@ class RuleEvaluator:
             "V011": _v011_indexacion_ipc,
             "V012": _v012_preaviso_termino_fijo,
             "V013": _v013_preaviso_declarado,
+            "V014": _v014_vacaciones_finiquito,
+            "V015": _v015_vacaciones_declaradas,
         }
         return mapping[rule_id]
 
@@ -452,5 +455,144 @@ def _v013_preaviso_declarado(
             f"preaviso_entregado={preaviso_entregado}, "
             f"fecha_preaviso={fecha_preaviso}. "
             f"Tipo FIJO, motivo={motivo}."
+        ),
+    }
+
+
+def _v014_vacaciones_finiquito(
+    input_data: Dict, result: Dict, params: Dict
+) -> Dict:
+    """Regla V014 — Vacaciones obligatorias en finiquito (Art. 189-190 CST).
+
+    Tarea 2.Z (Fase 2, addendum finiquito/vacaciones).
+
+    Bloqueante (severity CRITICAL). Cuando el input declara
+    modo FINIQUITO y vacaciones.dias_pendientes > 0, valida:
+    - Que el desglose contenga el renglón de vacaciones compensadas
+      (key 'vacaciones_compensadas_finiquito').
+    - Que el valor del renglón sea > 0.
+
+    Excepción: si vacaciones.dias_pendientes == 0 (todas disfrutadas),
+    la regla NO aplica.
+
+    Si modo != FINIQUITO, la regla NO aplica.
+    """
+    modo = str(input_data.get("modo", "")).upper()
+    if modo != "FINIQUITO":
+        return {
+            "result": "PASS",
+            "evidence": (
+                "V_VACACIONES_FINIQUITO no aplica: "
+                f"modo={modo}. Solo aplica a FINIQUITO."
+            ),
+        }
+
+    vacaciones = input_data.get("vacaciones")
+    if not isinstance(vacaciones, dict):
+        # vacaciones no declaradas → V015 lo advierte; aquí es N/A
+        return {
+            "result": "PASS",
+            "evidence": (
+                "V_VACACIONES_FINIQUITO no aplica: "
+                "vacaciones no declaradas (N/A). "
+                "Regla V015 (V_VACACIONES_DECLARADAS) emitirá WARNING."
+            ),
+        }
+
+    dias_pendientes = vacaciones.get("dias_pendientes", 0)
+    try:
+        dias = Decimal(str(dias_pendientes))
+    except (ValueError, TypeError):
+        dias = Decimal(0)
+
+    if dias <= 0:
+        return {
+            "result": "PASS",
+            "evidence": (
+                "V_VACACIONES_FINIQUITO no aplica: "
+                f"dias_pendientes={dias} (todas disfrutadas o 0). "
+                "Regla N/A."
+            ),
+        }
+
+    # CRITICAL: dias_pendientes > 0 → debe existir renglón en desglose
+    desglose = result.get("desglose", {})
+    renglon_vac = desglose.get("vacaciones_compensadas_finiquito", {})
+    valor_vac = renglon_vac.get("valor", 0) if isinstance(renglon_vac, dict) else 0
+
+    try:
+        valor_dec = Decimal(str(valor_vac))
+    except (ValueError, TypeError):
+        valor_dec = Decimal(0)
+
+    if valor_dec <= 0:
+        return {
+            "result": "FAIL",
+            "evidence": (
+                f"FINIQUITO con vacaciones.dias_pendientes={dias} "
+                f"pero renglón 'vacaciones_compensadas_finiquito' "
+                f"ausente o con valor 0 en el desglose. "
+                f"Art. 189-190 CST exige pago obligatorio "
+                f"(SBL/30 × {dias} días)."
+            ),
+        }
+
+    return {
+        "result": "PASS",
+        "evidence": (
+            f"Vacaciones compensadas en finiquito: "
+            f"{valor_dec:,} COP ({dias} días, Art. 189-190 CST)."
+        ),
+    }
+
+
+def _v015_vacaciones_declaradas(
+    input_data: Dict, result: Dict, params: Dict
+) -> Dict:
+    """Regla V015 — Declaración de vacaciones en finiquito.
+
+    Tarea 2.Z (Fase 2, addendum finiquito/vacaciones).
+
+    No es bloqueante (severity MEDIUM). Cuando el input declara
+    modo FINIQUITO y vacaciones es None, emite WARNING recomendando
+    declarar vacaciones explícitamente.
+
+    Si vacaciones.dias_pendientes == 0 (declaración explícita de que
+    todas se disfrutaron), NO se advierte.
+
+    Si modo != FINIQUITO, la regla NO aplica.
+    """
+    modo = str(input_data.get("modo", "")).upper()
+    if modo != "FINIQUITO":
+        return {
+            "result": "PASS",
+            "evidence": (
+                "V_VACACIONES_DECLARADAS no aplica: "
+                f"modo={modo}. Solo aplica a FINIQUITO."
+            ),
+        }
+
+    vacaciones = input_data.get("vacaciones")
+    if vacaciones is not None:
+        # vacaciones declaradas (incluso dias=0 es válida declaración)
+        return {
+            "result": "PASS",
+            "evidence": (
+                "Vacaciones declaradas en FINIQUITO: "
+                f"dias_pendientes={vacaciones.get('dias_pendientes', 'N/A')}. "
+                "Regla V015 OK."
+            ),
+        }
+
+    # vacaciones es None → WARNING MEDIUM
+    return {
+        "result": "WARN",
+        "evidence": (
+            "FINIQUITO sin vacaciones declaradas. "
+            "Si hubo vacaciones pendientes, declararlas en "
+            "input.vacaciones.dias_pendientes. "
+            "Si todas se disfrutaron, declarar "
+            "vacaciones: {dias_pendientes: 0} explícitamente. "
+            "Compliance no puede inventar el dato."
         ),
     }
