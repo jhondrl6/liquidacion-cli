@@ -356,36 +356,34 @@
      (probablemente correcto, no causa de falla).
 - **Acción aplicada en S14:** Fix 1-4 en código. Documentar 5-7 como
   pendientes menores para Fase 1.X.
+- **Cierre S26 (2026-06-13):** RESUELTO. Los 4 fixes de código
+  productivo aplicados en S14 (template_manager, markdown_generator,
+  pdf_generator, health_checker). Los 3 callers pendientes verificados
+  contra código vivo: #5 `input_validator.py:78` es whitelist de
+  paths operacional, no ruta de plantilla (funciona tal cual); #6
+  `test_markdown_generator.py` reescrito en S22 con fixture pattern
+  (31/31 tests pasan); #7 `final_validation.py` es script legacy
+  fuera del core. Ninguno requiere fix adicional. 0 cambios en S26.
 - **Impacto en DoD de Tarea 1.A-plan:** ninguno. El packaging funciona
   via `pip install -e .` aunque el monitor no encuentre las plantillas
   (no es código de path crítico). Las plantillas viajen con el paquete
   es el objetivo de packaging, no de funcionalidad operacional.
 
-## R-OP-08 (NUEVO, S14) — `markdown_generator.py:48` usa `datetime.now()` con `import datetime` (módulo)
+## R-OP-08 (NUEVO, S14, RESUELTO S26) — `datetime.now()` con `import datetime` (módulo) en 2 archivos
 
-- **Severidad:** BAJA (bug latente — solo se manifiesta si se llama a
-  `MarkdownGenerator.generate_markdown()` con datos reales; los tests
-  existentes no ejercitan este path).
-- **Origen:** Pre-existente, introducido en S4 (Tarea 0.D —
-  normalización de imports `datetime`). El fix de S4 cambió
-  `from datetime import datetime` → `import datetime` en
-  `markdown_generator.py:7`, pero la línea de uso (ahora línea 48)
-  quedó como `datetime.now().strftime(...)` que solo funciona con
-  `from datetime import datetime`. LSP Pyright ahora lo reporta como
-  `reportAttributeAccessIssue`.
-- **Causa:** S4 quiso unificar el estilo de import a `import datetime`
-  (módulo) en 5 archivos, pero solo ajustó 4 de ellos en su uso. El
-  archivo `markdown_generator.py` quedó con import de módulo + uso de
-  clase, generando el mismatch.
-- **Fix mínimo:** cambiar `import datetime` → `from datetime import
-  datetime` (mantiene el patrón de S4 en otros 4 archivos? NO — los
-  otros 4 SÍ funcionan con `import datetime` porque usan
-  `datetime.now()` que es válido con el módulo vía
-  `datetime.datetime.now()`? **VERIFICAR.**). La forma idiomática es
-  `from datetime import datetime` y dejar `datetime.now()` tal cual.
-- **Asignación:** Tarea 1.X (suite stabilisation) o abrir R-OP-08-fix
-  como hot-patch de 1 línea si surge la necesidad de ejecutar
-  `generate_markdown()` antes de cerrar 1.B.
+- **Severidad:** BAJA (bug latente preexistente de S4).
+- **Resolución S26 (2026-06-13):** 2 archivos arreglados:
+  1. `params_versioning.py:6` — `import datetime` → `from datetime
+     import datetime` (también cierra R-OP-02 Causa 2, 9 tests).
+  2. `test_override.py:5` — mismo fix (1 test).
+  Ambos: 1 línea c/u. **28/28 PASS combinados** (21 versioning + 7
+  override). 0 regresiones.
+- **Historial:** introducido en S4 (Tarea 0.D) cuando se normalizaron
+  imports en 5 archivos. `markdown_generator.py` fue arreglado en S22
+  (Tarea 1.F). `test_trail_generator.py` y `test_indemnizacion.py`
+  fueron corregidos en S4 mismo. Quedaban 2 archivos con el bug,
+  ambos cerrados en S26.
+- **Fix:** `import datetime` → `from datetime import datetime`.
 
 ## R-OP-09 (NUEVO, S14 cierre) — `.gitignore` no procesa patrones con comentario inline
 
@@ -413,6 +411,12 @@
   con patrones en líneas separadas y comentarios en líneas propias
   (sin inline). Eliminar los `────...` separadores decorativos que
   tienen 60+ caracteres repetidos — pueden ser el disparador del bug.
+- **Resolución S26 (2026-06-13):** `.gitignore` reescrito — todos
+  los comentarios movidos a líneas propias, separadores decorativos
+  eliminados. Verificado con `git check-ignore -v`:
+  `.env.backup_pre_rotation_2026-06-12` → `OK` (matched by `.env.backup*`),
+  `audit/logs/audit_202606.log` → `OK`, `docs/audit/logs/audit_202511.log`
+  → `OK`. Cero patrones rotos.
 - **Mitigación aplicada S14 cierre:** el commit accidental `6a312dd`
   con la clave de cifrado se revirtió con `git reset --soft HEAD~1`
   + `git rm --cached` ANTES de hacer push. `git ls-remote origin`
@@ -544,21 +548,13 @@
   - ✗ `liquidator/tests/test_params/test_params_loader.py`
   - ✗ `liquidator/tests/test_params/test_validator.py`
 
-#### Causa 2 — Regresión de `datetime` en `params_versioning.py` (9 failed)
+#### Causa 2 — Regresión de `datetime` en `params_versioning.py` (9 failed) — RESUELTO S26
 
-- **Razón probable:** regresión introducida por Tarea 0.D (S4).
-  S4 cambió `from datetime import datetime` →
-  `import datetime` en `liquidator/params/params_versioning.py:6`,
-  pero el archivo usa `datetime.now().astimezone().isoformat()`
-  en la línea 51 (atributo de la CLASE `datetime`, no del módulo).
-  Con `import datetime` se importa el módulo, no la clase.
-  Llamar `datetime.now()` falla con `AttributeError: module
-  'datetime' has no attribute 'now'`.
-- **Acción propuesta:** revertir la línea 6 a
-  `from datetime import datetime` (o agregar el alias). 1 línea.
-- **Fase de resolución:** 1.A/1.B (revisión del cambio de 0.D;
-  0.D corrigió 4 archivos correctamente — sólo `params_versioning.py`
-  quedó mal).
+- **Resolución S26 (2026-06-13):** `import datetime` → `from datetime
+  import datetime` en `params_versioning.py:6`. 1 línea.
+  **21/21 PASS** en `test_versioning.py` (los 9 que fallaban + 12
+  que ya pasaban). 0 regresiones.
+- **Origen:** regresión introducida por Tarea 0.D (S4).
 - **Tests fallidos (9):**
   - `test_params/test_versioning.py::TestRegisterVersion::test_register_version_basic`
   - `test_params/test_versioning.py::TestRegisterVersion::test_register_version_with_data`

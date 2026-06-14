@@ -10,6 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+**S26 — Remate R-OP-02/07/08/09 + bug checklist_loader.py:21 (2026-06-13)**
+- **R-OP-02 Causa 2 (RESUELTO):** `liquidator/params/params_versioning.py` — `import datetime` → `from datetime import datetime` (1 línea). 9 tests de `test_versioning.py` pasan ahora (21/21 PASS, +9 vs baseline).
+- **R-OP-08 (RESUELTO):** `liquidator/tests/test_compliance/test_override.py` — mismo fix (1 línea, 7/7 PASS, +1 vs baseline).
+- **Bug checklist_loader.py:21 (RESUELTO):** `Path()` wrapper sobre `params_loader.params_dir` (str) para que el operador `/` funcione correctamente.
+- **R-OP-09 (RESUELTO):** `.gitignore` reescrito sin comentarios inline ni separadores decorativos. `git check-ignore -v` confirma todos los patrones (`.env.backup*`, `audit/`, `docs/audit/`) funcionales.
+- **R-OP-07 (RESUELTO):** Cerrado sin cambios — los 4 fixes de S14 en código productivo verificados contra código vivo; 3 callers pendientes inspeccionados y confirmados no-bloqueantes.
+- **Fase 1 CERRADA formalmente.** Suite: 393 passed, 36 failed, 15 errors (+10 tests verdes, 0 regresiones).
+
 ### Added (Fase 0 — Higiene + segundo cerebro mínimo)
 - **`Contexto/KB_LLM/`**: 9 notas sustantivas creadas (00-09) — segundo cerebro local versionado en Markdown.
   - `00_fuente_de_verdad.md` — jerarquía de verdad (código > params > tests > legal > docs).

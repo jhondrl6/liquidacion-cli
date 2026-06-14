@@ -18,7 +18,7 @@ class ChecklistLoader:
         if checklist_path is None:
             from liquidator.params.params_loader import ParamsLoader
             params_loader = ParamsLoader()
-            self.path = params_loader.params_dir / "checklist.json"
+            self.path = Path(params_loader.params_dir) / "checklist.json"
         else:
             self.path = Path(checklist_path)
 

@@ -2,7 +2,7 @@
 Tests para el módulo de override manager.
 """
 
-import datetime
+from datetime import datetime
 
 import pytest
 

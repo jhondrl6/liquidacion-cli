@@ -1,28 +1,24 @@
 # liquidacion_cli — .gitignore
 # Generado en Fase 0 / Tarea 0.B (2026-06-12).
 # Fuente: plan_modernizacion_v2.0_2026-06-09.md §5.2 + adiciones por hallazgos en vivo.
+# S26: Comentarios inline removidos — causaban que git no procesara los patrones en WSL/Windows (R-OP-09).
 
-# ─────────────────────────────────────────────────────────────
 # Entornos virtuales
-# ─────────────────────────────────────────────────────────────
 .venv/
-.venv-liq/  # [ADD S14] venv local usado en `uv pip install -e .` para validar packaging
+# [ADD S14] venv local usado en uv pip install -e . para validar packaging
+.venv-liq/
 venv/
 liquidacion-env/
 env/
 ENV/
 
-# ─────────────────────────────────────────────────────────────
 # Empaquetado
-# ─────────────────────────────────────────────────────────────
 *.egg-info/
 build/
 dist/
 *.egg
 
-# ─────────────────────────────────────────────────────────────
 # Bytecode y cachés de Python
-# ─────────────────────────────────────────────────────────────
 __pycache__/
 *.pyc
 *.pyo
@@ -31,41 +27,45 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 
-# ─────────────────────────────────────────────────────────────
 # Cobertura de tests
-# ─────────────────────────────────────────────────────────────
 .coverage
 .coverage.*
 htmlcov/
 coverage.xml
 .nyc_output/
 
-# ─────────────────────────────────────────────────────────────
 # Salidas generadas por el motor (directorios vacíos se mantienen con .gitkeep)
-# ─────────────────────────────────────────────────────────────
-output/                                   # artefactos de liquidación (gitignored; .gitkeep tracked)
-artifacts/                                # auditoría inmutable
-logs/                                     # logs de ejecución
-!output/.gitkeep                          # [FIX] mantener marcador para que el dir exista post-clone
-!artifacts/.gitkeep                       # [FIX]
-!logs/.gitkeep                            # [FIX]
-audit/                                    # [FIX] auditoría histórica (gitignored; .gitkeep tracked)
-audit/**                                  # [FIX S14] subdirs concretos (logs/, reports/, trails/) — bug: audit/ solo no matcheaba contenido
-!audit/.gitkeep                           # [FIX] mantener marcador
-docs/audit/                               # [FIX S14] mirror histórico de auditoría en docs/
-docs/audit/**                             # [FIX S14] subdirs (logs/, reports/, trails/)
+# artefactos de liquidación (gitignored; .gitkeep tracked)
+output/
+# auditoría inmutable
+artifacts/
+# logs de ejecución
+logs/
+# [FIX] mantener marcador para que el dir exista post-clone
+!output/.gitkeep
+# [FIX]
+!artifacts/.gitkeep
+# [FIX]
+!logs/.gitkeep
+# [FIX] auditoría histórica (gitignored; .gitkeep tracked)
+audit/
+# [FIX S14] subdirs concretos (logs/, reports/, trails/)
+audit/**
+# [FIX] mantener marcador
+!audit/.gitkeep
+# [FIX S14] mirror histórico de auditoría en docs/
+docs/audit/
+# [FIX S14] subdirs (logs/, reports/, trails/)
+docs/audit/**
 
-# ─────────────────────────────────────────────────────────────
 # Datos de ejecución local (mencionado en .env: LIQUIDACION_DATA_PATH=./data)
-# ─────────────────────────────────────────────────────────────
-data/                                     # [ADD] ruta de datos, puede contener PII
+# [ADD] ruta de datos, puede contener PII
+data/
 *.sqlite
 *.sqlite3
 *.db
 
-# ─────────────────────────────────────────────────────────────
 # Artefactos históricos / outputs espurios en raíz (mover o ignorar)
-# ─────────────────────────────────────────────────────────────
 liquidacion*.json
 liquidacion*.pdf
 liquidacion*.txt
@@ -75,55 +75,56 @@ finca_rural_result*
 liquidacion_actualizada*
 liquidacion_20*.pdf
 
-# ─────────────────────────────────────────────────────────────
-# Secretos y entorno
-# ─────────────────────────────────────────────────────────────
+# Secretos y entorno (no modificar orden — los .env.* dependen de que .env se liste primero)
 .env
 .env.local
 .env.*.local
-.env.backup*                              # [ADD] proteger backups de rotación de clave (issue 2026-06-12)
+# [ADD] proteger backups de rotación de clave (issue 2026-06-12)
+.env.backup*
 *.pem
 *.key
 
-# ─────────────────────────────────────────────────────────────
 # Scripts espurios de un solo uso (mover a scripts/_legacy/ o eliminar)
-# ─────────────────────────────────────────────────────────────
 /generate_liquidacion.py
 /generar_varios.py
 /test_encabezado.py
-/Plan de ejecución.py                     # [ADD] legacy 68KB; revisar en Tarea 0.C
+# [ADD] legacy 68KB; revisar en Tarea 0.C
+/Plan de ejecución.py
 
-# ─────────────────────────────────────────────────────────────
 # Backups genéricos (cualquier .bak, .backup, ~)
-# ─────────────────────────────────────────────────────────────
-*.bak                                     # [ADD]
-*.backup                                  # [ADD]
-*.tmp                                     # [ADD]
-*.swp                                     # [ADD]
-*~                                        # [ADD]
+# [ADD]
+*.bak
+# [ADD]
+*.backup
+# [ADD]
+*.tmp
+# [ADD]
+*.swp
+# [ADD]
+*~
 
-# ─────────────────────────────────────────────────────────────
 # Logs genéricos (directorios ya ignorados arriba; este es catch-all)
-# ─────────────────────────────────────────────────────────────
-*.log                                     # [ADD]
+# [ADD]
+*.log
 
-# ─────────────────────────────────────────────────────────────
 # Configuración de editores
-# ─────────────────────────────────────────────────────────────
-.vscode/                                  # [ADD]
-.idea/                                    # [ADD]
-*.iml                                     # [ADD]
-.DS_Store                                 # [ADD]
-Thumbs.db                                 # [ADD]
+# [ADD]
+.vscode/
+# [ADD]
+.idea/
+# [ADD]
+*.iml
+# [ADD]
+.DS_Store
+# [ADD]
+Thumbs.db
 
-# ─────────────────────────────────────────────────────────────
 # Documentos legacy a revisar (pueden contener PII; mover o ignorar)
-# ─────────────────────────────────────────────────────────────
-/documentos_legales_rurales/              # [ADD] revisar contenido en Tarea 0.C
+# [ADD] revisar contenido en Tarea 0.C
+/documentos_legales_rurales/
 
-# ─────────────────────────────────────────────────────────────
 # Sistema
-# ─────────────────────────────────────────────────────────────
 *.swp
 *.swo
-.directory                                # [ADD] KDE
+# [ADD] KDE
+.directory
