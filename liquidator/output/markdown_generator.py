@@ -22,6 +22,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 from .template_manager import TemplateManager
+from .pre_render_validator import PreRenderValidator, PreRenderValidationError
 
 # Default: directorio de plantillas del paquete (liquidator/templates/).
 # Ver REGISTRY.md (S14 — Tarea 1.A-plan) y KB_LLM/06 R-OP-07.
@@ -86,6 +87,13 @@ class MarkdownGenerator:
 
         modo = (json_data.get("meta", {}).get("modo", "") or "").upper()
         template_name = "finiquito" if modo == "FINIQUITO" else "periodica"
+
+        # --- PreRenderValidator: validar requisitos por motivo (Tarea 3.G) ---
+        if modo == "FINIQUITO":
+            try:
+                self._validar_pre_render(json_data)
+            except PreRenderValidationError as e:
+                return self._render_pre_render_error(str(e))
 
         return self.template_manager.render_template(template_name, context)
 
@@ -201,6 +209,9 @@ class MarkdownGenerator:
             "desglose_segmentado": self._format_desglose_segmentado(segmented),
         }
 
+        # Pasar desglose plano al contexto para templates condicionales (Tarea 3.G)
+        context["desglose"] = flat_desglose
+
         # Campos exclusivos de FINIQUITO
         if modo == "FINIQUITO":
             context.update(
@@ -215,6 +226,15 @@ class MarkdownGenerator:
                     "norma_salario": sal_pend.get("norma", "—"),
                 }
             )
+            # Agregar motivo_terminacion para templates condicionales
+            motivo = contrato.get("motivo_terminacion") or ""
+            if isinstance(motivo, str):
+                context["motivo_terminacion"] = motivo
+            else:
+                # Puede ser enum o dict
+                context["motivo_terminacion"] = str(
+                    getattr(motivo, "value", motivo)
+                )
 
         # Pasar compliance status para advertencias condicionales
         context["compliance_status"] = status
@@ -410,6 +430,72 @@ class MarkdownGenerator:
             + "\n".join(f"- {m}" for m in missing)
             + "\n\n*Verifique que el JSONGenerator esté produciendo la "
             "forma ``LiquidacionResult`` correcta.*"
+        )
+
+    # ------------------------------------------------------------------
+    # PreRenderValidator (Tarea 3.G)
+    # ------------------------------------------------------------------
+
+    def _validar_pre_render(self, data: Dict[str, Any]) -> None:
+        """Valida requisitos por motivo de terminación (Tarea 3.G).
+
+        Construye un wrapper mínimo para el PreRenderValidator a partir
+        de los datos JSON y el desglose plano.
+
+        Raises:
+            PreRenderValidationError: si el desglose no cumple los
+                requisitos legales para el motivo de terminación.
+        """
+        validator = PreRenderValidator()
+
+        # Construir wrapper mínimo con motivo_terminacion
+        contrato = data.get("contrato", {})
+        motivo = contrato.get("motivo_terminacion")
+
+        if not motivo:
+            return  # sin motivo, no hay matriz a aplicar
+
+        # Crear wrapper mínimo para el validator
+        class _ContratoWrapper:
+            def __init__(self, motivo_val):
+                self.motivo_terminacion = motivo_val
+
+        class _InputWrapper:
+            def __init__(self, motivo_val):
+                self.contrato = _ContratoWrapper(motivo_val)
+
+        # Normalizar motivo: puede ser string, enum o dict
+        if isinstance(motivo, str):
+            motivo_str = motivo
+        elif hasattr(motivo, "value"):
+            motivo_str = motivo.value
+        else:
+            motivo_str = str(motivo)
+
+        # Crear wrapper con motivo como string (el validator acepta string)
+        from enum import Enum
+
+        class _MotivoEnum(str, Enum):
+            VALOR = motivo_str
+
+        wrapper = _InputWrapper(_MotivoEnum.VALOR)
+
+        # Obtener desglose plano
+        _, flat_desglose = self._normalize_desglose(data.get("desglose", {}))
+
+        # Llamar al validator
+        validator.validar_requisitos_por_motivo(wrapper, flat_desglose)
+
+    def _render_pre_render_error(self, error_msg: str) -> str:
+        """Renderiza error de PreRenderValidator (sin PII)."""
+        return (
+            "# ERROR DE VALIDACIÓN PRE-RENDER\n\n"
+            "La liquidación no puede generarse porque el desglose "
+            "no cumple los requisitos legales para el motivo de "
+            "terminación:\n\n"
+            f"- {error_msg}\n\n"
+            "*Verifique que el desglose incluya los renglones correctos "
+            "para el motivo de terminación seleccionado.*"
         )
 
     # ------------------------------------------------------------------

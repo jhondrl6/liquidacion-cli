@@ -34,9 +34,11 @@ htmlcov/
 coverage.xml
 .nyc_output/
 
-# Salidas generadas por el motor (directorios vacíos se mantienen con .gitkeep)
+# Salidas generadas por el motor (directorios vacíos se mantienen con .gitignore)
 # artefactos de liquidación (gitignored; .gitkeep tracked)
 output/
+# [FIX S34] NO ignorar liquidator/output/ (código fuente del paquete)
+!liquidator/output/
 # auditoría inmutable
 artifacts/
 # logs de ejecución
