@@ -161,40 +161,71 @@
   se ejecutó `jsonschema.validate` directamente y se descubrió que la
   descripción del bug estaba desactualizada.
 
-## R-OP-10 (NUEVO, S20) — id `LEY_2466_2025_INTERESES_MENSUALES` excede `maxLength: 20` del schema
+## R-OP-10 (NUEVO, S20, RESUELTO S20) — id `LEY_2466_2025_INTERESES_MENSUALES` excede `maxLength: 20` del schema
 
 - **Severidad:** BAJA (no afecta motor; `params/normas.json` no se valida
-  en flujo CLI actual). Sí bloquea cierre 100% formal de Tarea 0.K (P-S11.3
-  sigue fallando).
+  en flujo CLI actual). Sí bloqueaba cierre 100% formal de Tarea 0.K (P-S11.3
+  fallaba).
 - **Origen:** Tarea 1.G / S20 (2026-06-13). Al re-ejecutar la validación
   `jsonschema.validate(normas.json, schema)` para cerrar R-OP-03, jsonschema
-  falló por causa **diferente** a la documentada en S11.6.
-- **Causa verificada:** `params/schema.json` L112 declara
-  `properties.normas.items.properties.id` con `maxLength: 20`. Sin embargo,
-  `params/normas.json` entrada `normas[15].id = "LEY_2466_2025_INTERESES_MENSUALES"`
-  tiene 33 caracteres. Es el **único** id problemático entre 18 entradas;
-  los otros 17 caben en ≤17 chars.
-- **Mensaje de error verbatim:**
-  `ValidationError: 'LEY_2466_2025_INTERESES_MENSUALES' is too long`
-  `Failed validating 'maxLength' in schema[1]['properties']['normas']['items']['properties']['id']`
-  `On instance['normas'][15]['id']: 'LEY_2466_2025_INTERESES_MENSUALES'`
-- **Contexto:** el id se introdujo en S11 (Tarea 0.K) cuando se agregó
-  la entrada sobre Ley 2466/2025. Se marcó como `PENDIENTE_TEXTO_LITERAL`
-  en `params/normas.json` por R-LEG-06 (la atribución del plan v2.0 a
-  "Art. 64 de la Ley 2466/2025" para pago mensual de intereses sobre
-  cesantías fue refutada por verificación SUIN). El id conserva la
-  intención original del plan v2.0 (pago mensual de intereses), pero
-  la regla legal citada es incorrecta — ver R-LEG-06.
+  (vía `oneOf` raíz) reportó `maxLength` para `LEY_2466_2025_INTERESES_MENSUALES`
+  (33 chars > 20 declarado en `params/schema.json` L112).
+- **Causa verificada:** `params/schema.json` L112 declaraba
+  `properties.normas.items.properties.id.maxLength: 20`. La entrada
+  `normas[15].id = "LEY_2466_2025_INTERESES_MENSUALES"` tiene 33 caracteres.
+  Único id que excedía el límite; los otros 17 caben en ≤17 chars.
+- **Resolución aplicada S20 (decisión del usuario, opción 1):** subir
+  `maxLength` de 20 a 40 en `params/schema.json` L112 (1 línea, retrocompatible,
+  no invasivo). El id conserva su semántica (`PENDIENTE_TEXTO_LITERAL` por
+  R-LEG-06).
+- **Estado:** CERRADO en S20. El fix NO afecta ningún id existente ni
+  introduce nuevas restricciones.
+
+## R-OP-11 (NUEVO, S20) — `params/normas.json`: entries de `plazos_pago` faltan campos required (`aplica_a`, `sancion_mora`, `calcula_fecha_limite`)
+
+- **Severidad:** BAJA (no afecta motor). Sí bloquea cierre 100% formal de
+  Tarea 0.K (P-S11.3 sigue fallando).
+- **Origen:** Tarea 1.G / S20 (2026-06-13). Al re-ejecutar la validación
+  con método correcto (`jsonschema.validate(data, schema['definitions']['normas_laborales'], resolver=RefResolver.from_schema(schema))`),
+  jsonschema reportó `'aplica_a' is a required property` en
+  `schema['properties']['plazos_pago']['properties']['vacaciones']`.
+- **Causa verificada (inspección directa del archivo):** las 6 entries de
+  `plazos_pago` en `params/normas.json` (`cesantias`, `intereses_cesantias`,
+  `prima_junio`, `prima_diciembre`, `vacaciones`, `indemnizacion`) tienen
+  solo 5 keys: `dia`, `mes`, `descripcion`, `norma_ref`, `tipo_plazo`. La
+  schema `plazo_pago_detalle` declara como required: `tipo_plazo`, `dia`,
+  `mes`, `descripcion`, `norma_ref`, `aplica_a`, `sancion_mora`,
+  `calcula_fecha_limite` (8 campos). Faltan 3 en TODAS las entries.
+- **Contexto histórico:** El S11 (Tarea 0.K) probablemente pobló
+  `plazos_pago` con un subset mínimo de campos pensando que el schema no
+  era estricto. El S11.6 detectó un error falso (R-OP-03) por usar
+  `jsonschema.validate` sin `RefResolver` — método que NO preserva el
+  scope de las definiciones top-level. El error real (R-OP-11) quedó
+  enmascarado.
 - **Decisión pendiente del usuario** (3 opciones):
-  1. **Subir `maxLength` a 40 en el schema (1 línea, retrocompatible, no
-     invasivo).** Aceptado por defecto si no se escoge otra opción.
-  2. **Renombrar el id a algo ≤20 chars** (p.ej. `LEY_2466_2025_INT_MENS`,
-     21 chars — preserva la restricción pero requiere elegir convención).
-  3. **Diferir como hot-patch futuro** (la validación de `normas.json`
-     queda pendiente; no bloquea Fase 1).
+  1. **Agregar los 3 campos faltantes a las 6 entries** en `normas.json`
+     (`aplica_a: ["PERIODICA", "FINIQUITO"]` p.ej., `sancion_mora: "..."`,
+     `calcula_fecha_limite: true/false`). Trabajo manual pero semánticamente
+     correcto. 6 entries × 3 campos = 18 líneas JSON a poblar.
+  2. **Hacer los 3 campos opcionales** en `params/schema.json` (quitar
+     de `required` array). Cambia semántica: el schema deja de exigir
+     datos que `normas.json` no tiene. 3 líneas a modificar.
+  3. **Diferir a hot-patch futuro.** La validación de `normas.json` queda
+     pendiente; no bloquea Fase 1.
 - **Impacto en DoD de Tarea 0.K:** P-S11.3 sigue FAIL hasta resolver
-  R-OP-10. No bloquea cierre formal de Fase 0 (P-S11.3 ya estaba
+  R-OP-11. No bloquea cierre formal de Fase 0 (P-S11.3 ya estaba
   pendiente desde S11.6, y se sigue marcando como tal).
+
+## R-OP-03 — Ver reclasificación en línea arriba (R-OP-10 derivado)
+
+- **Estado final S20:** R-OP-03 (descripción S11.6) era un **artefacto
+  del método de validación** usado por S11.6. La schema está bien
+  internamente (definiciones a top-level, refs válidas). El error
+  reaparecía con método ingenuo (sin `RefResolver`) porque jsonschema
+  perdía el scope de las definiciones top-level al validar contra la
+  sub-rama `definitions.normas_laborales`. Con método correcto
+  (`RefResolver.from_schema(schema)`), R-OP-03 desaparece; aparece
+  R-OP-11 (el bug real).
 
 ## R-OP-04 (NUEVO, S11.6) — `uv run` SÍ bypasea el sandbox de seguridad perimetral de Hermes
 
