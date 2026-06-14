@@ -1,0 +1,36 @@
+{
+  "modo": "FINIQUITO",
+  "fecha_ingreso": "2025-06-01",
+  "fecha_corte": "2026-06-01",
+  "salario_mensual": 2000000,
+  "tipo_contrato": "FIJO",
+  "motivo_terminacion": "termino_fijo_vencido",
+  "trabajador": {
+    "nombre": "Carlos Martínez",
+    "documento": "12345678"
+  },
+  "empleador": {
+    "nombre": "Empresa XYZ S.A.S.",
+    "documento": "900123456"
+  },
+  "contrato": {
+    "fecha_ingreso": "2025-06-01",
+    "fecha_corte": "2026-06-01",
+    "tipo": "FIJO",
+    "motivo_terminacion": "termino_fijo_vencido",
+    "fecha_terminacion_real": "2026-06-01",
+    "fecha_vencimiento_termino_fijo": "2026-06-01",
+    "preaviso_entregado": false,
+    "fecha_preaviso": "2026-05-22",
+    "dias_preaviso": 10
+  },
+  "salario": {
+    "SBL": 2200000,
+    "salario_mensual": 2000000,
+    "variable": false
+  },
+  "vacaciones": {
+    "dias_pendientes": 0
+  },
+  "_nota_caso": "Caso golden Tarea 2.B-cuater (Fase 2, S30). FINIQUITO + FIJO + termino_fijo_vencido. Preaviso de 10 dias (insuficiente). Formula: (SBL/30) x dias_faltantes = (2200000/30) x 20 = 1.466.667 COP. Indemnizacion preaviso es renglon SEPARADO de Art. 64."
+}

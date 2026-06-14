@@ -10,6 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+**S30 — Tarea 2.B-cuater: Indemnización preaviso Art. 46 CST (addendum preaviso) (2026-06-14)**
+- **IndemnizacionCalculator:** método `calculate_indemnizacion_preaviso(sbl, dias_preaviso_efectivos)` con fórmula `(SBL/30) × dias_faltantes`, `ROUND_HALF_UP` al peso, dict con evidencia_legal Art. 46 CST. Import `Decimal`, `ROUND_HALF_UP` agregado. 18 tests unitarios.
+- **Engine:** hook `_calcular_preaviso_si_fijo_vencido` en `process_input()` — activa solo FINIQUITO + FIJO + termino_fijo_vencido, inyecta `preaviso_indemnizacion` en desglose, actualiza `total_liquidacion`. Reparo (b): renglón SEPARADO de indemnización Art. 64, NO se acumula. Dias_preaviso_efectivos se calcula desde campo directo o diferencia de fechas.
+- **Golden test:** `test_preaviso_fijo_vencido.py` (10 tests) + fixture `finiquito_fijo_vencido_preaviso.json` (formato plano). 10 días preaviso → faltan 20 → (2.200.000/30) × 20 = $1.466.667 exacto.
+- **Norma verificada:** `CST_46_PREAVISO` en `params/normas.json` con texto literal desde SUIN (`estado_verificacion: VERIFICADO`, URL `https://www.suin-juriscol.gov.co/viewDocument.asp?id=30019323`). Texto: prórroga automática 30 días para contratos a término fijo.
+- **KB:** `01_reglas_calculo.md` — nueva sección "Indemnización por preaviso insuficiente (Art. 46 CST)" con fórmula, condiciones de activación, regla reparo (b).
+- **Suite:** 497P/36F/15E (+27 vs S29). 28 tests nuevos (18 unitarios + 10 golden, 1 xfail), 0 regresiones. Reparos (a)(b)(c) cerrados.
+
 **S29 — Tarea 2.B-ter: Vacaciones compensadas en finiquito (addendum finiquito, Art. 189-190 CST) (2026-06-13)**
 - **PrestacionesCalculator:** método `calculate_vacaciones_compensadas_finiquito(sbl, dias_pendientes)` con fórmula `(SBL/30) × dias_pendientes`, `ROUND_HALF_UP` al peso, dict con evidencia_legal Art. 189-190 CST. 9 tests unitarios.
 - **Engine:** hook `_calcular_vacaciones_si_finiquito` en `process_input()` — activa solo FINIQUITO con `dias_pendientes > 0`, inyecta `vacaciones_compensadas_finiquito` en desglose, actualiza `total_liquidacion`.

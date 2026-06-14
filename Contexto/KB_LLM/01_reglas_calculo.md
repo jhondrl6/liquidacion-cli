@@ -96,6 +96,30 @@
   cada año subsiguiente. Tope: `params[*].TOPE_INDEMNIZACION_SMMLV × SMMLV`
   = 20 × SMMLV del año de terminación.
 
+## Concepto: Indemnización por preaviso insuficiente (Art. 46 CST)
+
+- **Aplica solo a:** contrato a término FIJO + motivo_terminacion =
+  termino_fijo_vencido + modo FINIQUITO. NO aplica a INDEFINIDO, OBRA_LABOR,
+  PRESTACION, ni a renuncia voluntaria.
+- **Preaviso legal:** 30 días de anticipación al vencimiento del plazo pactado.
+  Si ninguna de las partes manifiesta intención de terminar, el contrato se
+  entiende renovado por un término igual al pactado (Art. 46 CST).
+- **Fórmula indemnización:** `indemnizacion_preaviso = (SBL / 30) × dias_faltantes`
+  donde `dias_faltantes = max(0, 30 - dias_preaviso_efectivos)`.
+  `dias_preaviso_efectivos` puede ser: (a) el campo `dias_preaviso` del input,
+  o (b) `(fecha_vencimiento_termino_fijo - fecha_preaviso).days` si no se
+  proporciona directamente.
+- **REGLA CRÍTICA (reparo b):** la indemnización por preaviso es un renglón
+  SEPARADO de la indemnización por despido sin justa causa (Art. 64). NO se
+  acumulan.
+- **Implementación:** `IndemnizacionCalculator.calculate_indemnizacion_preaviso`
+  en `liquidator/calculators/indemnizacion_calculator.py` (Tarea 2.B-cuater,
+  S30). Hook `_calcular_preaviso_si_fijo_vencido` en `engine.py` — inyecta
+  en `desglose["preaviso_indemnizacion"]` y actualiza `total_liquidacion`.
+- **Verificación Art. 46 CST:** entrada `CST_46_PREAVISO` en
+  `params/normas.json` — VERIFICADO en SUIN con texto literal
+  (fecha: 2026-06-14).
+
 ## Concepto: Recargo dominical / festivo (Ley 2466/2025)
 
 - **Cronograma gradual** (codificado en `params/normas.json` entrada

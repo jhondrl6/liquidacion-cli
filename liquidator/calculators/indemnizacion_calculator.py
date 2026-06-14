@@ -6,6 +6,7 @@ sin justa causa, aplicación de topes legales y cálculo de salarios pendientes.
 """
 
 from typing import Dict, Any
+from decimal import Decimal, ROUND_HALF_UP
 from ..utils.date_utils import (
     calculate_days_between,
     calculate_years_of_service,
@@ -372,3 +373,85 @@ class IndemnizacionCalculator:
             resultado["salario_pendiente"] = salario_pendiente
 
         return resultado
+
+    # ------------------------------------------------------------------
+    # 2.B-cuater (Fase 2, S30) — Indemnización por preaviso Art. 46 CST
+    # ------------------------------------------------------------------
+    def calculate_indemnizacion_preaviso(
+        self,
+        sbl: float,
+        dias_preaviso_efectivos: int,
+    ) -> Dict[str, Any]:
+        """
+        Calcula la indemnización por preaviso insuficiente en contrato a
+        término fijo, según Art. 46 CST.
+
+        El empleador debe notificar con al menos 30 días de anticipación
+        al vencimiento del plazo pactado si NO desea renovar el contrato.
+        Si el preaviso fue insuficiente (< 30 días), la indemnización es:
+
+            indemnización = (SBL / 30) × dias_faltantes
+
+        donde dias_faltantes = max(0, 30 - dias_preaviso_efectivos).
+
+        Args:
+            sbl: Salario Base de Liquidación mensual
+            dias_preaviso_efectivos: Días de anticipación con los que se
+                entregó el preaviso (0 si no se entregó).
+
+        Returns:
+            Dict con: valor, dias_faltantes, dias_preaviso_efectivos,
+            sbl_utilizado, formula, aplica, norma, nota.
+        """
+        if sbl <= 0:
+            raise ValueError(f"SBL debe ser positivo: {sbl}")
+
+        if dias_preaviso_efectivos < 0:
+            raise ValueError(
+                f"dias_preaviso_efectivos no puede ser negativo: "
+                f"{dias_preaviso_efectivos}"
+            )
+
+        dias_faltantes = max(0, 30 - dias_preaviso_efectivos)
+
+        if dias_faltantes == 0:
+            return {
+                "valor": 0,
+                "dias_faltantes": 0,
+                "dias_preaviso_efectivos": dias_preaviso_efectivos,
+                "sbl_utilizado": int(sbl),
+                "formula": "Preaviso suficiente (>= 30 dias), no aplica indemnizacion",
+                "aplica": False,
+                "norma": "Art. 46 CST",
+                "nota": (
+                    "El preaviso fue entregado con la anticipacion "
+                    "legal requerida. No hay indemnizacion."
+                ),
+            }
+
+        sbl_dec = Decimal(str(sbl))
+        dias_faltantes_dec = Decimal(str(dias_faltantes))
+        valor_dec = (sbl_dec / Decimal("30")) * dias_faltantes_dec
+        valor = int(valor_dec.quantize(Decimal("1"), rounding=ROUND_HALF_UP))
+
+        return {
+            "valor": valor,
+            "dias_faltantes": dias_faltantes,
+            "dias_preaviso_efectivos": dias_preaviso_efectivos,
+            "sbl_utilizado": int(sbl),
+            "formula": (
+                f"({int(sbl):,} / 30) x {dias_faltantes} "
+                f"= {valor:,} COP"
+            ),
+            "aplica": True,
+            "norma": "Art. 46 CST",
+            "nota": (
+                f"Indemnizacion por preaviso insuficiente: "
+                f"{dias_preaviso_efectivos} de 30 dias requeridos. "
+                f"Faltan {dias_faltantes} dias."
+            ),
+            "evidencia_legal": (
+                "Art. 46 CST: preaviso de 30 dias para no renovar "
+                "contrato a termino fijo."
+            ),
+        }

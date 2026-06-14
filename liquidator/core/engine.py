@@ -3,6 +3,9 @@
 Tarea 2.X (Fase 2-bis, S28): integración de ``IPCIndexador`` para
 indexar prestaciones no pagadas oportunamente (SL2630-2024 + Art. 488 CST).
 Activa SOLO cuando el input declara ``periodos_no_pagados``.
+
+Tarea 2.B-cuater (Fase 2, S30): indemnización por preaviso insuficiente
+Art. 46 CST. Activa SOLO en FINIQUITO + FIJO + termino_fijo_vencido.
 """
 
 from __future__ import annotations
@@ -23,6 +26,7 @@ from liquidator.output.json_generator import JSONGenerator
 from liquidator.compliance.compliance_engine import ComplianceEngine
 from liquidator.calculators.indexacion import IPCIndexador
 from liquidator.calculators.prestaciones_calculator import PrestacionesCalculator
+from liquidator.calculators.indemnizacion_calculator import IndemnizacionCalculator
 
 from .input_parser import InputParser
 from .workflow_orchestrator import WorkflowOrchestrator
@@ -145,6 +149,12 @@ class LiquidacionEngine:
         # --- 2.B-ter (Fase 2): vacaciones compensadas en finiquito ---
         if parsed_data.get("modo") == "FINIQUITO":
             self._calcular_vacaciones_si_finiquito(
+                parsed_data, params, calc_results, alerts
+            )
+
+        # --- 2.B-cuater (Fase 2, S30): indemnizacion preaviso Art. 46 ---
+        if parsed_data.get("modo") == "FINIQUITO":
+            self._calcular_preaviso_si_fijo_vencido(
                 parsed_data, params, calc_results, alerts
             )
 
@@ -498,4 +508,129 @@ class LiquidacionEngine:
         alerts["vacaciones_compensadas_finiquito"] = (
             f"Vacaciones compensadas en finiquito: {valor_comp:,} COP "
             f"({dias_pendientes} dias, SBL={int(sbl):,}) — Art. 189-190 CST"
+        )
+
+    # ------------------------------------------------------------------
+    # 2.B-cuater (Fase 2, S30) — Indemnización preaviso Art. 46 CST
+    # ------------------------------------------------------------------
+    def _calcular_preaviso_si_fijo_vencido(
+        self,
+        parsed_data: Dict[str, Any],
+        params: Dict[str, Any],
+        calc_results: Dict[str, Any],
+        alerts: Dict[str, str],
+    ) -> None:
+        """Hook de indemnización por preaviso insuficiente (Tarea 2.B-cuater).
+
+        Solo aplica cuando:
+        - modo == FINIQUITO
+        - contrato.tipo == FIJO
+        - motivo_terminacion == termino_fijo_vencido
+
+        Fórmula: (SBL / 30) × dias_faltantes
+        donde dias_faltantes = max(0, 30 - dias_preaviso_efectivos).
+
+        Reparo (b): la indemnización por preaviso es un renglón SEPARADO
+        de la indemnización por despido sin justa causa (Art. 64).
+        NO se acumulan.
+        """
+        contrato = parsed_data.get("contrato", {})
+        if not isinstance(contrato, dict):
+            return
+
+        tipo = str(contrato.get("tipo", "")).upper()
+        motivo = str(contrato.get("motivo_terminacion", "")).lower()
+
+        if tipo != "FIJO":
+            return
+        if motivo != "termino_fijo_vencido":
+            return
+
+        # Calcular dias_preaviso_efectivos
+        dias_preaviso = contrato.get("dias_preaviso")
+        if isinstance(dias_preaviso, (int, float)) and dias_preaviso >= 0:
+            dias_efectivos = int(dias_preaviso)
+        else:
+            # Calcular desde fechas
+            fecha_preaviso_str = contrato.get("fecha_preaviso")
+            fecha_vencimiento = contrato.get("fecha_vencimiento_termino_fijo")
+            fecha_terminacion = contrato.get("fecha_terminacion_real")
+
+            fecha_ref_str = fecha_vencimiento or fecha_terminacion
+            if not fecha_preaviso_str or not fecha_ref_str:
+                alerts["preaviso_sin_fechas"] = (
+                    "No se puede calcular indemnizacion por preaviso: "
+                    "faltan fecha_preaviso y/o fecha_vencimiento_termino_fijo "
+                    "(o fecha_terminacion_real)."
+                )
+                return
+
+            try:
+                fecha_prev = date.fromisoformat(str(fecha_preaviso_str))
+                fecha_ref = date.fromisoformat(str(fecha_ref_str))
+                dias_efectivos = (fecha_ref - fecha_prev).days
+                if dias_efectivos < 0:
+                    alerts["preaviso_fechas_invertidas"] = (
+                        f"fecha_preaviso ({fecha_preaviso_str}) es posterior "
+                        f"a fecha de referencia ({fecha_ref_str}). "
+                        f"No se calcula indemnizacion."
+                    )
+                    return
+            except (ValueError, TypeError) as exc:
+                alerts["preaviso_error_fechas"] = (
+                    f"Error calculando dias de preaviso: {exc}"
+                )
+                return
+
+        # Obtener SBL
+        salario_obj = parsed_data.get("salario", {})
+        if isinstance(salario_obj, dict) and "SBL" in salario_obj:
+            sbl = float(Decimal(str(salario_obj["SBL"])))
+        else:
+            sbl = float(Decimal(str(parsed_data.get("salario_mensual", 0))))
+        if sbl <= 0:
+            alerts["preaviso_sbl_invalido"] = (
+                f"SBL invalido ({sbl}). No se puede calcular indemnizacion "
+                f"por preaviso."
+            )
+            return
+
+        # Calcular con IndemnizacionCalculator
+        indemn_calc = IndemnizacionCalculator(params)
+        renglon = indemn_calc.calculate_indemnizacion_preaviso(
+            sbl=sbl,
+            dias_preaviso_efectivos=dias_efectivos,
+        )
+
+        if not renglon.get("aplica"):
+            alerts["preaviso_suficiente"] = (
+                f"Preaviso fue suficiente ({dias_efectivos} >= 30 dias). "
+                f"No hay indemnizacion por preaviso."
+            )
+            return
+
+        # Inyectar en desglose como renglón SEPARADO
+        if "desglose" not in calc_results:
+            calc_results["desglose"] = {}
+        calc_results["desglose"]["preaviso_indemnizacion"] = renglon
+
+        # Actualizar total (SEPARADO de indemnizacion Art. 64)
+        valor = renglon["valor"]
+        total_actual = Decimal(str(calc_results.get("total", 0)))
+        total_actual += Decimal(str(valor))
+        calc_results["total"] = int(total_actual)
+        calc_results["total_liquidacion"] = int(total_actual)
+
+        logger.info(
+            "Indemnizacion preaviso Art. 46 CST: %s COP "
+            "(%d dias faltantes, SBL=%s)",
+            f"{valor:,}",
+            renglon["dias_faltantes"],
+            f"{int(sbl):,}",
+        )
+
+        alerts["indemnizacion_preaviso"] = (
+            f"Indemnizacion preaviso Art. 46 CST: {valor:,} COP "
+            f"({renglon['dias_faltantes']} dias faltantes, "
+            f"SBL={int(sbl):,}) — renglon separado de Art. 64."
         )

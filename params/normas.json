@@ -207,6 +207,18 @@
       "fecha_verificacion": "2026-06-13",
       "sala": "N/A (norma codificada, no sentencia)",
       "vigencia": "permanente"
+    },
+    {
+      "id": "CST_46_PREAVISO",
+      "nombre": "Código Sustantivo del Trabajo Art. 46",
+      "descripcion": "Preaviso para contrato a término fijo. Si con 30 días de antelación al vencimiento ninguna de las partes manifestare su intención de terminar, el contrato se entiende renovado por un término igual al pactado. Indemnización por preaviso insuficiente: (SBL/30) × dias_faltantes.",
+      "texto_relevante": "Si con treinta (30) días de antelación al vencimiento del plazo pactado o su prórroga, ninguna de las partes manifestare su intención de terminar el contrato, este se entenderá renovado por un término igual al inicialmente pactado o al de su prórroga, según sea el caso, sin que pueda superarse el límite máximo de cuatro (4) años previsto en este artículo.",
+      "estado_verificacion": "VERIFICADO",
+      "url": "https://www.suin-juriscol.gov.co/viewDocument.asp?id=30019323",
+      "url_secundaria": "https://leyes.co/codigo_sustantivo_del_trabajo/46.htm",
+      "fecha_verificacion": "2026-06-14",
+      "sala": "N/A (norma codificada, no sentencia)",
+      "vigencia": "permanente"
     }
   ],
   "plazos_pago": {
@@ -290,6 +302,6 @@
     "version": "2026-06-13",
     "fecha_actualizacion": "2026-06-13",
     "fuente": "SUIN-Juriscol (verificadas) + Ministerio del Trabajo - Colombia (Decretos 1469/2025, 1470/2025, 159/2026; Ley 2466/2025; Ley 50/1990; CST)",
-    "notas": "Este archivo contiene la normatividad vigente para liquidacion de nomina en Colombia. Los valores monetarios y tasas reflejan la actualizacion anual segun decretos expedidos. Tras Tarea 0.K (S11, 2026-06-13) incluye: Decreto 1469/2025 (SMMLV 2026, SUSPENDIDO provisionalmente por Consejo de Estado 2026-02-12), Decreto 159/2026 (re-fijacion transitoria del SMMLV 2026 con mismo valor), Decreto 1470/2025 (aux_trans 2026), Ley 2466/2025 (verificada SUIN). Tras Tarea 2.X (S28, 2026-06-13) incluye: SL2630_2024 (anualizacion e indexacion IPC) y CST_488_PRESCRIPCION (prescripcion 3 anios, termino especial de CST, NO el termino general equivocado). Ambas marcadas PENDIENTE_VERBATIM. Tras Tarea 2.B-ter (S29, 2026-06-13) incluye: CST_189_VACACIONES (compensacion de vacaciones en dinero Art. 189-190 CST, VERIFICADO con texto literal SUIN https://www.suin-juriscol.gov.co/viewDocument.asp?id=30019323). URLs reales verificadas en SUIN y Alcaldia de Bogota. ISSUE R-LEG-NUEVO-01: la entrada LEY_2466_2025_INTERESES_MENSUALES (pago mensual de intereses sobre cesantias) del plan v2.0 esta atribuida al Art. 64, pero SUIN muestra que Art. 64 = 'Regimen simple laboral'. NO implementar pago mensual de intereses en motor hasta verificar el articulo literal exacto."
+    "notas": "Este archivo contiene la normatividad vigente para liquidacion de nomina en Colombia. Los valores monetarios y tasas reflejan la actualizacion anual segun decretos expedidos. Tras Tarea 0.K (S11, 2026-06-13) incluye: Decreto 1469/2025 (SMMLV 2026, SUSPENDIDO provisionalmente por Consejo de Estado 2026-02-12), Decreto 159/2026 (re-fijacion transitoria del SMMLV 2026 con mismo valor), Decreto 1470/2025 (aux_trans 2026), Ley 2466/2025 (verificada SUIN). Tras Tarea 2.X (S28, 2026-06-13) incluye: SL2630_2024 (anualizacion e indexacion IPC) y CST_488_PRESCRIPCION (prescripcion 3 anios, termino especial de CST, NO el termino general equivocado). Ambas marcadas PENDIENTE_VERBATIM. Tras Tarea 2.B-ter (S29, 2026-06-13) incluye: CST_189_VACACIONES (compensacion de vacaciones en dinero Art. 189-190 CST, VERIFICADO con texto literal SUIN https://www.suin-juriscol.gov.co/viewDocument.asp?id=30019323). Tras Tarea 2.B-cuater (S30, 2026-06-14) incluye: CST_46_PREAVISO (preaviso contrato termino fijo Art. 46 CST, VERIFICADO con texto literal SUIN/leyes.co). URLs reales verificadas en SUIN y Alcaldia de Bogota. ISSUE R-LEG-NUEVO-01: la entrada LEY_2466_2025_INTERESES_MENSUALES (pago mensual de intereses sobre cesantias) del plan v2.0 esta atribuida al Art. 64, pero SUIN muestra que Art. 64 = 'Regimen simple laboral'. NO implementar pago mensual de intereses en motor hasta verificar el articulo literal exacto."
       }
 }
