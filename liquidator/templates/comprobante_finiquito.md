@@ -25,6 +25,10 @@
 ### TOTAL LIQUIDACIÓN POR FINIQUITO
 **{{ format_currency(total) }} COP**
 
+{% if desglose_segmentado %}
+{{ desglose_segmentado }}
+{% endif %}
+
 ### OBSERVACIONES
 {{ observaciones }}
 
