@@ -163,6 +163,7 @@ R3 del plan mitigado: 0 inputs en `examples/inputs/` con `variable=true` (grep c
 ## [Unreleased]
 
 ### Changed
+- **Limpieza documental v2.0** (Tarea 4.D, plan §9.2). (a) `QWEN.md` eliminado — referenciaba `settle` y `colombia-payroll-settlement==1.0.0` (entry points legacy). Reemplazado por `CONTRIBUTING.md` (122 líneas, 6 secciones). (b) `docs/health/system_health.json` y `docs/validation_results.json` eliminados (artefactos stale 2025-11-04 con datos pre-v2.0). (c) `docs/code_quality_analysis.md` reescrito completo (301 líneas) con métricas reales post-Fase 4: 23,709 LOC, 130 archivos .py, 708 tests, compileall=0, ruff 0 errores, mypy configurado, 15 reglas compliance, 0 hardcodeos, comparativa pre-v2.0 vs v2.0.
 - **`README.md` reescrito para v2.0** (Tarea 4.C, plan §9.2). 8/8 secciones obligatorias presentes: Qué es / Qué NO es, Instalación (`pip install -e .` o `uv tool install`), Uso (`liquidacion` con subcomandos `liquidar`/`validate`/`info`), Caso canónico (input Pydantic + output esperado), Estructura del proyecto, Cómo correr tests, Cómo contribuir, Disclaimer legal. Reemplaza contenido v1.0.0 (input schema flat legacy, 10 reglas obsoletas, refs a docs v1). Refleja el estado real del motor v2.0: 15 reglas de compliance (V001-V015), estados `GO/WARN/NO_GO/OVERRIDE_APPROVED`, `liquidacion_BLOQUEADA.*` en NO_GO, los 3 addenda absorbidos (preaviso Art.46, vacaciones finiquito Art.189-190, IPC SL2630-2024 + Art.488).
 
 ---
