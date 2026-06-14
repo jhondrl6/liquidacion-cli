@@ -40,11 +40,19 @@
 | V007  | Vacaciones manejadas según modo de liquidación           | CRITICAL   | Arts. 186-192 CST                |
 | V008  | Plazos de pago documentados                               | HIGH       | Art. 65 CST, Ley 50/1990 Art. 99 |
 | V009  | (no leído en esta nota)                                   | ...        | ...                              |
-| V010  | (no leído en esta nota)                                   | ...        | ...                              |
+|| V010  | (no leído en esta nota)                                   | ...        | ...                              |
 
-> El archivo `params/checklist.json` tiene 10 reglas V001-V010. Esta
+> El archivo `params/checklist.json` tiene 13 reglas V001-V013. Esta
 > tabla es extracto parcial; leer el archivo completo antes de
 > modificar el motor.
+
+Reglas V011-V013 (Fase 2):
+
+| ID    | Descripción                                              | Severity   | Norma ref                       |
+|-------|----------------------------------------------------------|------------|----------------------------------|
+| V011  | Indexación IPC para prestaciones no pagadas              | MEDIUM     | SL2630-2024, Art. 488 CST        |
+| V012  | Preaviso Art. 46 CST: FIJO vencido datos cálculo         | MEDIUM     | Art. 46 CST                      |
+| V013  | Preaviso declarado: consistencia en FIJO                 | MEDIUM     | Art. 46 CST                      |
 
 ## Mecánica de ejecución (código vivo)
 

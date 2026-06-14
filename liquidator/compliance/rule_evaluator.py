@@ -24,6 +24,8 @@ class RuleEvaluator:
             "V009": _v009_legal_support,
             "V010": _v010_hashes_versioning,
             "V011": _v011_indexacion_ipc,
+            "V012": _v012_preaviso_termino_fijo,
+            "V013": _v013_preaviso_declarado,
         }
         return mapping[rule_id]
 
@@ -224,5 +226,231 @@ def _v011_indexacion_ipc(input_data: Dict, result: Dict, params: Dict) -> Dict:
         "evidence": (
             f"Indexacion IPC aplicable: {n_indexables} periodo(s) sin "
             f"prescripcion. SL2630-2024 + Art. 488 CST."
+        ),
+    }
+
+
+def _v012_preaviso_termino_fijo(
+    input_data: Dict, result: Dict, params: Dict
+) -> Dict:
+    """Regla V012 — Preaviso Art. 46 CST para contrato a término fijo vencido.
+
+    Tarea 2.Y (Fase 2, addendum preaviso).
+
+    No es bloqueante (severity MEDIUM). Cuando el input declara
+    modo FINIQUITO + tipo FIJO + motivo termino_fijo_vencido, valida:
+    - Que los datos de preaviso estén declarados (preaviso_entregado).
+    - Que haya suficiente información para calcular la indemnización
+      (dias_preaviso o fecha_preaviso + fecha_vencimiento_termino_fijo).
+    - Si el preaviso fue >= 30 días: PASS (no hay indemnización).
+    - Si el preaviso fue < 30 días: WARN (indemnización Art. 46 se
+      calculará como renglón SEPARADO de Art. 64 — reparo b).
+    """
+    contrato = input_data.get("contrato", {})
+    if not isinstance(contrato, dict) or not contrato:
+        # Forma 1 plana: buscar campos en top-level
+        contrato = input_data
+
+    modo = str(input_data.get("modo", "")).upper()
+    tipo = str(contrato.get("tipo", "") or input_data.get("tipo_contrato", "")).upper()
+    motivo = str(
+        contrato.get("motivo_terminacion", "")
+        or input_data.get("motivo_terminacion", "")
+    ).lower()
+
+    # Solo aplica a FINIQUITO + FIJO + termino_fijo_vencido
+    if modo != "FINIQUITO" or tipo != "FIJO" or motivo != "termino_fijo_vencido":
+        return {
+            "result": "PASS",
+            "evidence": (
+                "V_PREAVISO_TERMINO_FIJO no aplica: "
+                f"modo={modo}, tipo={tipo}, motivo={motivo}. "
+                "Solo aplica a FINIQUITO + FIJO + termino_fijo_vencido."
+            ),
+        }
+
+    # Obtener días de preaviso efectivos
+    dias_preaviso = contrato.get("dias_preaviso")
+    if isinstance(dias_preaviso, (int, float)) and dias_preaviso >= 0:
+        dias_efectivos = int(dias_preaviso)
+    else:
+        # Intentar calcular desde fechas
+        fecha_preaviso_str = contrato.get("fecha_preaviso")
+        fecha_vencimiento = contrato.get("fecha_vencimiento_termino_fijo")
+        fecha_terminacion = contrato.get("fecha_terminacion_real")
+        fecha_ref_str = (
+            fecha_vencimiento
+            or fecha_terminacion
+            or input_data.get("fecha_corte")
+        )
+
+        if not fecha_preaviso_str or not fecha_ref_str:
+            return {
+                "result": "WARN",
+                "evidence": (
+                    "FINIQUITO + FIJO + termino_fijo_vencido sin datos "
+                    "suficientes de preaviso: falta dias_preaviso o "
+                    "(fecha_preaviso + fecha_vencimiento_termino_fijo). "
+                    "No se puede validar compliance Art. 46 CST."
+                ),
+            }
+
+        try:
+            fecha_prev = datetime.fromisoformat(str(fecha_preaviso_str))
+            fecha_ref = datetime.fromisoformat(str(fecha_ref_str))
+            dias_efectivos = (fecha_ref - fecha_prev).days
+            if dias_efectivos < 0:
+                return {
+                    "result": "WARN",
+                    "evidence": (
+                        f"fecha_preaviso ({fecha_preaviso_str}) es posterior "
+                        f"a fecha de referencia ({fecha_ref_str}). "
+                        f"Fechas invertidas; no se puede validar preaviso."
+                    ),
+                }
+        except (ValueError, TypeError):
+            return {
+                "result": "WARN",
+                "evidence": (
+                    f"Error parseando fechas de preaviso: "
+                    f"fecha_preaviso={fecha_preaviso_str}, "
+                    f"fecha_ref={fecha_ref_str}."
+                ),
+            }
+
+    # Evaluar suficiencia del preaviso
+    if dias_efectivos >= 30:
+        return {
+            "result": "PASS",
+            "evidence": (
+                f"Preaviso suficiente: {dias_efectivos} días >= 30 "
+                f"(Art. 46 CST). No hay indemnización por preaviso."
+            ),
+        }
+
+    dias_faltantes = 30 - dias_efectivos
+    return {
+        "result": "WARN",
+        "evidence": (
+            f"Preaviso insuficiente: {dias_efectivos} de 30 días "
+            f"requeridos (Art. 46 CST). Faltan {dias_faltantes} días. "
+            f"Indemnización = (SBL/30) × {dias_faltantes}. "
+            f"Renglón SEPARADO de indemnización Art. 64 (reparo b)."
+        ),
+    }
+
+
+def _v013_preaviso_declarado(
+    input_data: Dict, result: Dict, params: Dict
+) -> Dict:
+    """Regla V013 — Consistencia de declaración de preaviso.
+
+    Tarea 2.Y (Fase 2, addendum preaviso).
+
+    No es bloqueante (severity MEDIUM). Valida que:
+    - Si tipo=FIJO y preaviso_entregado=True, fecha_preaviso debe existir.
+    - Si tipo=FIJO y motivo=termino_fijo_vencido, preaviso_entregado
+      debe estar declarado (defensa en profundidad contra drift del schema).
+    - Si tipo NO es FIJO y hay campos de preaviso: WARN (campos
+      sin base legal fuera de término fijo).
+
+    Nota: el schema Pydantic (1.C-quater, model_validator
+    _preaviso_consistencia) ya valida estas reglas a nivel de parse.
+    Esta regla de compliance captura drift en datos que bypasean
+    el schema (ej. input procesado por ruta legacy sin Pydantic).
+    """
+    contrato = input_data.get("contrato", {})
+    if not isinstance(contrato, dict) or not contrato:
+        contrato = input_data
+
+    tipo = str(contrato.get("tipo", "") or input_data.get("tipo_contrato", "")).upper()
+    motivo = str(
+        contrato.get("motivo_terminacion", "")
+        or input_data.get("motivo_terminacion", "")
+    ).lower()
+    preaviso_entregado = contrato.get(
+        "preaviso_entregado", input_data.get("preaviso_entregado")
+    )
+    fecha_preaviso = contrato.get(
+        "fecha_preaviso", input_data.get("fecha_preaviso")
+    )
+    modo = str(input_data.get("modo", "")).upper()
+
+    # --- Tipo NO FIJO con campos de preaviso: WARN ---
+    if tipo != "FIJO":
+        has_preaviso_fields = any(
+            contrato.get(f) is not None
+            for f in ("preaviso_entregado", "fecha_preaviso", "dias_preaviso")
+        ) or any(
+            input_data.get(f) is not None
+            for f in ("preaviso_entregado", "fecha_preaviso", "dias_preaviso")
+        )
+        if has_preaviso_fields:
+            return {
+                "result": "WARN",
+                "evidence": (
+                    f"Campos de preaviso declarados en contrato tipo "
+                    f"{tipo}, pero Art. 46 CST solo aplica a FIJO. "
+                    f"Campos ignorados por motor."
+                ),
+            }
+        return {
+            "result": "PASS",
+            "evidence": (
+                f"V_PREAVISO_DECLARADO no aplica: tipo={tipo}. "
+                "Art. 46 CST solo aplica a término fijo."
+            ),
+        }
+
+    # --- Tipo FIJO ---
+    # Regla: FINIQUITO + FIJO + termino_fijo_vencido exige preaviso_entregado
+    if motivo == "termino_fijo_vencido" and preaviso_entregado is None:
+        return {
+            "result": "FAIL",
+            "evidence": (
+                "FINIQUITO + FIJO + termino_fijo_vencido sin "
+                "preaviso_entregado declarado. Art. 46 CST requiere "
+                "declarar si hubo preaviso (True/False). "
+                "Schema Pydantic debió rechazar esto; posible bypass."
+            ),
+        }
+
+    # Regla: preaviso_entregado=True exige fecha_preaviso
+    if preaviso_entregado is True and fecha_preaviso is None:
+        return {
+            "result": "FAIL",
+            "evidence": (
+                "preaviso_entregado=True pero fecha_preaviso no está "
+                "presente. Sin fecha no se pueden calcular días de "
+                "anticipación (Art. 46 CST). Schema Pydantic debió "
+                "rechazar esto; posible bypass."
+            ),
+        }
+
+    # Regla: preaviso_entregado=False → indemnización completa (30 días)
+    if preaviso_entregado is False:
+        return {
+            "result": "WARN",
+            "evidence": (
+                "preaviso_entregado=False en contrato FIJO"
+                + (
+                    " + termino_fijo_vencido. "
+                    "Indemnización Art. 46 CST será 30 días completos."
+                    if motivo == "termino_fijo_vencido"
+                    else ". "
+                    "Si el motivo no es termino_fijo_vencido, preaviso "
+                    "no genera indemnización."
+                )
+            ),
+        }
+
+    # PASS: declaración consistente
+    return {
+        "result": "PASS",
+        "evidence": (
+            f"Declaración de preaviso consistente: "
+            f"preaviso_entregado={preaviso_entregado}, "
+            f"fecha_preaviso={fecha_preaviso}. "
+            f"Tipo FIJO, motivo={motivo}."
         ),
     }

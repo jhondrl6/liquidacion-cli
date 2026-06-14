@@ -69,6 +69,23 @@
       "rule_ref": ["SL2630-2024", "Art. 488 CST (prescripción)", "DANE IPC"],
       "formula": "VA = VH × (ÍndiceIPC_referencia / ÍndiceIPC_origen)",
       "nota": "NO usar tasas anuales de inflación como si fueran índices acumulados. Defensiva en profundidad: IPCIndexador rechaza valores entre 0 y 1."
+    },
+    {
+      "id": "V012",
+      "description": "Preaviso Art. 46 CST: contrato a término fijo vencido con datos de preaviso suficientes para calcular indemnización",
+      "severity": "MEDIUM",
+      "blocking": false,
+      "rule_ref": ["Art. 46 CST"],
+      "formula": "indemnización = (SBL / 30) × dias_faltantes, donde dias_faltantes = max(0, 30 - dias_preaviso_efectivos)",
+      "nota": "Solo aplica a FINIQUITO + FIJO + termino_fijo_vencido. Si el preaviso fue suficiente (>=30 días), no hay indemnización. La indemnización es un renglón SEPARADO de la indemnización Art. 64 (reparo b del addendum preaviso)."
+    },
+    {
+      "id": "V013",
+      "description": "Preaviso declarado: consistencia de la declaración de preaviso en contrato a término fijo",
+      "severity": "MEDIUM",
+      "blocking": false,
+      "rule_ref": ["Art. 46 CST"],
+      "nota": "Si preaviso_entregado=True, fecha_preaviso debe estar presente. Si preaviso_entregado=False en termino_fijo_vencido, indemnización será 30 días completos. Defensa en profundidad: el schema Pydantic (1.C-quater) ya valida esto a nivel de parse, pero esta regla captura drift en datos que bypasean el schema."
     }
   ]
 }
