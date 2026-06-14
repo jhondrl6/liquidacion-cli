@@ -91,12 +91,15 @@ Campos adicionales respecto a Forma 1:
     `OTRO`).
   - `VacacionesEstado` (sub-objeto con `dias_pendientes`, `dias_compensados`,
     `dias_disfrutados_periodo_actual`).
-- **Addendum SL2630 (Tarea 1.C-bis):** añadir a `salario`:
+- **Addendum SL2630 (Tarea 1.C-bis):** añadir a `salario` (IMPLEMENTADO en
+  S23, retrocompatible):
   - `sbl_por_anio` (dict `{anio: monto}`) para contratos multi-año
     con SBL variable. Por defecto el SBL es único (caso canónico), pero
     el motor debe aceptar la estructura anualizada.
-  - `intereses_mensuales_acuerdo` (bool) para activar la variante
-    Ley 2466/2025 Art. 64.
+  - `historial_salarial` (list de `MesValor` con `año`/`mes`/`valor`)
+    para salario variable real (promedio del año del segmento).
+  - `model_validator` rechaza `variable=True` sin
+    `sbl_por_anio` ni `historial_salarial`.
 
 ## Reglas de validación a la entrada
 
@@ -152,10 +155,11 @@ Validaciones implementadas en la base 1.C:
 Extensiones planificadas (no en 1.C base, son tareas separadas
 anidadas en Fase 1):
 
-- **1.C-bis** (addendum SL2630-2024): `Salario.sbl_por_anio:
+- **1.C-bis** (addendum SL2630-2024, **IMPLEMENTADO S23**): `Salario.sbl_por_anio:
   dict[int, Decimal] | None`, `Salario.historial_salarial:
-  list[MesValor] | None`, `model_validator` rechaza
-  `variable=True` sin historial.
+  list[MesValor] | None`, sub-modelo `MesValor` con `año: int`,
+  `mes: int` (1-12), `valor: Decimal` (>0), `model_validator` rechaza
+  `variable=True` sin historial. Ver `liquidator/contracts/input_model.py`.
 - **1.C-ter** (addendum finiquito/vacaciones):
   `Contrato.motivo_terminacion: MotivoTerminacion` (enum Arts. 45-49
   CST), `VacacionesEstado` tipado (reemplaza `vacaciones: dict`).
@@ -166,4 +170,6 @@ anidadas en Fase 1):
   `Contrato.fecha_vencimiento_termino_fijo: date | None`.
 
 **Validación contra tests:** 17/17 PASS en
-`liquidator/tests/test_contracts/test_input_model.py` (S16).
+`liquidator/tests/test_contracts/test_input_model.py` (S16) + 10/10 PASS
+en `liquidator/tests/test_contracts/test_salario_extendido.py` (S23,
+extensión 1.C-bis). Total `test_contracts/`: 39/39 PASS.

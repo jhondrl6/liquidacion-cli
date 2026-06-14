@@ -31,7 +31,7 @@ from datetime import date
 from decimal import Decimal
 from typing import Literal
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 # --- Sub-modelos -------------------------------------------------------------
 
@@ -64,6 +64,21 @@ class Contrato(BaseModel):
     motivo_terminacion: str | None = None
 
 
+class MesValor(BaseModel):
+    """Un mes con su valor de salario (Tarea 1.C-bis, addendum SL2630-2024).
+
+    Modela un punto de la serie mensual del salario variable. El motor
+    (Tarea 2.B-bis) calcula el promedio del año calendario del segmento
+    a partir de los `MesValor` cuyo `año` coincida con el año del
+    segmento. Cada `MesValor` representa el salario DEVENGADO en ese
+    mes (no el pactado, no el proyectado).
+    """
+
+    año: int
+    mes: int = Field(ge=1, le=12)
+    valor: Decimal = Field(gt=0)
+
+
 class Salario(BaseModel):
     """Salario base del trabajador (SBL) y sus condiciones.
 
@@ -71,13 +86,44 @@ class Salario(BaseModel):
     esté presente cuando `variable=True`. Tarea 1.C-bis agrega ese
     model_validator + los campos `sbl_por_anio` y `historial_salarial`
     para anualización salarial (SL2630-2024).
+
+    **Extensión 1.C-bis (addendum SL2630, absorción v2.0.0):**
+    `sbl_por_anio` y `historial_salarial` son **opcionales y
+    retrocompatibles**. El motor (Tarea 2.B-bis) intenta en este orden:
+    1. `historial_salarial` → promedio del año del segmento.
+    2. `sbl_por_anio[<año>]` → SBL explícito por año.
+    3. `SBL` único (compatibilidad con v1.x — caso canónico).
     """
 
     SBL: Decimal = Field(gt=0)
     auxilio_transporte: bool = False
     variable: bool = False
-    # Requerido si variable=True (validación se agrega en 1.C-bis).
+    # Requerido si variable=True (validación agregada en 1.C-bis).
     dias_trabajados: int | None = None
+
+    # --- 1.C-bis (addendum SL2630-2024, absorción v2.0.0) ---------------
+    sbl_por_anio: dict[int, Decimal] | None = None
+    historial_salarial: list[MesValor] | None = None
+
+    @model_validator(mode="after")
+    def _consistencia(self) -> "Salario":
+        """Garantiza que `variable=True` siempre tenga cómo anualizar.
+
+        Sin esta regla, un input con `variable=True` que solo trae
+        `SBL` único sería ambiguo (¿el SBL es de qué año?). El
+        model_validator corre DESPUÉS de la creación de campos, por
+        lo que la presencia de `sbl_por_anio` o `historial_salarial`
+        es detectable aquí.
+        """
+        if (
+            self.variable
+            and not self.historial_salarial
+            and not self.sbl_por_anio
+        ):
+            raise ValueError(
+                "Salario variable requiere historial_salarial o sbl_por_anio"
+            )
+        return self
 
 
 class LiquidacionInput(BaseModel):
@@ -119,5 +165,6 @@ __all__ = [
     "Empleador",
     "Contrato",
     "Salario",
+    "MesValor",
     "LiquidacionInput",
 ]
