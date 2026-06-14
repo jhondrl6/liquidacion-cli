@@ -62,21 +62,29 @@
 
 ## Concepto: Vacaciones (CST 186-192)
 
-- **Fórmula base:** `vacaciones = SBL × 15 / 30` (15 días hábiles por año).
+- **Fórmula base (causación):** `vacaciones = (dias_servicio / 360) × 15`
+  (15 días hábiles por año, Art. 186 CST).
+- **Fórmula en dinero (acuerdo mutuo):** `vacaciones = (SBL × 15) / 720`
+  (Art. 192 CST, denominador 720).
+- **Fórmula compensación en finiquito (Art. 189-190):**
+  `vacaciones_compensadas = (SBL / 30) × dias_pendientes`
+  — **IMPLEMENTADO S29 (Tarea 2.B-ter)** en `PrestacionesCalculator.
+  calculate_vacaciones_compensadas_finiquito`. Se invoca solo en modo
+  FINIQUITO con `dias_pendientes > 0`. El SBL para vacaciones excluye
+  recargos/HHE (Art. 185) y auxilio de transporte. Redondeo: ROUND_HALF_UP
+  al peso. El renglón se inyecta en `desglose["vacaciones_compensadas_finiquito"]`.
 - **Modo PERIODICA:** se pagan solo los días disfrutados o compensados
-  voluntariamente. Acumulación pasiva al siguiente periodo.
+  voluntariamente. Acumulación pasiva al siguiente periodo. PERIODICA NO
+  invoca `calculate_vacaciones_compensadas_finiquito` (regresión dura).
 - **Modo FINIQUITO:** se pagan todas las vacaciones causadas y no
-  disfrutadas, INCLUIDAS las fracciones. Ver reparo (b) del addendum
-  finiquito (`Planificación/REGISTRY.md`): distinguir compensación por
-  acuerdo mutuo (Art. 189) vs compensación obligatoria en finiquito
-  (Art. 189 párr. 1° + Art. 190). El motor DEBE invocar
-  `calculate_vacaciones_compensadas_finiquito` solo en modo FINIQUITO.
-- **Verificación pendiente Art. 189:** añadir entrada
-  `CST_189_VACACIONES` en `params/normas.json` con `estado_verificacion: "VERIFICADO"`,
-  URL SUIN oficial y fecha — bloqueante para cerrar 2.B-ter.
-- **Denominador para pago en dinero:** `VACACIONES_DENOM = 720.0` (Art. 192
-  CST: pago = (SBL × 15) / 30 → simplifica, pero el motor mantiene
- 720 por paridad con Convencionalismo).
+  disfrutadas, INCLUIDAS las fracciones. El motor distingue entre
+  compensación por acuerdo mutuo (Art. 189, periodo vigente) y
+  compensación obligatoria en finiquito (Art. 189 párr. 1° + Art. 190,
+  terminación del contrato). El hook `_calcular_vacaciones_si_finiquito`
+  en `engine.py` solo activa en modo FINIQUITO.
+- **Verificación Art. 189 párr. 1° CST:** entrada `CST_189_VACACIONES`
+  en `params/normas.json` — pendiente de verificación en SUIN
+  (bloqueante para cerrar 2.B-ter).
 
 ## Concepto: Indemnización por despido sin justa causa (CST 64)
 

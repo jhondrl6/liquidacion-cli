@@ -510,6 +510,48 @@ class PrestacionesCalculator:
             "total_prestaciones": total,
         }
 
+    # ------------------------------------------------------------------
+    # 2.B-ter — Vacaciones compensadas en finiquito (addendum finiquito)
+    # ------------------------------------------------------------------
+    def calculate_vacaciones_compensadas_finiquito(
+        self,
+        sbl: Decimal,
+        dias_pendientes: Decimal,
+    ) -> dict:
+        """Vacaciones no disfrutadas pagadas obligatoriamente en finiquito.
+
+        Base legal: Art. 189 párr. 1° + Art. 190 CST.
+        Fórmula: (SBL / 30) × dias_pendientes.
+        El SBL para vacaciones excluye recargos, horas extras (Art. 185) y
+        auxilio de transporte. Fracciones de día son legalmente válidas.
+
+        Esta función SOLO se invoca desde el motor cuando modo == "FINIQUITO".
+        El modo PERIODICA NO la invoca: las vacaciones por acuerdo mutuo
+        (Art. 189, periodo vigente) son lógica distinta en VacacionesCalculator.
+
+        Returns
+        -------
+        dict
+            ``concepto``, ``valor`` (Decimal redondeado), ``dias``,
+            ``formula``, ``evidencia_legal``, ``obligatorio_en_finiquito``,
+            ``params_usados``.
+        """
+        valor = (sbl / Decimal(30) * dias_pendientes).quantize(
+            Decimal("1"), rounding=ROUND_HALF_UP
+        )
+        return {
+            "concepto": "Vacaciones compensadas (finiquito)",
+            "valor": int(valor),
+            "dias": float(dias_pendientes),
+            "formula": "SBL / 30 × días_pendientes",
+            "evidencia_legal": "Art. 189 párr. 1° + Art. 190 CST",
+            "obligatorio_en_finiquito": True,
+            "params_usados": {
+                "SBL": int(sbl),
+                "dias_pendientes": float(dias_pendientes),
+            },
+        }
+
 
 def validate_formulas_against_known_cases() -> bool:
     """

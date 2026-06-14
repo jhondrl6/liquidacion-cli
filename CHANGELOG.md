@@ -10,6 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+**S29 — Tarea 2.B-ter: Vacaciones compensadas en finiquito (addendum finiquito, Art. 189-190 CST) (2026-06-13)**
+- **PrestacionesCalculator:** método `calculate_vacaciones_compensadas_finiquito(sbl, dias_pendientes)` con fórmula `(SBL/30) × dias_pendientes`, `ROUND_HALF_UP` al peso, dict con evidencia_legal Art. 189-190 CST. 9 tests unitarios.
+- **Engine:** hook `_calcular_vacaciones_si_finiquito` en `process_input()` — activa solo FINIQUITO con `dias_pendientes > 0`, inyecta `vacaciones_compensadas_finiquito` en desglose, actualiza `total_liquidacion`.
+- **Golden test:** `test_finiquito_renuncia_212d.py` (8 tests) + fixture `finiquito_renuncia_212d.json` (formato plano). 7.5 días × (2.200.000/30) = $550.000 exacto.
+- **Norma verificada:** `CST_189_VACACIONES` en `params/normas.json` con texto literal desde SUIN (`estado_verificacion: VERIFICADO`, URL `https://www.suin-juriscol.gov.co/viewDocument.asp?id=30019323`). Art. 189 num. 1 (acuerdo mutuo hasta mitad) y num. 2 (compensación obligatoria al terminar contrato).
+- **KB:** `01_reglas_calculo.md` — sección vacaciones actualizada con fórmula 2.B-ter.
+- **Suite:** 470P/36F/15E (+77 vs S28). 17 tests nuevos (9 unitarios + 8 golden), 0 regresiones.
+
 **S28 — Tarea 2.X: Indexación IPC para prestaciones no pagadas (addendum SL2630-2024 + Art. 488 CST) (2026-06-13)**
 - **IPCIndexador:** `liquidator/calculators/indexacion.py` (nuevo, 237 líneas). Clase `IPCIndexador` con validación defensiva anti-tasa (rechaza 0<v≤1 y negativos), preferencia mensual sobre anual, `from_json()` dual-formato (con metadata o dict plano), `indexar()` con `ROUND_HALF_UP` a peso.
 - **Integración en engine:** `liquidator/core/engine.py`. Método `_procesar_periodos_no_pagados()` integrado en `process_input()`. Constante `_PRESCRIPCION_ANIOS=3` con tolerancia 5 días. Carga IPC desde `params/ipc_dane_mensual.json`, valida prescripción (Art. 488 CST), calcula VA, inyecta renglones en `desglose` y suma a `total_liquidacion`. Periodos prescritos generan `<concepto>_indexado_prescrito` con valor 0 + WARNING (no FAIL).

@@ -1,0 +1,14 @@
+{
+  "modo": "FINIQUITO",
+  "fecha_ingreso": "2025-11-16",
+  "fecha_corte": "2026-06-15",
+  "salario_mensual": 2200000,
+  "tipo_contrato": "INDEFINIDO",
+  "motivo_terminacion": "renuncia_voluntaria",
+  "fecha_terminacion_real": "2026-06-15",
+  "vacaciones": {
+    "dias_pendientes": 7.5,
+    "dias_disfrutados": 0
+  },
+  "_nota_caso": "Caso golden Tarea 2.B-ter (Fase 2, addendum finiquito). Formato plano (compatible con WorkflowOrchestrator legacy). Renuncia voluntaria con 7.5 dias de vacaciones pendientes. Vacaciones compensadas: (2.200.000 / 30) x 7.5 = $550.000. Total esperado con cesantias, intereses y primas (~$3.877.014 base + $550.000 vacaciones compensadas) ≈ $4.427.014."
+}

@@ -8,6 +8,7 @@ Activa SOLO cuando el input declara ``periodos_no_pagados``.
 from __future__ import annotations
 
 import json
+import logging
 import time
 import uuid
 from copy import deepcopy
@@ -21,9 +22,12 @@ from liquidator.params.params_loader import ParamsLoader
 from liquidator.output.json_generator import JSONGenerator
 from liquidator.compliance.compliance_engine import ComplianceEngine
 from liquidator.calculators.indexacion import IPCIndexador
+from liquidator.calculators.prestaciones_calculator import PrestacionesCalculator
 
 from .input_parser import InputParser
 from .workflow_orchestrator import WorkflowOrchestrator
+
+logger = logging.getLogger(__name__)
 
 
 # ---------------------------------------------------------------------------
@@ -137,6 +141,12 @@ class LiquidacionEngine:
             # Sumar los VA al total y exponer en calc_results para que
             # el JSONGenerator los incluya en desglose.
             calc_results["periodos_indexados"] = periodos_indexados
+
+        # --- 2.B-ter (Fase 2): vacaciones compensadas en finiquito ---
+        if parsed_data.get("modo") == "FINIQUITO":
+            self._calcular_vacaciones_si_finiquito(
+                parsed_data, params, calc_results, alerts
+            )
 
         # 1.D — delegamos al JSONGenerator con el dict unificado y los
         # params que el engine ya cargó (ParamsLoader -> dict). El
@@ -427,3 +437,65 @@ class LiquidacionEngine:
                 f"prescrito(s) por Art. 488 CST"
             )
         return renglones
+
+    # ------------------------------------------------------------------
+    # 2.B-ter (Fase 2) — Vacaciones compensadas en finiquito
+    # ------------------------------------------------------------------
+    def _calcular_vacaciones_si_finiquito(
+        self,
+        parsed_data: Dict[str, Any],
+        params: Dict[str, Any],
+        calc_results: Dict[str, Any],
+        alerts: Dict[str, str],
+    ) -> None:
+        """Hook de vacaciones compensadas en finiquito (Tarea 2.B-ter).
+
+        Idempotente: si no aplica (modo PERIODICA, sin vacaciones,
+        dias=0), no aade nada al desglose. Si aplica, aade un unico
+        renglon de vacaciones compensadas con formula Art. 189-190 CST.
+        """
+        # OPT-IN: solo FINIQUITO con vacaciones pendientes
+        vacaciones = parsed_data.get("vacaciones")
+        if not isinstance(vacaciones, dict):
+            return  # regla V_VACACIONES_DECLARADAS_FINIQUITO lo advertira (2.Z)
+        dias_pendientes = vacaciones.get("dias_pendientes", 0)
+        if not isinstance(dias_pendientes, (int, float, Decimal)):
+            return
+        dias_dec = Decimal(str(dias_pendientes))
+        if dias_dec <= 0:
+            logger.info("Finiquito sin vacaciones pendientes; nada que pagar")
+            return
+
+        # Obtener SBL desde el input (Forma 2 anidada o Forma 1 plana)
+        salario_obj = parsed_data.get("salario", {})
+        if isinstance(salario_obj, dict) and "SBL" in salario_obj:
+            sbl = Decimal(str(salario_obj["SBL"]))
+        else:
+            sbl = Decimal(str(parsed_data.get("salario_mensual", 0)))
+        if sbl <= 0:
+            alerts["vacaciones_finiquito_sbl_invalido"] = (
+                f"SBL invalido ({sbl}). No se pueden calcular vacaciones compensadas."
+            )
+            return
+
+        prest_calc = PrestacionesCalculator(params)
+        renglon = prest_calc.calculate_vacaciones_compensadas_finiquito(
+            sbl=sbl, dias_pendientes=dias_dec
+        )
+
+        # Inyectar en desglose
+        if "desglose" not in calc_results:
+            calc_results["desglose"] = {}
+        calc_results["desglose"]["vacaciones_compensadas_finiquito"] = renglon
+
+        # Actualizar total
+        valor_comp = renglon["valor"]
+        total_actual = Decimal(str(calc_results.get("total", 0)))
+        total_actual += Decimal(str(valor_comp))
+        calc_results["total"] = int(total_actual)
+        calc_results["total_liquidacion"] = int(total_actual)
+
+        alerts["vacaciones_compensadas_finiquito"] = (
+            f"Vacaciones compensadas en finiquito: {valor_comp:,} COP "
+            f"({dias_pendientes} dias, SBL={int(sbl):,}) — Art. 189-190 CST"
+        )

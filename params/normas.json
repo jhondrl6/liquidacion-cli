@@ -196,6 +196,17 @@
       "url": "https://www.suin-juriscol.gov.co/",
       "issue_bloqueante": "Verificación verbatim con SUIN/CST antes de cerrar Fase 2-bis DoD. La entrada documenta el uso y NO representa una cita legal verificada.",
       "vigencia": "permanente"
+    },
+    {
+      "id": "CST_189_VACACIONES",
+      "nombre": "Código Sustantivo del Trabajo Art. 189",
+      "descripcion": "Compensación en dinero de vacaciones. Núm. 1: acuerdo escrito empleador-trabajador para pagar hasta la mitad. Núm. 2: obligatoria al terminar el contrato sin disfrute, por año cumplido y proporcionalmente por fracción > 3 meses.",
+      "texto_relevante": "Artículo 189. Compensación en dinero. 1. Empleador y trabajador, podrán acordar por escrito, previa solicitud del trabajador, que se pague en dinero hasta la mitad de las vacaciones. 2. Cuando el contrato de trabajo termine sin que el trabajador hubiere disfrutado de vacaciones, la compensación de éstas en dinero procederá por año cumplido de servicio y proporcionalmente por fracción de año, siempre que este exceda de tres meses.",
+      "estado_verificacion": "VERIFICADO",
+      "url": "https://www.suin-juriscol.gov.co/viewDocument.asp?id=30019323",
+      "fecha_verificacion": "2026-06-13",
+      "sala": "N/A (norma codificada, no sentencia)",
+      "vigencia": "permanente"
     }
   ],
   "plazos_pago": {
@@ -279,6 +290,6 @@
     "version": "2026-06-13",
     "fecha_actualizacion": "2026-06-13",
     "fuente": "SUIN-Juriscol (verificadas) + Ministerio del Trabajo - Colombia (Decretos 1469/2025, 1470/2025, 159/2026; Ley 2466/2025; Ley 50/1990; CST)",
-    "notas": "Este archivo contiene la normatividad vigente para liquidacion de nomina en Colombia. Los valores monetarios y tasas reflejan la actualizacion anual segun decretos expedidos. Tras Tarea 0.K (S11, 2026-06-13) incluye: Decreto 1469/2025 (SMMLV 2026, SUSPENDIDO provisionalmente por Consejo de Estado 2026-02-12), Decreto 159/2026 (re-fijacion transitoria del SMMLV 2026 con mismo valor), Decreto 1470/2025 (aux_trans 2026), Ley 2466/2025 (verificada SUIN). Tras Tarea 2.X (S28, 2026-06-13) incluye: SL2630_2024 (anualizacion e indexacion IPC) y CST_488_PRESCRIPCION (prescripcion 3 anios, termino especial de CST, NO el termino general equivocado). Ambas marcadas PENDIENTE_VERBATIM — requieren verificacion contra relatoría/SIUGJ y SUIN/CST antes de marcarse VERIFICADO. URLs reales verificadas en SUIN y Alcaldia de Bogota. ISSUE R-LEG-NUEVO-01: la entrada LEY_2466_2025_INTERESES_MENSUALES (pago mensual de intereses sobre cesantias) del plan v2.0 esta atribuida al Art. 64, pero SUIN muestra que Art. 64 = 'Regimen simple laboral'. NO implementar pago mensual de intereses en motor hasta verificar el articulo literal exacto."
-  }
+    "notas": "Este archivo contiene la normatividad vigente para liquidacion de nomina en Colombia. Los valores monetarios y tasas reflejan la actualizacion anual segun decretos expedidos. Tras Tarea 0.K (S11, 2026-06-13) incluye: Decreto 1469/2025 (SMMLV 2026, SUSPENDIDO provisionalmente por Consejo de Estado 2026-02-12), Decreto 159/2026 (re-fijacion transitoria del SMMLV 2026 con mismo valor), Decreto 1470/2025 (aux_trans 2026), Ley 2466/2025 (verificada SUIN). Tras Tarea 2.X (S28, 2026-06-13) incluye: SL2630_2024 (anualizacion e indexacion IPC) y CST_488_PRESCRIPCION (prescripcion 3 anios, termino especial de CST, NO el termino general equivocado). Ambas marcadas PENDIENTE_VERBATIM. Tras Tarea 2.B-ter (S29, 2026-06-13) incluye: CST_189_VACACIONES (compensacion de vacaciones en dinero Art. 189-190 CST, VERIFICADO con texto literal SUIN https://www.suin-juriscol.gov.co/viewDocument.asp?id=30019323). URLs reales verificadas en SUIN y Alcaldia de Bogota. ISSUE R-LEG-NUEVO-01: la entrada LEY_2466_2025_INTERESES_MENSUALES (pago mensual de intereses sobre cesantias) del plan v2.0 esta atribuida al Art. 64, pero SUIN muestra que Art. 64 = 'Regimen simple laboral'. NO implementar pago mensual de intereses en motor hasta verificar el articulo literal exacto."
+      }
 }
