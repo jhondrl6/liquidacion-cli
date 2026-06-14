@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+**S32 — Optimización REGISTRY: log archivado + compacts (-73% contexto) (2026-06-14)**
+- **REGISTRY.md (M):** 95,452 → 25,441 bytes (-73.3% en contexto por sesión). Sección "Log de cierres" reemplazada por puntero de 9 líneas a REGISTRY_LOG.md. Tabla "Tareas de Fase 1" (13 filas) y "Pendientes S11" (5 filas) compactadas a 1 línea c/u con puntero al log. "Trampas conocidas" (17 items) compactadas a 11 activas + 7 resueltas con puntero a KB_LLM/06. 8 secciones principales intactas, contenido operativo preservado.
+- **REGISTRY_LOG.md (A):** 61,048 bytes. Histórico completo de cierres de sesión (S0 a S31) preservado verbatim — 32 filas con evidencia por sesión (archivos tocados, tests corridos, R-OPs/LEGs resueltos). Convención de mantenimiento documentada en header.
+- **0 cambios de código, 0 tests, 0 cambios a params/reglas.** Refactor puramente estructural. Sin regresiones.
+- **Commits:** `5c4bccc` (split log + compacts).
+
 **S30 — Tarea 2.B-cuater: Indemnización preaviso Art. 46 CST (addendum preaviso) (2026-06-14)**
 - **IndemnizacionCalculator:** método `calculate_indemnizacion_preaviso(sbl, dias_preaviso_efectivos)` con fórmula `(SBL/30) × dias_faltantes`, `ROUND_HALF_UP` al peso, dict con evidencia_legal Art. 46 CST. Import `Decimal`, `ROUND_HALF_UP` agregado. 18 tests unitarios.
 - **Engine:** hook `_calcular_preaviso_si_fijo_vencido` en `process_input()` — activa solo FINIQUITO + FIJO + termino_fijo_vencido, inyecta `preaviso_indemnizacion` en desglose, actualiza `total_liquidacion`. Reparo (b): renglón SEPARADO de indemnización Art. 64, NO se acumula. Dias_preaviso_efectivos se calcula desde campo directo o diferencia de fechas.
