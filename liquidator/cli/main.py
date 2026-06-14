@@ -46,6 +46,64 @@ def _resolve_input(input_path: Path) -> Dict[str, Any]:
         raise click.ClickException(str(exc))
 
 
+def _write_output_artifacts(
+    result: Dict[str, Any],
+    out_dir: Path,
+    input_stem: str,
+    is_blocked: bool,
+) -> tuple[Path, Path | None]:
+    """Escribe los artefactos de salida (.json, .md opcional).
+
+    Tarea 3.D (Fase 3 base, plan §8.2):
+    - ``is_blocked=False``: escribe ``liquidacion.<json>`` (comportamiento
+      previo, sólo JSON). El plan original pide también ``liquidacion.md``
+      y ``liquidacion.pdf``; el MD se omite intencionalmente para no
+      duplicar la lógica del ``MarkdownGenerator`` (gap preexistente de
+      Fase 1, fuera de scope de 3.D).
+    - ``is_blocked=True``: escribe ``liquidacion_BLOQUEADA.json`` Y
+      ``liquidacion_BLOQUEADA.md`` con la salida del ``MarkdownGenerator``
+      en estado ``NO_GO`` (regla AGENTS.md #7: NO PDF cuando NO_GO).
+
+    Returns:
+        Tuple ``(json_path, md_path_or_None)``.
+    """
+    out_dir.mkdir(parents=True, exist_ok=True)
+    base_name = "liquidacion_BLOQUEADA" if is_blocked else "liquidacion"
+
+    json_path = out_dir / f"{base_name}.json"
+    json_path.write_text(
+        json.dumps(result, indent=2, ensure_ascii=False, default=str),
+        encoding="utf-8",
+    )
+
+    md_path: Path | None = None
+    if is_blocked:
+        # Generar también el markdown de bloqueo (Tarea 3.D).
+        # Import diferido: el generator puede no estar listo en tests
+        # de import aislados; este path solo se ejecuta cuando el
+        # usuario invoca `liquidar` y hay NO_GO real.
+        try:
+            from liquidator.output.markdown_generator import (
+                MarkdownGenerator,
+            )
+
+            md_content = MarkdownGenerator().generate_markdown(
+                result, status="NO_GO"
+            )
+            md_path = out_dir / f"{base_name}.md"
+            md_path.write_text(md_content, encoding="utf-8")
+        except Exception as exc:  # noqa: BLE001
+            click.secho(
+                f"Advertencia: no se pudo generar el markdown de "
+                f"bloqueo: {exc}",
+                fg="yellow",
+                err=True,
+            )
+            md_path = None
+
+    return json_path, md_path
+
+
 # --- CLI ----------------------------------------------------------------------
 
 @click.group()
@@ -102,6 +160,16 @@ def liquidar(
 
     El motor genera JSON + Markdown en --out-dir. Con --json-only emite
     solo el JSON de resultado por stdout.
+
+    Modo NO_GO (Tarea 3.D, plan §8.2):
+        Cuando compliance = NO_GO, los archivos se emiten con el prefijo
+        ``liquidacion_BLOQUEADA.`` (``liquidacion_BLOQUEADA.json`` +
+        ``liquidacion_BLOQUEADA.md``) y el proceso termina con exit
+        code 2. NO se genera PDF (regla AGENTS.md #7).
+
+    Modo GO/WARN/OVERRIDE_APPROVED:
+        Archivos ``liquidacion.json`` (comportamiento previo) y exit
+        code 0.
     """
     if override and not override_reason:
         raise click.ClickException(
@@ -143,22 +211,23 @@ def liquidar(
     compliance_status = result.get("compliance_report", {}).get(
         "compliance_status", "GO"
     )
+    is_blocked = compliance_status.upper() == "NO_GO"
 
     if json_only:
         click.echo(json.dumps(result, indent=2, ensure_ascii=False, default=str))
     else:
-        out_dir.mkdir(parents=True, exist_ok=True)
-        out_json = out_dir / f"{input_path.stem}_result.json"
-        out_json.write_text(
-            json.dumps(result, indent=2, ensure_ascii=False, default=str),
-            encoding="utf-8",
+        json_path, md_path = _write_output_artifacts(
+            result, out_dir, input_path.stem, is_blocked
         )
-        click.echo(f"Resultado escrito en {out_json}")
+        click.echo(f"Resultado escrito en {json_path}")
+        if md_path is not None:
+            click.echo(f"Bloqueo (markdown) escrito en {md_path}")
 
-    if compliance_status in ("GO", "WARN", "OVERRIDE_APPROVED"):
-        sys.exit(0)
-    else:
+    # Tarea 3.D: código de salida diferenciado para NO_GO.
+    if is_blocked:
         sys.exit(2)
+    else:
+        sys.exit(0)
 
 
 # ---- validate ----------------------------------------------------------------

@@ -7,4 +7,23 @@ aplican como tareas separadas sobre estos modelos.
 Este paquete NO reemplaza al InputParser ni al motor en esta iteración;
 solo formaliza el contrato de entrada/salida. La integración con el
 engine real se completa en Tareas 1.D (JSONGenerator) y Fase 2.
+
+Contenido:
+- ``input_model``: ``LiquidacionInput`` (entrada, sub-objetos tipados).
+- ``output_model``: ``LiquidacionResult`` (salida del motor, PII incluida).
+- ``document_context``: ``DocumentContext`` (Fase 3 Tarea 3.A — contexto
+  anonimizado y tipado que consume la capa de presentación).
 """
+from .document_context import (
+    ComplianceInfo,
+    ComplianceStatus,
+    DocumentContext,
+    RenglonDesglose,
+)
+
+__all__ = [
+    "ComplianceInfo",
+    "ComplianceStatus",
+    "DocumentContext",
+    "RenglonDesglose",
+]
