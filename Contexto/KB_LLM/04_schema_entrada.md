@@ -184,15 +184,24 @@ anidadas en Fase 1):
   CST), `VacacionesEstado` tipado (reemplaza `vacaciones: dict`),
   `Contrato.fecha_terminacion_real: date | None`. Ver
   `liquidator/contracts/input_model.py`.
-- **1.C-quater** (addendum preaviso):
+- **1.C-quater** (addendum preaviso, **IMPLEMENTADO S25**):
   `Contrato.preaviso_entregado: bool | None`,
   `Contrato.fecha_preaviso: date | None`,
   `Contrato.dias_preaviso: int | None`,
-  `Contrato.fecha_vencimiento_termino_fijo: date | None`.
+  `Contrato.fecha_vencimiento_termino_fijo: date | None` +
+  `_preaviso_consistencia` (regla 1: solo aplica a FIJO;
+  regla 2: `preaviso_entregado=True` exige `fecha_preaviso`;
+  regla 3: FINIQUITO+FIJO+vencido exige `preaviso_entregado` declarado).
+  Preaviso aplica exclusivamente a contrato a término fijo (Art. 46 CST).
+  El motor consume estos campos en Tarea 2.B-cuater (Fase 2) para
+  calcular la indemnización por preaviso insuficiente. Ver
+  `liquidator/contracts/input_model.py` y
+  `liquidator/tests/test_contracts/test_preaviso_contrato.py` (16 tests).
 
 **Validación contra tests:** 17/17 PASS en
 `liquidator/tests/test_contracts/test_input_model.py` (S16) + 10/10 PASS
 en `liquidator/tests/test_contracts/test_salario_extendido.py` (S23,
 extensión 1.C-bis) + 15/15 PASS en `test_vacaciones_estado.py` (S24,
 extensión 1.C-ter) + 15/15 PASS en `test_motivo_terminacion.py` (S24,
-extensión 1.C-ter). Total `test_contracts/`: 69/69 PASS.
+extensión 1.C-ter) + **16/16 PASS en `test_preaviso_contrato.py` (S25,
+extensión 1.C-quater)**. Total `test_contracts/`: **85/85 PASS**.

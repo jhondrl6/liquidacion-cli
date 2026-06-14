@@ -11,16 +11,18 @@ Forma 1 (plana, estilo `examples/inputs/finca_rural.json` y
 validador unificado) consolide el contrato. Por eso este schema
 exige explícitamente los sub-objetos.
 
-Extensiones futuras (NO en esta tarea, se aplican como tareas
-separadas y retrocompatibles):
-- 1.C-bis (addendum SL2630): `Salario.sbl_por_anio`,
+Extensiones aplicadas (tareas anidadas, retrocompatibles):
+- 1.C-bis (addendum SL2630, S23): `Salario.sbl_por_anio`,
   `Salario.historial_salarial`, `MesValor`, model_validator
   `variable → requiere historial o sbl_por_anio`.
-- 1.C-ter (addendum finiquito): `Contrato.motivo_terminacion` como
+- 1.C-ter (addendum finiquito, S24): `Contrato.motivo_terminacion` como
   `MotivoTerminacion` (enum), `VacacionesEstado` tipado
   (reemplaza `vacaciones: dict`).
-- 1.C-quater (addendum preaviso): `Contrato.preaviso_entregado`,
-  `fecha_preaviso`, `dias_preaviso`, `fecha_vencimiento_termino_fijo`.
+- 1.C-quater (addendum preaviso, **IMPLEMENTADO S25**):
+  `Contrato.preaviso_entregado`, `fecha_preaviso`, `dias_preaviso`,
+  `fecha_vencimiento_termino_fijo` + `_preaviso_consistencia`
+  (preaviso solo aplica a FIJO; FINIQUITO+FIJO+vencido exige
+  declaración).
 
 Convención: 1 fase por sesión. Esta tarea sienta la base; las
 extensiones se aplican en sesiones posteriores.
@@ -60,6 +62,17 @@ class Contrato(BaseModel):
 
     `fecha_terminacion_real` es obligatorio en modo FINIQUITO (validado
     por `LiquidacionInput._finiquito_requiere_motivo`).
+
+    **Extensión 1.C-quater (addendum preaviso, absorción v2.0.0):**
+    Los 4 campos `fecha_vencimiento_termino_fijo`, `preaviso_entregado`,
+    `fecha_preaviso` y `dias_preaviso` son **opcionales y retrocompatibles**.
+    El preaviso aplica exclusivamente a contratos a término fijo
+    (Art. 46 CST). El motor (Tarea 2.B-cuater) consume estos campos
+    para calcular la indemnización por preaviso insuficiente.
+    El validador `_preaviso_consistencia` rechaza:
+      - Preaviso declarado en tipo distinto de FIJO.
+      - `preaviso_entregado=True` sin `fecha_preaviso`.
+      - FINIQUITO+FIJO+vencido sin `preaviso_entregado` declarado.
     """
 
     fecha_ingreso: date
@@ -67,6 +80,12 @@ class Contrato(BaseModel):
     tipo: Literal["INDEFINIDO", "FIJO", "OBRA_LABOR", "PRESTACION"]
     motivo_terminacion: MotivoTerminacion | None = None
     fecha_terminacion_real: date | None = None
+
+    # --- 1.C-quater (addendum preaviso Art. 46 CST) -----------------------
+    fecha_vencimiento_termino_fijo: date | None = None
+    preaviso_entregado: bool | None = None
+    fecha_preaviso: date | None = None
+    dias_preaviso: int | None = None  # días de anticipación efectivos
 
     @model_validator(mode="after")
     def _terminacion_real_requiere_motivo(self) -> "Contrato":
@@ -79,6 +98,51 @@ class Contrato(BaseModel):
             raise ValueError(
                 "Si hay fecha_terminacion_real, es obligatorio motivo_terminacion"
             )
+        return self
+
+    @model_validator(mode="after")
+    def _preaviso_consistencia(self) -> "Contrato":
+        """Reglas de consistencia para preaviso (Tarea 1.C-quater).
+
+        Regla 1 — Preaviso solo aplica a término fijo (Art. 46 CST).
+        Si el tipo NO es FIJO, NO se admite ningún campo de preaviso
+        declarado. Esto evita que inputs con tipo INDEFINIDO/OBRA_LABOR/
+        PRESTACION traigan `preaviso_entregado` (que carece de base
+        legal y contaminaría el cálculo en Tarea 2.B-cuater).
+
+        Regla 2 — `preaviso_entregado=True` exige `fecha_preaviso`
+        (sin fecha, el motor no puede calcular días de anticipación
+        ni detectar renovación automática Art. 46).
+
+        Regla 3 — FINIQUITO por término fijo vencido exige declarar
+        `preaviso_entregado` (True o False). Es el ÚNICO caso donde
+        el preaviso es bloqueante para que el schema valide; el
+        resto de motivos de terminación sobre tipo FIJO no requieren
+        preaviso declarado (riesgo R2 del plan §6.2 mitigado).
+        """
+        # Regla 1: Preaviso solo aplica a FIJO
+        if self.preaviso_entregado is not None and self.tipo != "FIJO":
+            raise ValueError(
+                "preaviso_entregado solo aplica a contratos tipo FIJO (Art. 46 CST)"
+            )
+
+        # Regla 2: preaviso_entregado=True exige fecha_preaviso
+        if self.preaviso_entregado and self.fecha_preaviso is None:
+            raise ValueError(
+                "Si preaviso_entregado=True, es obligatorio fecha_preaviso"
+            )
+
+        # Regla 3: FINIQUITO+FIJO+vencido exige preaviso_entregado declarado
+        if (
+            self.tipo == "FIJO"
+            and self.motivo_terminacion == MotivoTerminacion.TERMINO_FIJO_VENCIDO
+            and self.preaviso_entregado is None
+        ):
+            raise ValueError(
+                "FINIQUITO por termino_fijo_vencido requiere declarar "
+                "preaviso_entregado (bool). Art. 46 CST."
+            )
+
         return self
 
 
