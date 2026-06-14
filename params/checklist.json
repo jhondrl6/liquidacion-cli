@@ -1,5 +1,5 @@
 {
-  "version": "2025-10-31",
+  "version": "2026-06-13",
   "rules": [
     {
       "id": "V001",
@@ -60,6 +60,15 @@
       "description": "Hashes y versionamiento registrados",
       "severity": "HIGH",
       "rule_ref": ["Checklist: Trazabilidad"]
+    },
+    {
+      "id": "V011",
+      "description": "Indexación IPC para prestaciones no pagadas oportunamente: VA = VH × (ÍndiceIPC_referencia / ÍndiceIPC_causacion). Validar prescripción según Art. 488 CST cuando corresponda (3 años desde fecha_exigibilidad).",
+      "severity": "MEDIUM",
+      "blocking": false,
+      "rule_ref": ["SL2630-2024", "Art. 488 CST (prescripción)", "DANE IPC"],
+      "formula": "VA = VH × (ÍndiceIPC_referencia / ÍndiceIPC_origen)",
+      "nota": "NO usar tasas anuales de inflación como si fueran índices acumulados. Defensiva en profundidad: IPCIndexador rechaza valores entre 0 y 1."
     }
   ]
 }

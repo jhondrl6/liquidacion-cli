@@ -23,6 +23,7 @@ class RuleEvaluator:
             "V008": _v008_payment_deadlines,
             "V009": _v009_legal_support,
             "V010": _v010_hashes_versioning,
+            "V011": _v011_indexacion_ipc,
         }
         return mapping[rule_id]
 
@@ -141,3 +142,87 @@ def _v010_hashes_versioning(input_data: Dict, result: Dict, params: Dict) -> Dic
         if k not in meta:
             return {"result": "FAIL", "evidence": f"Falta {k} en meta"}
     return {"result": "PASS", "evidence": "Hashes y versionamiento presentes"}
+
+
+def _v011_indexacion_ipc(input_data: Dict, result: Dict, params: Dict) -> Dict:
+    """Regla V011 — Indexacion IPC para prestaciones no pagadas oportunamente.
+
+    Tarea 2.X (Fase 2-bis, addendum SL2630-2024).
+
+    No es bloqueante (severity MEDIUM). Cuando el input declara
+    `periodos_no_pagados`, valida:
+    - Estructura: cada periodo tiene los 4 campos requeridos
+      (concepto, valor_historico, fecha_causacion, fecha_exigibilidad,
+      fecha_referencia_indexacion).
+    - Prescripcion (Art. 488 CST): si la diferencia entre
+      fecha_referencia_indexacion y fecha_exigibilidad es > 3 anios,
+      el periodo esta prescrito (WARNING, no FAIL).
+    - El calculo de VA lo hace el motor (engine.py) y aparece como
+      `<concepto>_indexado` en el desglose con `evidencia_legal` y
+      `formula`.
+    """
+    periodos = input_data.get("periodos_no_pagados")
+    if not periodos:
+        return {
+            "result": "PASS",
+            "evidence": (
+                "Sin periodos_no_pagados en input. La regla V011 NO aplica "
+                "a este caso (opt-in). Motor se comporta como v2.0.0 sin "
+                "indexacion."
+            ),
+        }
+
+    # Validamos estructura basica y prescripcion
+    n_prescritos = 0
+    n_indexables = 0
+    campos_requeridos = {
+        "concepto",
+        "valor_historico",
+        "fecha_causacion",
+        "fecha_exigibilidad",
+        "fecha_referencia_indexacion",
+    }
+    for p in periodos:
+        if not isinstance(p, dict):
+            continue
+        if not campos_requeridos.issubset(p.keys()):
+            return {
+                "result": "FAIL",
+                "evidence": (
+                    f"periodos_no_pagados entry falta campos requeridos: "
+                    f"{campos_requeridos - set(p.keys())}"
+                ),
+            }
+        # Prescripcion Art. 488 CST: 3 anios desde fecha_exigibilidad
+        try:
+            exig = datetime.fromisoformat(str(p["fecha_exigibilidad"]))
+            ref = datetime.fromisoformat(str(p["fecha_referencia_indexacion"]))
+            delta_anios = (ref - exig).days / 365.25
+            if delta_anios > 3.0:
+                n_prescritos += 1
+            else:
+                n_indexables += 1
+        except (ValueError, TypeError):
+            # Fechas invalidas ya fueron rechazadas por Pydantic;
+            # aqui no bloqueamos, solo ignoramos.
+            pass
+
+    if n_prescritos > 0:
+        return {
+            "result": "WARN",
+            "evidence": (
+                f"Indexacion IPC: {n_indexables} periodo(s) indexable(s) + "
+                f"{n_prescritos} periodo(s) prescrito(s) por Art. 488 CST. "
+                f"Periodos prescritos NO se indexan; se conservan en el "
+                f"output con WARNING. Verificar manualmente si aplica "
+                f"interrupcion de prescripcion."
+            ),
+        }
+
+    return {
+        "result": "PASS",
+        "evidence": (
+            f"Indexacion IPC aplicable: {n_indexables} periodo(s) sin "
+            f"prescripcion. SL2630-2024 + Art. 488 CST."
+        ),
+    }

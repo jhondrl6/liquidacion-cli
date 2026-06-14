@@ -139,6 +139,86 @@ con el SBL resuelto para cada año.
 **Tests:** 15 unitarios (`test_salario_resolver.py`) + 9 golden
 (`test_salario_variable_por_anio.py`). Regresión canónica verde.
 
+## Indexación por IPC (Tarea 2.X, S28 — Fase 2-bis, addendum SL2630-2024)
+
+> **Fuente:** Addendum `addendum_sl2630_y_ipc_2026-06-09.md` (reparos
+> bloqueantes b y c cerrados con `estado_verificacion: PENDIENTE_VERBATIM`
+> en `params/normas.json`).
+> **Marco legal:** SL2630-2024 (anualización + indexación) + **Art. 488
+> CST** (prescripción 3 años desde fecha_exigibilidad).
+
+**Principio:** las prestaciones adeudadas de años anteriores, no
+pagadas oportunamente, deben **actualizarse a valor presente** usando
+el IPC acumulado publicado por el DANE. La fórmula legal:
+
+```
+VA = VH × (ÍndiceIPC_referencia / ÍndiceIPC_origen)
+```
+
+donde `IPC_origen` se toma a la fecha de causación y `IPC_referencia`
+a la fecha de pago efectivo (o la fecha de referencia solicitada).
+
+**Activación (opt-in):** el input declara
+`periodos_no_pagados: list[PeriodoNoPagado]`. Si el campo es `None`
+o lista vacía, el motor se comporta como v2.0.0 (sin indexación).
+
+**Validación de prescripción (Art. 488 CST):** si la diferencia entre
+`fecha_referencia_indexacion` y `fecha_exigibilidad` supera 3 años,
+el periodo se considera prescrito y se emite WARNING (no FAIL). El
+renglón aparece en el desglose como `<concepto>_indexado_prescrito`
+con `valor: 0` y `estado: "PRESCRITO"`.
+
+**Defensa contra confusión índice/tasa (reparo c):** la clase
+`IPCIndexador` (en `liquidator/calculators/indexacion.py`) rechaza
+valores entre 0 y 1 en el constructor, lo que captura tasas anuales
+disfrazadas de índices. Test:
+`test_reparo_c_ipc_es_indice_no_tasa`.
+
+**Fuente de datos:** `params/ipc_dane_mensual.json` (generado por
+`scripts/build_ipc_index.py` a partir de la variación anual DANE
+oficial). El script valida internamente que los cocientes
+`dic/Y / dic/(Y-1)` reproducen exactamente la variación anual
+declarada (tolerancia 0.1% para años 2+; 0.5% para el año base 2010
+por la asimetría 11 vs 12 transiciones).
+
+**Implementación:**
+- `liquidator/calculators/indexacion.py` — clase `IPCIndexador`.
+- `liquidator/contracts/input_model.py` — modelo `PeriodoNoPagado`
+  (con `model_validator` de consistencia de fechas:
+  `causacion <= exigibilidad <= referencia`).
+- `liquidator/core/engine.py` — método `_procesar_periodos_no_pagados`
+  integrado en `process_input()`. Carga la fuente, valida
+  prescripción, calcula VA, inyecta renglones en `desglose` y suma
+  al `total_liquidacion`.
+- `liquidator/compliance/rule_evaluator.py` — regla `V011`
+  (V_INDEXACION_IPC) con severidad MEDIUM, no bloqueante.
+- `params/normas.json` — entradas `SL2630_2024` y `CST_488_PRESCRIPCION`
+  (ambas `PENDIENTE_VERBATIM`).
+- `params/checklist.json` — regla `V011` con `formula` y `nota`.
+
+**Tests:**
+- 24 unitarios (`test_indexacion.py`, 4 clases) — defensa en
+  profundidad, casos ficticios del plan, integración con datos DANE
+  reales, conformidad con reparos.
+- 12 golden (`test_prescripcion_indexada.py`, 3 clases) — caso golden
+  con periodo indexable, caso de prescripción, no-regresión del
+  caso canónico.
+
+**Limitación documentada:** la distribución mensual del índice es
+**geométrica uniforme** (factor = `(1 + r_anual)^(1/12)`), lo cual
+reproduce la variación anual DANE al cierre de cada año, pero **NO
+preserva la estacionalidad intra-anual real** (los meses de enero
+y diciembre suelen diferir del promedio). Para liquidaciones que
+requieren precisión sub-anual, sustituir por la serie mensual DANE
+oficial cuando se requiera (modificar `scripts/build_ipc_index.py`
+para leer `ipc_mensual_dane.csv` con variación mensual directa).
+
+**Reparos pendientes (no bloquean DoD de la tarea, sí bloquean v2.0
+release):**
+- Verificación verbatim de SL2630-2024 (texto literal, sala, URL
+  oficial en relatoría/SIUGJ). R-LEG-03.
+- Verificación verbatim de Art. 488 CST (texto literal en SUIN).
+
 ## Última validación contra código
 
-- **Fecha:** 2026-06-13 (sesión S27, Tarea 2.B-bis).
+- **Fecha:** 2026-06-13 (sesión S28, Tarea 2.X — Fase 2-bis).

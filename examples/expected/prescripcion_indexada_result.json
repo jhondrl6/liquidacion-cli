@@ -1,0 +1,23 @@
+{
+  "_meta": {
+    "caso": "prescripcion_indexada",
+    "descripcion": "Cesantias de 2024 ($1.500.000) indexadas a 2025-06-09 con IPC DANE acumulado (Tarea 2.X, Fase 2-bis).",
+    "tarea": "2.X — Indexacion IPC para prestaciones no pagadas oportunamente",
+    "addendum": "SL2630-2024",
+    "base_legal": "SL2630-2024; Art. 488 CST (prescripcion 3 anios)",
+    "fuente_ipc": "params/ipc_dane_mensual.json (DANE variacion anual aplicada mensualmente)",
+    "ratio_esperado": 1.066362,
+    "valor_esperado_va": 1599543,
+    "tolerancia_va": 10,
+    "tolerancia_ratio": 0.001,
+    "comentario": "Los valores esperados son EXACTOS en el momento de la generacion. Si se actualiza params/ipc_dane_mensual.json con datos DANE reales, el ratio puede cambiar ligeramente."
+  },
+  "cesantias_indexado_esperado": {
+    "concepto_original": "cesantias",
+    "valor_historico": 1500000,
+    "valor_actualizado_aprox": 1599543,
+    "ratio_aprox": 1.066362,
+    "evidencia_legal": "SL2630-2024; Art. 488 CST",
+    "norma": "SL2630-2024; Art. 488 CST"
+  }
+}

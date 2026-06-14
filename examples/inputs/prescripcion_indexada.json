@@ -1,0 +1,17 @@
+{
+  "modo": "PERIODICA",
+  "fecha_ingreso": "2025-11-16",
+  "fecha_corte": "2026-06-09",
+  "salario_mensual": 2200000,
+  "tipo_contrato": "INDEFINIDO",
+  "periodos_no_pagados": [
+    {
+      "concepto": "cesantias",
+      "valor_historico": 1500000,
+      "fecha_causacion": "2024-02-14",
+      "fecha_exigibilidad": "2024-02-14",
+      "fecha_referencia_indexacion": "2025-06-09"
+    }
+  ],
+  "_nota_caso": "Caso golden Tarea 2.X (Fase 2-bis, addendum SL2630-2024). Formato plano (compatible con WorkflowOrchestrator legacy). Cesantias de 2024 ($1.500.000) indexadas a 2025-06-09 con IPC DANE acumulado. Esperado: VA ~ $1.599.543 (ratio IPC 2025-06 / IPC 2024-02). El formato Forma 2 (anidado con contrato/salario/trabajador) NO es soportado por el WorkflowOrchestrator actual; ver R-LEG-08 / Tarea 2.A en REGISTRY para la migracion."
+}

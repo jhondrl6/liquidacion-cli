@@ -175,6 +175,27 @@
       "texto_relevante": "El trabajo suplementario o de horas extras no podrá exceder de dos horas diarias ni de doce semanales. Por el trabajo suplementario se reconocerá un recargo del 25% sobre el valor de la hora ordinaria.",
       "url": "https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=2809",
       "vigencia": "permanente"
+    },
+    {
+      "id": "SL2630_2024",
+      "nombre": "Sentencia SL2630-2024 Corte Suprema de Justicia",
+      "descripcion": "Criterio jurisprudencial sobre anualización de prestaciones adeudadas e indexación por pérdida de poder adquisitivo (IPC).",
+      "texto_relevante": "RESUMEN NO LITERAL — pendiente de verificación verbatim con la fuente oficial de la Corte Suprema. La sentencia establece que las prestaciones adeudadas de años anteriores deben liquidarse año por año con el salario correspondiente a cada año calendario y luego indexarse a valor presente utilizando el IPC acumulado publicado por el DANE. La activación operativa de este criterio en el motor se da con periodos_no_pagados en el input, combinado con Art. 488 CST para validar prescripción.",
+      "sala": "PENDIENTE verificación oficial; fuentes secundarias indican Sala de Descongestión Laboral N.º 1. Confirmar con relatoría de la CSJ antes de marcar VERIFICADO.",
+      "url": "https://siugj.ramajudicial.gov.co/",
+      "estado_verificacion": "PENDIENTE_VERBATIM",
+      "issue_bloqueante": "R-LEG-03 (cierre post-Fase 2-bis): el texto literal, la sala y la URL oficial de la SL2630-2024 deben verificarse verbatim contra relatoría/SIUGJ antes de marcar VERIFICADO. La presente entrada documenta el uso operativo y NO representa una cita legal verificada.",
+      "vigencia": "2024"
+    },
+    {
+      "id": "CST_488_PRESCRIPCION",
+      "nombre": "Código Sustantivo del Trabajo Art. 488",
+      "descripcion": "Regla general de prescripción de las acciones laborales: tres (3) años contados desde que la obligación se hizo exigible, salvo prescripciones especiales.",
+      "texto_relevante": "RESUMEN NO LITERAL — pendiente de verificación verbatim con SUIN/CST. Art. 488 CST establece que las acciones correspondientes a los derechos regulados en el CST prescriben en tres (3) años. En relación de trabajo, el término se cuenta desde que la obligación se hace exigible. Esta es la base legal que el motor usa para validar prescripción en periodos_no_pagados (Tarea 2.X). R-LEG-02 (reparo a addendum SL2630-2024): NO usar el termino general equivocado; usar SIEMPRE este Art. 488.",
+      "estado_verificacion": "PENDIENTE_VERBATIM",
+      "url": "https://www.suin-juriscol.gov.co/",
+      "issue_bloqueante": "Verificación verbatim con SUIN/CST antes de cerrar Fase 2-bis DoD. La entrada documenta el uso y NO representa una cita legal verificada.",
+      "vigencia": "permanente"
     }
   ],
   "plazos_pago": {
@@ -258,6 +279,6 @@
     "version": "2026-06-13",
     "fecha_actualizacion": "2026-06-13",
     "fuente": "SUIN-Juriscol (verificadas) + Ministerio del Trabajo - Colombia (Decretos 1469/2025, 1470/2025, 159/2026; Ley 2466/2025; Ley 50/1990; CST)",
-    "notas": "Este archivo contiene la normatividad vigente para liquidacion de nomina en Colombia. Los valores monetarios y tasas reflejan la actualizacion anual segun decretos expedidos. Tras Tarea 0.K (S11, 2026-06-13) incluye: Decreto 1469/2025 (SMMLV 2026, SUSPENDIDO provisionalmente por Consejo de Estado 2026-02-12), Decreto 159/2026 (re-fijacion transitoria del SMMLV 2026 con mismo valor), Decreto 1470/2025 (aux_trans 2026), Ley 2466/2025 (verificada SUIN). URLs reales verificadas en SUIN y Alcaldia de Bogota. ISSUE R-LEG-NUEVO-01: la entrada LEY_2466_2025_INTERESES_MENSUALES (pago mensual de intereses sobre cesantias) del plan v2.0 esta atribuida al Art. 64, pero SUIN muestra que Art. 64 = 'Regimen simple laboral'. NO implementar pago mensual de intereses en motor hasta verificar el articulo literal exacto."
+    "notas": "Este archivo contiene la normatividad vigente para liquidacion de nomina en Colombia. Los valores monetarios y tasas reflejan la actualizacion anual segun decretos expedidos. Tras Tarea 0.K (S11, 2026-06-13) incluye: Decreto 1469/2025 (SMMLV 2026, SUSPENDIDO provisionalmente por Consejo de Estado 2026-02-12), Decreto 159/2026 (re-fijacion transitoria del SMMLV 2026 con mismo valor), Decreto 1470/2025 (aux_trans 2026), Ley 2466/2025 (verificada SUIN). Tras Tarea 2.X (S28, 2026-06-13) incluye: SL2630_2024 (anualizacion e indexacion IPC) y CST_488_PRESCRIPCION (prescripcion 3 anios, termino especial de CST, NO el termino general equivocado). Ambas marcadas PENDIENTE_VERBATIM — requieren verificacion contra relatoría/SIUGJ y SUIN/CST antes de marcarse VERIFICADO. URLs reales verificadas en SUIN y Alcaldia de Bogota. ISSUE R-LEG-NUEVO-01: la entrada LEY_2466_2025_INTERESES_MENSUALES (pago mensual de intereses sobre cesantias) del plan v2.0 esta atribuida al Art. 64, pero SUIN muestra que Art. 64 = 'Regimen simple laboral'. NO implementar pago mensual de intereses en motor hasta verificar el articulo literal exacto."
   }
 }

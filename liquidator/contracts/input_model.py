@@ -23,6 +23,11 @@ Extensiones aplicadas (tareas anidadas, retrocompatibles):
   `fecha_vencimiento_termino_fijo` + `_preaviso_consistencia`
   (preaviso solo aplica a FIJO; FINIQUITO+FIJO+vencido exige
   declaración).
+- **2.X (Fase 2-bis, Tarea 2.X — IMPLEMENTADO S28)**: campo opcional
+  `periodos_no_pagados: list[PeriodoNoPagado]` en `LiquidacionInput`
+  para indexación IPC de prestaciones de años anteriores (SL2630-2024
+  + Art. 488 CST). Retrocompatible: si el input no trae este campo, el
+  motor se comporta como en v2.0.0 sin indexación.
 
 Convención: 1 fase por sesión. Esta tarea sienta la base; las
 extensiones se aplican en sesiones posteriores.
@@ -224,6 +229,72 @@ class MesValor(BaseModel):
     valor: Decimal = Field(gt=0)
 
 
+class PeriodoNoPagado(BaseModel):
+    """Una prestación histórica no pagada oportunamente (Tarea 2.X — Fase 2-bis).
+
+    Origen: addendum SL2630-2024 + Plan §7-bis.2. Se activa cuando el
+    usuario declara que el empleador le adeuda una prestación de un
+    período anterior (cesantías, prima, intereses, vacaciones) que
+    quiere liquidar con indexación IPC a valor presente.
+
+    La activación es **opt-in**: si el input no incluye
+    `periodos_no_pagados`, el motor se comporta idéntico a v2.0.0.
+    La presencia de este campo activa:
+
+    1. **Validación de prescripción (Art. 488 CST)**: si la diferencia
+       entre `fecha_referencia_indexacion` y `fecha_exigibilidad`
+       supera 3 años (prescripción general), el renglón NO se indexa
+       y se registra WARNING en compliance.
+    2. **Cálculo de VA con IPCIndexador** (reparo c del addendum):
+       `VA = VH × (IPC_referencia / IPC_origen)`, donde
+       `IPC_origen` se toma a `fecha_causacion` (criterio legal
+       de la SL2630-2024).
+    3. **Renglón `<concepto>_indexado` en el desglose** con VA,
+       `evidencia_legal` y `formula`.
+
+    Ejemplo (input):
+    ```json
+    {
+      "concepto": "cesantias",
+      "valor_historico": 1500000,
+      "fecha_causacion": "2020-02-14",
+      "fecha_exigibilidad": "2020-02-14",
+      "fecha_referencia_indexacion": "2025-06-09"
+    }
+    ```
+    """
+
+    concepto: Literal["cesantias", "prima", "intereses_cesantias", "vacaciones"]
+    valor_historico: Decimal = Field(gt=0)
+    fecha_causacion: date  # cuándo se causó la obligación
+    fecha_exigibilidad: date  # cuándo se hizo exigible (inicio prescripción)
+    fecha_referencia_indexacion: date  # hasta cuándo se indexa (default: hoy)
+
+    @model_validator(mode="after")
+    def _consistencia_fechas(self) -> "PeriodoNoPagado":
+        """Las fechas deben seguir orden logico:
+        fecha_causacion <= fecha_exigibilidad <= fecha_referencia_indexacion.
+
+        Si no, registramos un WARNING explicito (riesgo R5 de Fase 2-bis).
+        NO se rechaza el input (defensa en profundidad: el operador puede
+        corregir fechas y reintentar).
+        """
+        if self.fecha_causacion > self.fecha_exigibilidad:
+            raise ValueError(
+                f"fecha_causacion ({self.fecha_causacion}) debe ser <= "
+                f"fecha_exigibilidad ({self.fecha_exigibilidad}). "
+                f"Una obligacion no puede ser exigible ANTES de causarse."
+            )
+        if self.fecha_exigibilidad > self.fecha_referencia_indexacion:
+            raise ValueError(
+                f"fecha_exigibilidad ({self.fecha_exigibilidad}) debe ser <= "
+                f"fecha_referencia_indexacion "
+                f"({self.fecha_referencia_indexacion}). "
+                f"No se puede indexar a una fecha anterior a la exigibilidad."
+            )
+        return self
+
+
 class Salario(BaseModel):
     """Salario base del trabajador (SBL) y sus condiciones.
 
@@ -292,12 +363,18 @@ class LiquidacionInput(BaseModel):
     vacaciones: VacacionesEstado | None = None
     auxilios: dict | None = None  # extensibilidad
 
+    # --- 2.X (Fase 2-bis, addendum SL2630-2024 + Art. 488 CST) ---------
+    # Lista de prestaciones de anios anteriores no pagadas oportunamente
+    # que el usuario quiere indexar a valor presente via IPC DANE.
+    # OPT-IN: si es None o vacia, el motor no activa indexacion.
+    periodos_no_pagados: list[PeriodoNoPagado] | None = None
+
     @field_validator("contrato")
     @classmethod
     def _corte_mayor_ingreso(cls, v: Contrato) -> Contrato:
         """Garantiza que el periodo de cálculo no se invierta.
 
-        Sin esta regla, un input con `fecha_corte < fecha_ingreso`
+        Sin esta regla, un input con `fecha_corte < fecha_ingreso` 
         produciría duraciones negativas y división por cero en los
         calculadores. La regla es dura (no overrideable en v2.0).
         """
@@ -330,5 +407,6 @@ __all__ = [
     "VacacionesEstado",
     "Salario",
     "MesValor",
+    "PeriodoNoPagado",
     "LiquidacionInput",
 ]
