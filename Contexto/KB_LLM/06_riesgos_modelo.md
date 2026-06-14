@@ -181,40 +181,21 @@
 - **Estado:** CERRADO en S20. El fix NO afecta ningún id existente ni
   introduce nuevas restricciones.
 
-## R-OP-11 (NUEVO, S20) — `params/normas.json`: entries de `plazos_pago` faltan campos required (`aplica_a`, `sancion_mora`, `calcula_fecha_limite`)
+## R-OP-11 (RESUELTO, S21) — `params/normas.json`: entries de `plazos_pago` faltaban campos required (`aplica_a`, `sancion_mora`, `calcula_fecha_limite`)
 
-- **Severidad:** BAJA (no afecta motor). Sí bloquea cierre 100% formal de
-  Tarea 0.K (P-S11.3 sigue fallando).
-- **Origen:** Tarea 1.G / S20 (2026-06-13). Al re-ejecutar la validación
-  con método correcto (`jsonschema.validate(data, schema['definitions']['normas_laborales'], resolver=RefResolver.from_schema(schema))`),
-  jsonschema reportó `'aplica_a' is a required property` en
-  `schema['properties']['plazos_pago']['properties']['vacaciones']`.
-- **Causa verificada (inspección directa del archivo):** las 6 entries de
-  `plazos_pago` en `params/normas.json` (`cesantias`, `intereses_cesantias`,
-  `prima_junio`, `prima_diciembre`, `vacaciones`, `indemnizacion`) tienen
-  solo 5 keys: `dia`, `mes`, `descripcion`, `norma_ref`, `tipo_plazo`. La
-  schema `plazo_pago_detalle` declara como required: `tipo_plazo`, `dia`,
-  `mes`, `descripcion`, `norma_ref`, `aplica_a`, `sancion_mora`,
-  `calcula_fecha_limite` (8 campos). Faltan 3 en TODAS las entries.
-- **Contexto histórico:** El S11 (Tarea 0.K) probablemente pobló
-  `plazos_pago` con un subset mínimo de campos pensando que el schema no
-  era estricto. El S11.6 detectó un error falso (R-OP-03) por usar
-  `jsonschema.validate` sin `RefResolver` — método que NO preserva el
-  scope de las definiciones top-level. El error real (R-OP-11) quedó
-  enmascarado.
-- **Decisión pendiente del usuario** (3 opciones):
-  1. **Agregar los 3 campos faltantes a las 6 entries** en `normas.json`
-     (`aplica_a: ["PERIODICA", "FINIQUITO"]` p.ej., `sancion_mora: "..."`,
-     `calcula_fecha_limite: true/false`). Trabajo manual pero semánticamente
-     correcto. 6 entries × 3 campos = 18 líneas JSON a poblar.
-  2. **Hacer los 3 campos opcionales** en `params/schema.json` (quitar
-     de `required` array). Cambia semántica: el schema deja de exigir
-     datos que `normas.json` no tiene. 3 líneas a modificar.
-  3. **Diferir a hot-patch futuro.** La validación de `normas.json` queda
-     pendiente; no bloquea Fase 1.
-- **Impacto en DoD de Tarea 0.K:** P-S11.3 sigue FAIL hasta resolver
-  R-OP-11. No bloquea cierre formal de Fase 0 (P-S11.3 ya estaba
-  pendiente desde S11.6, y se sigue marcando como tal).
+- **Severidad:** BAJA (cero consumidores runtime). No bloqueaba Fase 1.
+- **Resolución aplicada S21 (opción b, decisión del usuario):** los 3 campos
+  removidos del array `required` en `plazo_pago_detalle` (`params/schema.json`
+  L307-310, -3 líneas). Ahora son opcionales en v2.0.
+- **Fundamento:** (1) `NormasRepository.get_plazo_definicion()` tiene 0
+  callers en todo el codebase; (2) la opción (a) requería inventar datos
+  legales sin verificación; (3) la opción (b) es honesta — el schema refleja
+  lo que el código necesita hoy.
+- **Validación post-fix:** normas.json ✓ con `RefResolver.from_schema()`.
+  P-S11.3 CERRADO. DoD Tarea 0.K = 100% (5/5).
+- **Plan futuro:** los 3 campos se harán `required` en Fase 2 cuando el motor
+  de plazos (con callers reales) necesite datos verificados.
+- **Estado:** CERRADO en S21.
 
 ## R-OP-03 — Ver reclasificación en línea arriba (R-OP-10 derivado)
 
