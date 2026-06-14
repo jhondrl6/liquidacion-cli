@@ -1,6 +1,6 @@
-# Sistema de Liquidación de Nómina Colombia 2025
+# Liquidación CLI v2.0 — Liquidación de Nómina Colombia
 
-Herramienta CLI para el cálculo de prestaciones sociales en Colombia, conforme a la normativa laboral vigente. Calcula liquidaciones periódicas y de finiquito con cumplimiento legal garantizado.
+Herramienta CLI local para el cálculo de prestaciones sociales en Colombia conforme a la normativa laboral vigente (2025-2026). Calcula liquidaciones periódicas y de finiquito con cumplimiento legal automático, motor de compliance, y segundo cerebro local versionado.
 
 ## Características Principales
 
@@ -15,46 +15,33 @@ Herramienta CLI para el cálculo de prestaciones sociales en Colombia, conforme 
 ## Instalación Rápida
 
 ### Requisitos
-- Python 3.8+
+- Python 3.11+
 
 ### Instalación desde repositorio
 ```bash
-git clone https://github.com/usuario/liquidacion_cli.git
-cd liquidacion_cli
+git clone https://github.com/jhondrl6/liquidacion-cli.git
+cd liquidacion-cli
 pip install -e .
+# O con uv:
+uv pip install -e .
 ```
+El entry point `liquidacion` queda disponible en el PATH.
 
 ## Uso Básico
 
-### Uso con archivo JSON
 ```bash
-# Usando archivo de entrada predefinido
-python bin/liquidar.py --input examples/example_finca_rural.json --output liquidacion.json
-```
+# Ver ayuda
+liquidacion --help
+liquidacion liquidar --help
 
-### Uso con argumentos individuales
-```bash
-# Liquidación periódica para trabajador de finca rural
-python bin/liquidar.py \
-    --modo PERIODICA \
-    --fecha_ingreso 2024-11-16 \
-    --fecha_corte 2025-11-15 \
-    --salario_mensual 2000000 \
-    --reside_en_lugar_trabajo true \
-    --auxilio_conectividad 200000 \
-    --output liquidacion.json
-```
+# Caso canónico (206 días, 2 segmentos, SBL $2.200.000)
+liquidacion liquidar examples/inputs/caso_canonico_periodico_206d.json
 
-### Uso con validación de cumplimiento únicamente
-```bash
-# Solo verificar compliance sin generar liquidación
-python bin/liquidar.py --compliance-check-only examples/example_finca_rural.json
-```
+# Validar un input contra parámetros 2025
+liquidacion validate examples/inputs/test_minimo_valid.json --params-year 2025
 
-### Generar PDF desde JSON existente
-```bash
-# Convertir resultado JSON a PDF profesional
-python bin/liquidar.py --generate-pdf liquidacion.json
+# Ver información del sistema
+liquidacion info
 ```
 
 ## Ejemplos Disponibles
@@ -161,16 +148,9 @@ Para ejecutar la suite completa de pruebas:
 
 ```bash
 # Ejecutar todos los tests
-pytest liquidator/tests/
-
-# Ejecutar con coverage
-pytest liquidator/tests/ --cov=liquidator --cov-report=html
-
-# Ejecutar tests específicos de compliance
-pytest liquidator/tests/test_compliance/
-
-# Ejecutar tests de calculadores
-pytest liquidator/tests/test_calculators/test_prestaciones.py
+uv run --with pytest --with python-dateutil --with PyYAML \
+  --with jsonschema --with pydantic --with loguru --with click \
+  --with markdown --with Jinja2 pytest liquidator/tests -q
 ```
 
 ## Documentación
@@ -204,6 +184,6 @@ Para soporte o preguntas:
 
 ---
 
-**Versión**: 1.0.0  
-**Última Actualización**: 2025-11-04  
-**Compatibilidad**: Ley Laboral Colombia 2025
+**Versión**: 2.0.0  
+**Última Actualización**: 2026-06-14  
+**Compatibilidad**: Ley Laboral Colombia 2025-2026

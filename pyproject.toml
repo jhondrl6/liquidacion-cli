@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "liquidacion-cli"
-version = "0.2.0-dev"   # Se promoverá a 2.0.0 en Fase 4
+version = "2.0.0"
 description = "CLI local para liquidación de nómina colombiana"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -17,7 +17,7 @@ keywords = [
   "severance", "bonus", "vacations", "legal-compliance",
 ]
 classifiers = [
-  "Development Status :: 3 - Alpha",
+  "Development Status :: 5 - Production/Stable",
   "Intended Audience :: Legal Industry",
   "Intended Audience :: Financial and Insurance Industry",
   "Intended Audience :: Developers",

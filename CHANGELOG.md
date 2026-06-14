@@ -8,7 +8,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [Unreleased]
+## [2.0.0] - 2026-06-14
+
+### Breaking changes
+
+- **Entry point:** `settle` → `liquidacion`. El comando `python -m liquidator.cli` o `liquidacion` reemplaza los entry points legacy `settle*`.
+- **Schemas Pydantic:** Entrada y salida formalizadas con Pydantic v2. El JSON histórico de v1.x puede no ser compatible. Usar los ejemplos de `examples/inputs/` como referencia.
+- **Compliance `WARN` eliminado:** Reemplazado por `GO` con sección de advertencias visibles. Estados vigentes: `GO`, `NO_GO`, `OVERRIDE_APPROVED`.
+- **`severity → blocking` activo:** Reglas CRITICAL bloquean la generación; HIGH requiere `--override --override-reason`. MEDIUM/LOW/INFO registran advertencias pero no bloquean.
+- **`params/checklist.json`:** Requiere campo `blocking` por regla (boolean). Las reglas sin `blocking` no se evaluarán.
+- **`audit/` inmutable:** Cada ejecución genera un registro inmutable (`audit/<timestamp>_<hash>.json`) con params_hash, input_hash, output_hash, reglas_aplicadas, warnings y overrides.
+- **`setup.py` eliminado:** Reemplazado por `pyproject.toml` (PEP 621). Paquete renombrado de `colombia_payroll_settlement` a `liquidacion-cli`.
+- **Plantillas movidas:** `templates/` → `liquidator/templates/`.
+
+### Added
+
+- **Segundo cerebro local:** `Contexto/KB_LLM/` con 10 notas sustantivas (jerarquía de verdad, reglas de cálculo, params vigentes, compliance, schemas, riesgos, checklist, arquitectura, caso canónico).
+- **`AGENTS.md`:** 12 reglas inamovibles + jerarquía de verdad de 6 niveles + 14 trampas conocidas para agentes/operadores.
+- **CLI real con Click:** Subcomandos `liquidar`, `validate`, `info`. `--version` retorna `2.0.0`. `--help` funcional.
+- **Schemas Pydantic:** `input_model.py` (Trabajador, Empleador, Contrato, Salario, MotivoTerminacion, VacacionesEstado, PeriodoNoPagado, campos de preaviso), `output_model.py` (MetaLiquidacion, Desglose, DesgloseConcepto), `document_context.py` (DocumentContext, RenglonDesglose, ComplianceInfo).
+- **WorkflowOrchestrator:** Segmentación de periodos por año calendario con SBL resuelto por año (SL2630-2024).
+- **`SalarioResolver` (SL2630-2024):** 3 prioridades — historial_salarial, sbl_por_anio, SBL único. Anualización de prestaciones por año calendario.
+- **`IPCIndexador` (SL2630-2024 + Art. 488 CST):** Indexación de prestaciones no pagadas con datos DANE en formato índice acumulado. Defensa anti-tasa. Prescripción Art. 488 CST (3 años).
+- **Vacaciones compensadas en finiquito (Art. 189-190 CST):** `calculate_vacaciones_compensadas_finiquito` con fórmula `(SBL/30) × dias_pendientes`, hook `_calcular_vacaciones_si_finiquito` solo en modo FINIQUITO.
+- **Indemnización preaviso (Art. 46 CST):** `calculate_indemnizacion_preaviso` con fórmula `(SBL/30) × dias_faltantes`. Solo aplica a contratos a término fijo vencidos.
+- **13 reglas de compliance (V001-V015):** V001-V010 (base), V011 indexación IPC, V012-V013 preaviso, V014 vacaciones finiquito, V015 vacaciones declaradas. Tabla severity→blocking documentada.
+- **`PreRenderValidator`:** Matriz `REQUISITOS_POR_MOTIVO` (10 motivos de terminación Arts. 45-49 CST). Validación específica por motivo antes del renderizado.
+- **`liquidacion_BLOQUEADA.*`:** Para compliance `NO_GO` se genera `liquidacion_BLOQUEADA.json` + `liquidacion_BLOQUEADA.md` con explicación de la regla fallida. Exit code 2. Sin PDF (regla AGENTS.md #7).
+- **`DocumentContext` formal (Pydantic):** `from_engine_result()` anonimiza PII y aplana desglose segmentado. 45 tests.
+- **Caso canónico (206 días, 2 segmentos):** `examples/inputs/caso_canonico_periodico_206d.json` — 2025-11-16 a 2026-06-09, SBL $2.200.000, 46d + 160d. Reproducible desde CLI.
+- **~15 golden tests:** Caso canónico, SBL variable, prescripción/indexación, finiquito renuncia 212d, finiquito término fijo sin preaviso.
+- **`check_kb_freshness.py`:** Detección de KB desactualizada vs params. 6 tests.
+- **Params 2025+2026 verificados:** SMMLV, aux_trans, tasas, normas (18 entradas con URLs SUIN reales), checklist (V001-V015).
+- **Tres addendas absorbidos en v2.0.0:** SL2630-2024 + IPC, finiquito por renuncia + vacaciones compensadas, preaviso contrato a término fijo (Art. 46 CST). Ver addendas en `Planificación/` para detalle de reparos.
+- **Suite de tests:** ~650 tests (575P/42F/1xfail/15E al cierre de Fase 3). 42 fails + 15 errors preexistentes pendientes para Fase 4 (suite 100%).
+
+### Detailed changes
 
 **S36 — Cierre Fase 3 base (Tareas 3.A + 3.D) (2026-06-14)**
 - **`DocumentContext` (Tarea 3.A, plan §8.2):** nuevo modelo Pydantic en `liquidator/contracts/document_context.py` con `RenglonDesglose`, `ComplianceInfo`, `DocumentContext` y constructor `from_engine_result()`. Anoniza PII (nombre → `[ANONIMIZADO]`, documento → `-`) y aplana desglose segmentado por año a `list[RenglonDesglose]` con `evidencia_legal` y `formula` por renglón. 45 tests nuevos en `test_contracts/test_document_context.py` (RenglonDesglose 5, ComplianceInfo 11, DocumentContext 5, from_engine_result segmentado 9, plano 2, edge cases 11, inmutabilidad 2). Cubre tolerancia a variantes de keys (`status`/`compliance_status`, `blocking_failures`/`failures`, `warnings`/`advertencias`).
@@ -122,6 +157,10 @@ R3 del plan mitigado: 0 inputs en `examples/inputs/` con `variable=true` (grep c
 - **R-OP-03 (RECLASIFICADO/CERRADO S20):** reclasificado en S20 como **artefacto del método de validación** S11.6 (sin `RefResolver`). Con método correcto (`RefResolver.from_schema(schema)`), las definiciones top-level se resuelven correctamente. El bug real resultó ser R-OP-11. La schema SÍ está bien internamente. No requiere acción.
 - **R-OP-10 (RESUELTO S20):** id `LEY_2466_2025_INTERESES_MENSUALES` (33 chars) excedía `maxLength: 20` en `params/schema.json` L112. Fix aplicado S20 = subir a 40 (1 línea, retrocompatible, decisión del usuario opción 1).
 - **Fase 0 CERRADA en S11 (DoD 100% = 5/5 con P-S11.3 cerrado en S21).** Siguiente fase: **Fase 1** (1.A-utils S12, 1.X S13, 1.A-plan S14, 1.B S15, 1.C S16, 1.E S17, 1.D S18, 1.I S19, 1.G S20, **R-OP-11 S21**). Próximas candidatas: **Tarea 1.C-bis/ter/quater** (addendas) o **Tarea 1.F** (refactor `markdown_generator.py`).
+
+---
+
+## [Unreleased]
 
 ---
 
