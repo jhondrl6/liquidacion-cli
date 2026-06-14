@@ -1,14 +1,30 @@
-"""Motor de orquestación de cálculos para la liquidación."""
+"""Motor de orquestación de cálculos para la liquidación.
+
+Tarea 2.B-bis (S27): integración de ``SalarioResolver`` para anualización
+salarial SL2630-2024 — cada año calendario se liquida con el SBL de ESE año.
+"""
 
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import date, datetime
+from decimal import Decimal
 from typing import Any, Dict, List, Tuple
+
+try:
+    from liquidator.contracts.input_model import Salario
+except ImportError:
+    Salario = None  # type: ignore[assignment]
 
 from liquidator.calculators.sbl_calculator import SBLCalculator
 from liquidator.calculators.prestaciones_calculator import PrestacionesCalculator
 from liquidator.calculators.vacaciones_calculator import VacacionesCalculator
 from liquidator.calculators.indemnizacion_calculator import IndemnizacionCalculator
+from liquidator.core.salario_resolver import (
+    SalarioResolver,
+    SegmentoCalculo,
+    segmentar_periodo,
+)
 
 
 @dataclass(frozen=True)
@@ -29,12 +45,18 @@ class WorkflowOrchestrator:
         self.vac_calc = VacacionesCalculator(params)
         self.indemn_calc = IndemnizacionCalculator(params)
 
+    # ------------------------------------------------------------------
+    # API pública
+    # ------------------------------------------------------------------
+
     def execute(self, input_data: Dict[str, Any]) -> WorkflowResult:
         modo = input_data.get("modo", "PERIÓDICA")
         fecha_ingreso = input_data.get("fecha_ingreso")
         fecha_corte = input_data.get("fecha_corte")
 
-        salario_mensual = input_data.get("salario_mensual", 0)
+        # --- Resolver SBL: flat vs nested + SalarioResolver (2.B-bis) ---
+        salario_mensual = self._extraer_salario_mensual(input_data)
+
         auxilio_transporte = input_data.get("auxilio_transporte")
         if auxilio_transporte is None:
             auxilio_transporte = self.params.get("AUXILIO_TRANS", 0)
@@ -89,18 +111,31 @@ class WorkflowOrchestrator:
         sbl_vacaciones = int(sbl_vacaciones_dec)
         sbl_prima = int(sbl_prima_dec)
 
-        dias_servicio = self.prest_calc.calculate_dias_servicio(
-            fecha_ingreso, fecha_corte
-        )
-        cesantias_data = self.prest_calc.calculate_cesantias(
-            sbl_general, dias_servicio, fecha_ingreso, fecha_corte
-        )
-        intereses_data = self.prest_calc.calculate_intereses_cesantias(
-            cesantias_data["valor"], dias_servicio, fecha_ingreso, fecha_corte
-        )
-        prima_data = self.prest_calc.calculate_prima(
-            sbl_prima, fecha_ingreso, fecha_corte
-        )
+        # --- 2.B-bis: segmentación por año calendario si hay Resolver ---
+        salario_resolver = self._build_salario_resolver(input_data)
+        if salario_resolver is not None and fecha_ingreso and fecha_corte:
+            cesantias_data, intereses_data, prima_data = self._calcular_prestaciones_segmentadas(
+                salario_resolver,
+                fecha_ingreso,
+                fecha_corte,
+                modo,
+            )
+            dias_servicio = self.prest_calc.calculate_dias_servicio(
+                fecha_ingreso, fecha_corte
+            )
+        else:
+            dias_servicio = self.prest_calc.calculate_dias_servicio(
+                fecha_ingreso, fecha_corte
+            )
+            cesantias_data = self.prest_calc.calculate_cesantias(
+                sbl_general, dias_servicio, fecha_ingreso, fecha_corte
+            )
+            intereses_data = self.prest_calc.calculate_intereses_cesantias(
+                cesantias_data["valor"], dias_servicio, fecha_ingreso, fecha_corte
+            )
+            prima_data = self.prest_calc.calculate_prima(
+                sbl_prima, fecha_ingreso, fecha_corte
+            )
 
         if modo == "FINIQUITO":
             for concepto in (cesantias_data, intereses_data, prima_data):
@@ -196,7 +231,9 @@ class WorkflowOrchestrator:
                 "norma": salario_pendiente.get("norma", "Art.65 CST"),
                 "nota": salario_pendiente.get("nota", ""),
             }
-            calculation_results["salario_pendiente"] = salario_pendiente.get("valor", 0)
+            calculation_results["salario_pendiente"] = salario_pendiente.get(
+                "valor", 0
+            )
 
         alerts = self._build_alerts(
             alerts_general + alerts_vacaciones + alerts_prima,
@@ -206,8 +243,7 @@ class WorkflowOrchestrator:
 
         calculation_results["validaciones_y_alertas"] = alerts
 
-        # Calcular total dinámico sumando todos los conceptos con valor > 0 en desglose
-        # Esto permite agregar nuevos conceptos sin modificar la lógica de totalización
+        # Calcular total dinámico
         total_liquidacion = 0
         for concepto, datos in desglose.items():
             if isinstance(datos, dict) and "valor" in datos:
@@ -232,6 +268,137 @@ class WorkflowOrchestrator:
             validaciones_y_alertas=alerts,
             normas_aplicadas=sorted(norm_set),
         )
+
+    # ------------------------------------------------------------------
+    # 2.B-bis — anualización salarial (SL2630-2024)
+    # ------------------------------------------------------------------
+
+    def _extraer_salario_mensual(self, input_data: Dict[str, Any]) -> float:
+        """Extrae ``salario_mensual`` del input, soportando formato plano y
+        anidado (``salario.SBL`` de la Tarea 1.C-bis)."""
+        # Forma 2 (anidada) — Pydantic Salario
+        salario_obj = input_data.get("salario")
+        if isinstance(salario_obj, dict) and "SBL" in salario_obj:
+            return float(salario_obj["SBL"])
+        # Forma 1 (plana)
+        return float(input_data.get("salario_mensual", 0))
+
+    def _build_salario_resolver(
+        self, input_data: Dict[str, Any]
+    ) -> SalarioResolver | None:
+        """Construye un ``SalarioResolver`` si el input tiene los campos
+        de anualización (1.C-bis). Retorna ``None`` si no aplica."""
+        salario_obj = input_data.get("salario")
+        if not isinstance(salario_obj, dict):
+            return None
+        # Solo activamos si hay campos de anualización
+        if "sbl_por_anio" not in salario_obj and "historial_salarial" not in salario_obj:
+            return None
+        if Salario is None:
+            return None
+        try:
+            salario_model = Salario.model_validate(salario_obj)
+            return SalarioResolver(salario_model)
+        except Exception:
+            return None
+
+    def _calcular_prestaciones_segmentadas(
+        self,
+        resolver: SalarioResolver,
+        fecha_ingreso: str,
+        fecha_corte: str,
+        modo: str,
+    ) -> tuple[Dict[str, Any], Dict[str, Any], Dict[str, Any]]:
+        """Calcula cesantías, intereses y prima por año calendario.
+
+        SL2630-2024: cada año se liquida con el SBL de ESE año.
+        Cesantías e intereses son estrictamente proporcionales a los días
+        → se segmentan y suman.  Prima es semestral y usa el SBL del año
+        de la ``fecha_corte``.
+        """
+        desde = datetime.strptime(fecha_ingreso, "%Y-%m-%d").date()
+        hasta = datetime.strptime(fecha_corte, "%Y-%m-%d").date()
+        segmentos = segmentar_periodo(desde, hasta)
+
+        cesantias_total = 0
+        dias_cesantias_total = 0
+
+        for seg in segmentos:
+            seg.sbl = resolver.sbl_para_segmento(seg)
+            sbl_seg = float(seg.sbl)
+            desde_str = seg.desde.isoformat()
+            hasta_str = seg.hasta.isoformat()
+
+            # Cesantías del segmento
+            cdata = self.prest_calc.calculate_cesantias(
+                sbl_seg, seg.dias, desde_str, hasta_str
+            )
+            cesantias_total += cdata["valor"]
+            dias_cesantias_total += cdata["dias_liquidados"]
+
+        # Intereses sobre cesantías: usan las cesantías TOTALES como base,
+        # no la suma de intereses por segmento (fórmula legal: Art. 99
+        # Ley 50/1990 = cesantías × días_totales × 12% / 360).
+        dias_totales = sum(seg.dias for seg in segmentos)
+        intereses_raw = self.prest_calc.calculate_intereses_cesantias(
+            cesantias_total, dias_totales, fecha_ingreso, fecha_corte
+        )
+
+        # Prima: no se segmenta — usa el SBL del año de fecha_corte
+        sbl_prima_seg = resolver.sbl_para_segmento(
+            SegmentoCalculo(
+                anio=hasta.year,
+                desde=hasta,
+                hasta=hasta,
+                sbl=Decimal("0"),
+                dias=0,
+            )
+        )
+        sbl_prima_val = int(sbl_prima_seg)
+        prima_data = self.prest_calc.calculate_prima(
+            sbl_prima_val, fecha_ingreso, fecha_corte
+        )
+
+        # Armar resultados con la misma forma que el flujo plano
+        cesantias_data = {
+            "valor": cesantias_total,
+            "dias_liquidados": dias_cesantias_total,
+            "sbl_utilizado": None,
+            "formula": f"Suma de {len(segmentos)} segmento(s) anual(es) — SL2630-2024",
+            "plazo_pago_legal": "ver compliance engine",
+            "norma": "Art. 249-250 CST; SL2630-2024",
+            "metadata": {
+                "fecha_ingreso": fecha_ingreso,
+                "fecha_corte": fecha_corte,
+                "segmentos": len(segmentos),
+                "anualizacion": "SL2630-2024",
+            },
+        }
+
+        intereses_data = {
+            "valor": intereses_raw["valor"],
+            "dias_liquidados": intereses_raw["dias_liquidados"],
+            "tasa_aplicada": 0.12,
+            "cesantias_base": cesantias_total,
+            "formula": f"Suma de {len(segmentos)} segmento(s) anual(es) — SL2630-2024",
+            "plazo_pago_legal": "ver compliance engine",
+            "norma": "Ley 50/1990 Art. 99; SL2630-2024",
+            "metadata": {
+                "fecha_ingreso": fecha_ingreso,
+                "fecha_corte": fecha_corte,
+                "segmentos": len(segmentos),
+            },
+        }
+
+        if modo == "FINIQUITO":
+            for concepto in (cesantias_data, intereses_data, prima_data):
+                concepto["plazo_pago_legal"] = fecha_corte
+
+        return cesantias_data, intereses_data, prima_data
+
+    # ------------------------------------------------------------------
+    # Internos
+    # ------------------------------------------------------------------
 
     def _build_alerts(
         self,

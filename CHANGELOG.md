@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+**S27 — Tarea 2.B-bis: `SalarioResolver` SBL por año (addendum SL2630) (2026-06-13)**
+- **SalarioResolver:** `liquidator/core/salario_resolver.py` (nuevo, 143 líneas). Clase `SalarioResolver` con 3 prioridades: (1) `historial_salarial` → promedio del año, (2) `sbl_por_anio[año]` → SBL explícito, (3) `SBL` único. Dataclass `SegmentoCalculo` y helper `segmentar_periodo()`.
+- **Integración en WorkflowOrchestrator:** `liquidator/core/workflow_orchestrator.py`. `_extraer_salario_mensual()` soporta formato anidado Pydantic `salario.SBL`. `_build_salario_resolver()` activa la vía segmentada cuando el input tiene `sbl_por_anio` o `historial_salarial`. `_calcular_prestaciones_segmentadas()` calcula cesantías por año calendario con SBL resuelto (intereses sobre cesantías totales, prima por año de fecha_corte).
+- **Tests:** `test_salario_resolver.py` (15 unitarios) + `test_salario_variable_por_anio.py` (9 golden) = 24/24 PASS. Suite: 417 passed (+24 vs S26 baseline). 0 regresiones. Caso canónico 11/11 verde.
+- **KB:** `Contexto/KB_LLM/01_reglas_calculo.md` — nueva sección "Anualización salarial SL2630-2024".
+
 **S26 — Remate R-OP-02/07/08/09 + bug checklist_loader.py:21 (2026-06-13)**
 - **R-OP-02 Causa 2 (RESUELTO):** `liquidator/params/params_versioning.py` — `import datetime` → `from datetime import datetime` (1 línea). 9 tests de `test_versioning.py` pasan ahora (21/21 PASS, +9 vs baseline).
 - **R-OP-08 (RESUELTO):** `liquidator/tests/test_compliance/test_override.py` — mismo fix (1 línea, 7/7 PASS, +1 vs baseline).

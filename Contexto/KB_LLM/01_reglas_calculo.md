@@ -25,7 +25,11 @@
 - **Fórmula por segmento:**
   `cesantias = SBL × días_trabajados_segmento / 360`
 - **Anualización:** si el periodo cruza 1 de enero, se segmenta por año
-  calendario. Cada año usa el `params/<año>.json` que le corresponde.
+  calendario. Cada año usa el `params/<año>.json` que le corresponde y
+  el **SBL del año** correspondiente (SL2630-2024: cada año calendario
+  se liquida con el promedio del salario de ESE año). Implementado en
+  `liquidator/core/salario_resolver.py` (Tarea 2.B-bis, S27).
+  Ver sección \"Anualización salarial SL2630-2024\" abajo.
 - **Plazo de pago:** 14 de febrero del año siguiente (ver
   `params/normas.json` → `plazos_pago.cesantías`, norma `CST_249_252`).
 - **Implementación:** `liquidator/calculators/prestaciones_calculator.py`
@@ -107,11 +111,34 @@
   (addendum SL2630-2024). Ver `02_parametros_vigentes.md` nota sobre
   IPC y `03_fuentes_normativas.md` sobre SL2630-2024.
 
+## Anualización salarial SL2630-2024 (Tarea 2.B-bis, S27)
+
+> **Fuente:** Addendum `addendum_sl2630_y_ipc_2026-06-09.md`, Sentencia
+> SL2630-2024 Corte Suprema de Justicia, Sala de Descongestión Laboral
+> N.º 1 (pendiente verificación verbatim).
+
+**Principio:** cada año calendario se liquida con el promedio del
+salario de ESE año. El SBL deja de ser un valor único del contrato.
+
+**Resolución de SBL por año — 3 prioridades:**
+
+1. **`historial_salarial`** — serie mensual (`list[MesValor]`).
+   El motor calcula el promedio de los meses cuyo `año` coincide con
+   el año del segmento.
+2. **`sbl_por_anio`** — dict explícito `{año: SBL}`.
+3. **`SBL` único** — compatibilidad con v1.x y caso canónico.
+
+**Implementación:** `liquidator/core/salario_resolver.py` clase
+`SalarioResolver` + dataclass `SegmentoCalculo` + helper
+`segmentar_periodo()`. Integrado en `WorkflowOrchestrator`:
+cuando el input contiene `sbl_por_anio` o `historial_salarial` en el
+objeto `salario` (Pydantic `Salario` de 1.C-bis), el orquestador
+activa la vía segmentada que calcula cesantías por año calendario
+con el SBL resuelto para cada año.
+
+**Tests:** 15 unitarios (`test_salario_resolver.py`) + 9 golden
+(`test_salario_variable_por_anio.py`). Regresión canónica verde.
+
 ## Última validación contra código
 
-- **Fecha:** 2026-06-13 (sesión S5, Tarea 0.E).
-- **Alcance verificado:** existencia de los 4 calculadores en
-  `liquidator/calculators/`, valores en `params/2025.json` y `2026.json`,
-  entradas de `params/normas.json` citadas. **NO** se re-ejecutó el motor
-  en esta sesión; la validación es estática (lectura de código y
-  params). Re-validar ejecutando caso canónico en Tarea 0.J o Fase 1.
+- **Fecha:** 2026-06-13 (sesión S27, Tarea 2.B-bis).
