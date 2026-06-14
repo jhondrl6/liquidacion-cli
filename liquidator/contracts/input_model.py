@@ -29,6 +29,7 @@ from __future__ import annotations
 
 from datetime import date
 from decimal import Decimal
+from enum import Enum
 from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator, model_validator
@@ -53,15 +54,95 @@ class Empleador(BaseModel):
 class Contrato(BaseModel):
     """Vínculo contractual y su ámbito temporal.
 
-    `motivo_terminacion` se modela como `str | None` en la base 1.C.
-    Tarea 1.C-ter lo convierte en enum `MotivoTerminacion` cubriendo
-    Arts. 45-49 CST. Mantener retrocompatible: default `None`.
+    `motivo_terminacion` usa el enum `MotivoTerminacion` (Tarea 1.C-ter,
+    addendum finiquito/vacaciones). Default `None` mantiene
+    retrocompatibilidad con el caso canónico PERIODICA.
+
+    `fecha_terminacion_real` es obligatorio en modo FINIQUITO (validado
+    por `LiquidacionInput._finiquito_requiere_motivo`).
     """
 
     fecha_ingreso: date
     fecha_corte: date
     tipo: Literal["INDEFINIDO", "FIJO", "OBRA_LABOR", "PRESTACION"]
-    motivo_terminacion: str | None = None
+    motivo_terminacion: MotivoTerminacion | None = None
+    fecha_terminacion_real: date | None = None
+
+    @model_validator(mode="after")
+    def _terminacion_real_requiere_motivo(self) -> "Contrato":
+        """Si hay fecha de terminación real, debe venir con motivo.
+
+        Regla de integridad: no se puede declarar que el contrato terminó
+        sin especificar por qué (Art. 49 CST exige causa expresa).
+        """
+        if self.fecha_terminacion_real and not self.motivo_terminacion:
+            raise ValueError(
+                "Si hay fecha_terminacion_real, es obligatorio motivo_terminacion"
+            )
+        return self
+
+
+class MotivoTerminacion(str, Enum):
+    """Motivos de terminación del contrato laboral (Arts. 45-49 CST).
+
+    Tarea 1.C-ter (addendum finiquito/vacaciones 2026-06-11).
+    El valor del enum es el string canónico que va al JSON.
+
+    Uso: `contrato.motivo_terminacion == MotivoTerminacion.RENUNCIA_VOLUNTARIA`.
+    """
+
+    RENUNCIA_VOLUNTARIA = "renuncia_voluntaria"           # Art. 49 num. 6
+    DESPIDO_SIN_JUSTA_CAUSA = "despido_sin_justa_causa"   # Art. 64
+    DESPIDO_CON_JUSTA_CAUSA = "despido_con_justa_causa"   # Art. 62
+    TERMINO_FIJO_VENCIDO = "termino_fijo_vencido"         # Art. 46
+    OBRA_O_LABOR_TERMINADA = "obra_o_labor_terminada"     # Art. 45
+    MUTUO_ACUERDO = "mutuo_acuerdo"                       # Art. 49 num. 1
+    MUERTE_TRABAJADOR = "muerte_trabajador"               # Art. 49 num. 5
+    MUERTE_EMPLEADOR = "muerte_empleador"                 # Art. 49 num. 4
+    SUSPENSION_DEFICITARIA = "suspension_deficitaria"     # Art. 49 num. 3
+    CIERRE_EMPRESA = "cierre_empresa"                     # Art. 49 num. 3
+
+
+class PeriodoDisfrute(BaseModel):
+    """Rango continuo de disfrute de vacaciones (histórico opcional).
+
+    Tarea 1.C-ter (addendum finiquito/vacaciones 2026-06-11).
+    """
+
+    desde: date
+    hasta: date  # inclusive
+
+
+class VacacionesEstado(BaseModel):
+    """Estado de vacaciones del trabajador al cierre del periodo.
+
+    Tarea 1.C-ter (addendum finiquito/vacaciones 2026-06-11).
+    Reemplaza el `dict` libre del input por un modelo tipado.
+    Tipos en Decimal para soportar fracciones de día (Art. 189 + 190 CST).
+
+    `dias_causados_proporcionales` es opcional: si el empleador no lo
+    provee, el validador de consistencia no se ejecuta y el motor lo
+    calculará a partir de los días de servicio (Tarea 2.B-ter).
+    """
+
+    dias_causados_proporcionales: Decimal | None = None
+    dias_disfrutados: Decimal = Decimal(0)
+    dias_pendientes: Decimal = Field(ge=0)
+    fechas_disfrute: list[PeriodoDisfrute] | None = None
+
+    @model_validator(mode="after")
+    def _consistencia(self) -> "VacacionesEstado":
+        """Si el empleador pasó dias_causados_proporcionales, validar
+        que dias_pendientes no exceda el máximo causable."""
+        causados = self.dias_causados_proporcionales
+        if causados is not None:
+            max_pendientes = causados - self.dias_disfrutados
+            if self.dias_pendientes > max_pendientes:
+                raise ValueError(
+                    f"dias_pendientes ({self.dias_pendientes}) excede el máximo "
+                    f"causable ({max_pendientes} = {causados} - {self.dias_disfrutados})"
+                )
+        return self
 
 
 class MesValor(BaseModel):
@@ -133,9 +214,10 @@ class LiquidacionInput(BaseModel):
     `WorkflowOrchestrator` cruzando año calendario. Ver KB_LLM/04
     §"Forma 2 — Input segmentado".
 
-    `vacaciones` y `auxilios` se modelan como `dict | None` en la base.
-    Tarea 1.C-ter los convierte en modelos tipados (`VacacionesEstado`,
-    `AuxiliosEstado` cuando exista).
+    `vacaciones` usa el modelo tipado `VacacionesEstado` (Tarea 1.C-ter,
+    addendum finiquito/vacaciones). Default `None` mantiene
+    retrocompatibilidad con el caso canónico PERIODICA.
+    `auxilios` queda como `dict | None` para extensibilidad futura.
     """
 
     trabajador: Trabajador
@@ -143,7 +225,7 @@ class LiquidacionInput(BaseModel):
     contrato: Contrato
     salario: Salario
     modo: Literal["PERIODICA", "FINIQUITO", "VACACIONES"]
-    vacaciones: dict | None = None  # tipado en 1.C-ter
+    vacaciones: VacacionesEstado | None = None
     auxilios: dict | None = None  # extensibilidad
 
     @field_validator("contrato")
@@ -159,11 +241,29 @@ class LiquidacionInput(BaseModel):
             raise ValueError("fecha_corte debe ser >= fecha_ingreso")
         return v
 
+    @model_validator(mode="after")
+    def _finiquito_requiere_motivo(self) -> "LiquidacionInput":
+        """Modo FINIQUITO exige motivo_terminacion explícito.
+
+        Sin esta regla, un finiquito podría generarse sin saber si
+        corresponde indemnización (Art. 64, despido sin justa causa) o
+        no (Art. 49 num. 6, renuncia voluntaria). El validador es duro:
+        no permite FINIQUITO sin motivo declarado.
+        """
+        if self.modo == "FINIQUITO" and not self.contrato.motivo_terminacion:
+            raise ValueError(
+                "Liquidación en modo FINIQUITO requiere contrato.motivo_terminacion"
+            )
+        return self
+
 
 __all__ = [
     "Trabajador",
     "Empleador",
     "Contrato",
+    "MotivoTerminacion",
+    "PeriodoDisfrute",
+    "VacacionesEstado",
     "Salario",
     "MesValor",
     "LiquidacionInput",

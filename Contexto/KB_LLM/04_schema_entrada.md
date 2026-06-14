@@ -83,14 +83,22 @@ Campos adicionales respecto a Forma 1:
 | `segmentos[].hasta`            | ISO date  | sí          | Inclusivo (convención día-a-día, ver §3 plan).     |
 | `segmentos[].params_ref`       | path      | sí          | Path relativo al repo, ej. `params/2026.json`.     |
 
-## Campos pendientes para Fase 1 (addenda)
+## Campos pendientes para Fase 1 (addendas)
 
 - **Addendum finiquito (Tarea 1.C-ter):** añadir a `contrato`:
-  - `motivo_terminacion` (enum: `RENUNCIA_VOLUNTARIA`, `DESPIDO_SIN_JUSTA_CAUSA`,
-    `DESPIDO_CON_JUSTA_CAUSA`, `MUTUO_ACUERDO`, `EXPIRACION_CONTRATO`,
-    `OTRO`).
-  - `VacacionesEstado` (sub-objeto con `dias_pendientes`, `dias_compensados`,
-    `dias_disfrutados_periodo_actual`).
+  - `motivo_terminacion` (enum `MotivoTerminacion` con 10 valores: `RENUNCIA_VOLUNTARIA`,
+    `DESPIDO_SIN_JUSTA_CAUSA`, `DESPIDO_CON_JUSTA_CAUSA`, `TERMINO_FIJO_VENCIDO`,
+    `OBRA_O_LABOR_TERMINADA`, `MUTUO_ACUERDO`, `MUERTE_TRABAJADOR`,
+    `MUERTE_EMPLEADOR`, `SUSPENSION_DEFICITARIA`, `CIERRE_EMPRESA`).
+    **IMPLEMENTADO S24 (1.C-ter).**
+  - `VacacionesEstado` (sub-modelo con `dias_causados_proporcionales: Decimal | None`,
+    `dias_disfrutados: Decimal = 0`, `dias_pendientes: Decimal (ge=0)`,
+    `fechas_disfrute: list[PeriodoDisfrute] | None`). Con `model_validator`
+    que rechaza `dias_pendientes > dias_causados - dias_disfrutados`.
+    **IMPLEMENTADO S24 (1.C-ter).**
+  - `Contrato.fecha_terminacion_real: date | None` agregado.
+  - `model_validator` en `Contrato`: fecha_terminacion_real requiere motivo.
+  - `model_validator` en `LiquidacionInput`: FINIQUITO requiere motivo_terminacion.
 - **Addendum SL2630 (Tarea 1.C-bis):** añadir a `salario` (IMPLEMENTADO en
   S23, retrocompatible):
   - `sbl_por_anio` (dict `{anio: monto}`) para contratos multi-año
@@ -116,14 +124,16 @@ Campos adicionales respecto a Forma 1:
 
 ## Última validación contra código
 
-- **Fecha:** 2026-06-13 (sesión S5, Tarea 0.E).
-- **Verificado:** lectura de `examples/inputs/finca_rural.json` (10
-  líneas, vigente) y del caso canónico documentado en plan §3
-  (líneas 120-159).
-- **NO verificado:** que `input_parser.py` realmente aplique la
-  derivación a Forma 2. La forma 2 está documentada en el plan y en
-  `workflow_orchestrator.py` pero NO fue leída en detalle en esta
-  sesión. Re-validar en Tarea 0.J.
+- **Fecha:** 2026-06-13 (sesión S24, Tarea 1.C-ter).
+- **Verificado:** `liquidator/contracts/input_model.py` con `MotivoTerminacion`
+  (10 valores), `PeriodoDisfrute`, `VacacionesEstado`, `Contrato` actualizado
+  (`motivo_terminacion: MotivoTerminacion | None`, `fecha_terminacion_real`,
+  `model_validator` `_terminacion_real_requiere_motivo`), `LiquidacionInput`
+  actualizado (`vacaciones: VacacionesEstado | None`,
+  `model_validator` `_finiquito_requiere_motivo`).
+- **Tests:** 69/69 PASS en `test_contracts/` (17 input + 12 output + 10 salario
+  extendido + 15 vacaciones + 15 motivo terminación). 11/11 PASS en caso
+  canónico (regresión cero).
 
 ## Schema Pydantic formal (S16 — Tarea 1.C, plan §6.2)
 
@@ -135,10 +145,19 @@ de entrada tiene modelo Pydantic v2 en
 - `Trabajador` (sub-modelo: `nombre`, `documento`)
 - `Empleador` (sub-modelo: `nombre`, `documento`)
 - `Contrato` (sub-modelo: `fecha_ingreso`, `fecha_corte`, `tipo`,
-  `motivo_terminacion: str | None = None`)
+  `motivo_terminacion: MotivoTerminacion | None = None`,
+  `fecha_terminacion_real: date | None = None`. **Extensión 1.C-ter S24**:
+  `model_validator` rechaza `fecha_terminacion_real` sin motivo.)
 - `Salario` (sub-modelo: `SBL: Decimal` con `Field(gt=0)`,
   `auxilio_transporte: bool = False`, `variable: bool = False`,
   `dias_trabajados: int | None = None`)
+- `VacacionesEstado` (sub-modelo: `dias_causados_proporcionales: Decimal | None = None`,
+  `dias_disfrutados: Decimal = Decimal(0)`,
+  `dias_pendientes: Decimal = Field(ge=0)`,
+  `fechas_disfrute: list[PeriodoDisfrute] | None = None`.
+  **Extensión 1.C-ter S24**: tipado, reemplaza `vacaciones: dict | None`.)
+- `MotivoTerminacion` (enum con 10 valores Arts. 45-49 CST. **1.C-ter S24**)
+- `PeriodoDisfrute` (sub-modelo con `desde: date`, `hasta: date`. **1.C-ter S24**)
 
 Validaciones implementadas en la base 1.C:
 
@@ -160,9 +179,11 @@ anidadas en Fase 1):
   list[MesValor] | None`, sub-modelo `MesValor` con `año: int`,
   `mes: int` (1-12), `valor: Decimal` (>0), `model_validator` rechaza
   `variable=True` sin historial. Ver `liquidator/contracts/input_model.py`.
-- **1.C-ter** (addendum finiquito/vacaciones):
+- **1.C-ter** (addendum finiquito/vacaciones, **IMPLEMENTADO S24**):
   `Contrato.motivo_terminacion: MotivoTerminacion` (enum Arts. 45-49
-  CST), `VacacionesEstado` tipado (reemplaza `vacaciones: dict`).
+  CST), `VacacionesEstado` tipado (reemplaza `vacaciones: dict`),
+  `Contrato.fecha_terminacion_real: date | None`. Ver
+  `liquidator/contracts/input_model.py`.
 - **1.C-quater** (addendum preaviso):
   `Contrato.preaviso_entregado: bool | None`,
   `Contrato.fecha_preaviso: date | None`,
@@ -172,4 +193,6 @@ anidadas en Fase 1):
 **Validación contra tests:** 17/17 PASS en
 `liquidator/tests/test_contracts/test_input_model.py` (S16) + 10/10 PASS
 en `liquidator/tests/test_contracts/test_salario_extendido.py` (S23,
-extensión 1.C-bis). Total `test_contracts/`: 39/39 PASS.
+extensión 1.C-bis) + 15/15 PASS en `test_vacaciones_estado.py` (S24,
+extensión 1.C-ter) + 15/15 PASS en `test_motivo_terminacion.py` (S24,
+extensión 1.C-ter). Total `test_contracts/`: 69/69 PASS.

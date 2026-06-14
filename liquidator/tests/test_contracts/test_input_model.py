@@ -114,25 +114,25 @@ def test_input_tipo_contrato_todos_los_valores(canonico_dict: dict) -> None:
 
 
 def test_input_con_vacaciones_y_auxilios(canonico_dict: dict) -> None:
-    """`vacaciones` y `auxilios` son dict libre en la base 1.C.
+    """`vacaciones` ahora es `VacacionesEstado` tipado (Tarea 1.C-ter).
 
-    Tarea 1.C-ter los convierte en modelos tipados; mientras tanto
-    se acepta cualquier dict. Test que fija el contrato actual.
+    El dict debe contener al menos `dias_pendientes` (campo obligatorio
+    en VacacionesEstado). `auxilios` sigue como `dict | None`.
     """
     canonico_dict["vacaciones"] = {
-        "dias_causados": 15,
-        "dias_tomados": 5,
-        "fecha_inicio": "2025-06-01",
-        "fecha_fin": "2025-06-15",
+        "dias_causados_proporcionales": 15,
+        "dias_disfrutados": 5,
+        "dias_pendientes": 10,
+        "fechas_disfrute": [
+            {"desde": "2025-06-01", "hasta": "2025-06-15"},
+        ],
     }
     canonico_dict["auxilios"] = {"conectividad": 150000}
     inp = LiquidacionInput.model_validate(canonico_dict)
-    assert inp.vacaciones == {
-        "dias_causados": 15,
-        "dias_tomados": 5,
-        "fecha_inicio": "2025-06-01",
-        "fecha_fin": "2025-06-15",
-    }
+    assert inp.vacaciones.dias_pendientes == Decimal("10")
+    assert inp.vacaciones.dias_causados_proporcionales == Decimal("15")
+    assert inp.vacaciones.dias_disfrutados == Decimal("5")
+    assert len(inp.vacaciones.fechas_disfrute) == 1
     assert inp.auxilios == {"conectividad": 150000}
 
 
