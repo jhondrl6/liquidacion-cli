@@ -131,36 +131,70 @@
   del año siguiente. NO aceptar `intereses_mensuales_acuerdo: true` en
   input hasta resolver R-LEG-06.
 
-## R-OP-03 (NUEVO, S11.6) — `params/schema.json`: refs rotas a `plazo_pago_detalle` y `limite_detalle`
+## R-OP-03 (NUEVO, S11.6 — RECLASIFICADO S20) — `params/schema.json`: descripción original resultaba inexacta
 
 - **Severidad:** BAJA (no afecta motor — el motor no valida `params/normas.json`
   contra el schema en runtime; es solo la 2da validación del plan §5.2 T0.K).
 - **Origen:** Tarea 0.K / S11.6 (2026-06-13). Al correr la validación
-  `jsonschema.validate(normas.json, schema['definitions']['normas_laborales'])`,
-  jsonschema reporta `PointerToNowhere: '/definitions/plazo_pago_detalle' does
-  not exist within {definitions.normas_laborales}`. El bug está en el schema
-  mismo, no en el JSON.
-- **Causa:** `params/schema.json` define `plazo_pago_detalle` y `limite_detalle`
-  **anidadas dentro de** `definitions.plazos_pago` (líneas 213-261 y 319-327).
-  Pero la sección `definitions.normas_laborales` (líneas 101-211) las referencia
-  con `$ref: '#/definitions/plazo_pago_detalle'` y `$ref: '#/definitions/limite_detalle'`,
-  apuntando a top-level (donde NO existen). Las refs deberían ser
-  `#/definitions/plazos_pago/properties/plazo_pago_detalle` o, mejor, mover las
-  2 definiciones a top-level de `definitions`.
-- **Impacto en DoD de Tarea 0.K:** P-S11.3 del plan §5.2 falla. El bug es
-  pre-existente (no introducido por 0.K) y se descubrió al ejecutar la
-  validación por primera vez. El fix es trivial (mover 2 bloques JSON).
-- **Acción:**
-  1. Documentado en REGISTRY S11.6 como pendiente.
-  2. **Fix sugerido (1 minuto):** mover `plazo_pago_detalle` (líneas 262-317)
-     y `limite_detalle` (líneas 319-327) a top-level de `definitions`,
-     dentro de `params/schema.json`. Re-correr
-     `jsonschema.validate(normas.json, schema['definitions']['normas_laborales'])`:
-     debe pasar.
-  3. Asignar a **Fase 1 Tarea 1.G** (cleanup de schema, aditiva). O fixear
-     ahora como hot-patch si el usuario lo aprueba.
-  4. NO bloquea cierre formal de Fase 0 (el motor no usa esta validación;
-     es check de auditoría del plan).
+  `jsonschema.validate(normas.json, schema)`, jsonschema reportó error
+  atribuido a "refs rotas a `plazo_pago_detalle` y `limite_detalle`".
+- **Causa documentada en S11.6:** las definiciones `plazo_pago_detalle` y
+  `limite_detalle` supuestamente estaban **anidadas dentro de**
+  `definitions.plazos_pago`, mientras que `definitions.normas_laborales` las
+  referenciaba como top-level.
+- **Reclasificación S20 (validación contra código vivo):** la causa era
+  **inexacta**. Inspección directa de `params/schema.json` reveló que las
+  definiciones `plazo_pago_detalle` (L262-318) y `limite_detalle` (L319-327)
+  YA están a top-level de `definitions`; las 13+4 refs en el schema son
+  todas válidas. Validación con `jsonschema.validate` (Tarea 1.G S20):
+  - `params/2025.json` → **OK** ✓
+  - `params/2026.json` → **OK** ✓
+  - `params/plazos.json` → **OK** ✓
+  - `params/normas.json` → **FAIL** (NO por R-OP-03 — ver **R-OP-10**)
+- **Estado:** CERRADO en S20 por validación contra código (Tarea 1.G).
+  El fix propuesto en S11.6 ya estaba aplicado. R-OP-03 ya no requiere
+  acción. La causa real de la falla en `normas.json` se documenta como
+  R-OP-10.
+- **Lección operativa (canonizada en REGISTRY S20):** confiar en
+  docs/REGISTRY sin verificar contra código lleva a falsas premisas. La
+  regla §5.5.11 del diagnóstico ("si contradice, gana código") se aplicó:
+  se ejecutó `jsonschema.validate` directamente y se descubrió que la
+  descripción del bug estaba desactualizada.
+
+## R-OP-10 (NUEVO, S20) — id `LEY_2466_2025_INTERESES_MENSUALES` excede `maxLength: 20` del schema
+
+- **Severidad:** BAJA (no afecta motor; `params/normas.json` no se valida
+  en flujo CLI actual). Sí bloquea cierre 100% formal de Tarea 0.K (P-S11.3
+  sigue fallando).
+- **Origen:** Tarea 1.G / S20 (2026-06-13). Al re-ejecutar la validación
+  `jsonschema.validate(normas.json, schema)` para cerrar R-OP-03, jsonschema
+  falló por causa **diferente** a la documentada en S11.6.
+- **Causa verificada:** `params/schema.json` L112 declara
+  `properties.normas.items.properties.id` con `maxLength: 20`. Sin embargo,
+  `params/normas.json` entrada `normas[15].id = "LEY_2466_2025_INTERESES_MENSUALES"`
+  tiene 33 caracteres. Es el **único** id problemático entre 18 entradas;
+  los otros 17 caben en ≤17 chars.
+- **Mensaje de error verbatim:**
+  `ValidationError: 'LEY_2466_2025_INTERESES_MENSUALES' is too long`
+  `Failed validating 'maxLength' in schema[1]['properties']['normas']['items']['properties']['id']`
+  `On instance['normas'][15]['id']: 'LEY_2466_2025_INTERESES_MENSUALES'`
+- **Contexto:** el id se introdujo en S11 (Tarea 0.K) cuando se agregó
+  la entrada sobre Ley 2466/2025. Se marcó como `PENDIENTE_TEXTO_LITERAL`
+  en `params/normas.json` por R-LEG-06 (la atribución del plan v2.0 a
+  "Art. 64 de la Ley 2466/2025" para pago mensual de intereses sobre
+  cesantías fue refutada por verificación SUIN). El id conserva la
+  intención original del plan v2.0 (pago mensual de intereses), pero
+  la regla legal citada es incorrecta — ver R-LEG-06.
+- **Decisión pendiente del usuario** (3 opciones):
+  1. **Subir `maxLength` a 40 en el schema (1 línea, retrocompatible, no
+     invasivo).** Aceptado por defecto si no se escoge otra opción.
+  2. **Renombrar el id a algo ≤20 chars** (p.ej. `LEY_2466_2025_INT_MENS`,
+     21 chars — preserva la restricción pero requiere elegir convención).
+  3. **Diferir como hot-patch futuro** (la validación de `normas.json`
+     queda pendiente; no bloquea Fase 1).
+- **Impacto en DoD de Tarea 0.K:** P-S11.3 sigue FAIL hasta resolver
+  R-OP-10. No bloquea cierre formal de Fase 0 (P-S11.3 ya estaba
+  pendiente desde S11.6, y se sigue marcando como tal).
 
 ## R-OP-04 (NUEVO, S11.6) — `uv run` SÍ bypasea el sandbox de seguridad perimetral de Hermes
 
