@@ -5,12 +5,12 @@ Este módulo implementa las reglas para calcular días de vacaciones causados,
 su valor monetario y determinar si aplica compensación en dinero.
 """
 
-from datetime import datetime
-from typing import Dict, Any
-from ..utils.date_utils import calculate_days_between, calculate_years_of_service
-from ..utils.currency_utils import round_currency
-from ..utils.constants import DEFAULT_DIAS_BASE_VACACIONES
+from typing import Any
+
 from ..legal.topes_manager import TopesManager
+from ..utils.constants import DEFAULT_DIAS_BASE_VACACIONES
+from ..utils.currency_utils import round_currency
+from ..utils.date_utils import calculate_days_between, calculate_years_of_service
 
 
 class VacacionesCalculator:
@@ -25,7 +25,7 @@ class VacacionesCalculator:
 
     VACACIONES_DENOM = DEFAULT_DIAS_BASE_VACACIONES
 
-    def __init__(self, params: Dict[str, Any]):
+    def __init__(self, params: dict[str, Any]):
         """
         Inicializa el calculador con los parámetros legales vigentes.
 
@@ -52,7 +52,7 @@ class VacacionesCalculator:
             int: Días de vacaciones causados (máximo 15 por año)
         """
         try:
-            dias_servicio = calculate_days_between(fecha_ingreso, fecha_corte)
+            calculate_days_between(fecha_ingreso, fecha_corte)
             years_service = calculate_years_of_service(fecha_ingreso, fecha_corte)
 
             # Cálculo proporcional: 15 días por año completo
@@ -68,14 +68,14 @@ class VacacionesCalculator:
             return dias_vacaciones
 
         except Exception as e:
-            raise ValueError(f"Error calculando días de vacaciones: {str(e)}")
+            raise ValueError(f"Error calculando días de vacaciones: {str(e)}") from e
 
     def calculate_valor_vacaciones(
         self, sbl_vacaciones: float, dias_vacaciones: int
     ) -> float:
         """
         Calcula el valor monetario de las vacaciones con base 720 días.
-        
+
         NOTA: Este método calcula vacaciones PROPORCIONALES desde días de servicio.
         Para compensación directa de días ya determinados, usar calculate_compensacion_dias_directos().
 
@@ -110,7 +110,7 @@ class VacacionesCalculator:
     ) -> float:
         """
         Calcula el valor monetario de compensación de días de vacaciones ya determinados.
-        
+
         Se utiliza cuando se compensan en dinero días específicos de vacaciones acumuladas
         (ej: 7.5 días solicitados) mediante acuerdo mutuo (Art. 189 CST).
 
@@ -122,8 +122,8 @@ class VacacionesCalculator:
 
         Returns:
             float: Valor monetario de la compensación, redondeado a pesos
-            
-        Ejemplo: 
+
+        Ejemplo:
             SBL = 1,500,000, días = 7.5
             (1,500,000 / 30) × 7.5 = 50,000 × 7.5 = 375,000
         """
@@ -141,7 +141,7 @@ class VacacionesCalculator:
 
     def determinar_compensacion_dinero(
         self, modo: str, dias_vacaciones_pendientes: int = 0, dias_compensar_acuerdo: float = 0
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Determina si aplica compensación en dinero por vacaciones.
 
@@ -172,18 +172,18 @@ class VacacionesCalculator:
                      # Si no hay pendientes, no se puede compensar
                      resultado["motivo"] = "No hay vacaciones pendientes para compensar"
                      return resultado
-                
+
                 # El límite legal es hasta la mitad de las vacaciones causadas.
                 # Asumimos que dias_vacaciones_pendientes refleja el saldo disponible.
                 limite = dias_vacaciones_pendientes / 2
                 if dias_compensar_acuerdo > limite:
-                    # Ajustamos al límite o lanzamos error? 
+                    # Ajustamos al límite o lanzamos error?
                     # Por seguridad, no compensamos más de lo legal pero permitimos el proceso
                     # advirtiendo (o ajustando). Aquí ajustamos al límite legal.
                     # Pero para ser estrictos con la solicitud, mejor lanzamos error si se excede
                     # o retornamos solo lo permitido. Vamos a retornar lo permitido.
                     dias_compensar_acuerdo = limite
-                
+
                 resultado["aplica_compensacion"] = True
                 resultado["dias_compensados"] = dias_compensar_acuerdo
                 resultado["motivo"] = f"Compensación parcial por acuerdo mutuo (Art. 189 CST). Solicitado: {dias_compensar_acuerdo}"
@@ -215,8 +215,8 @@ class VacacionesCalculator:
         raise ValueError(f"Modo no válido: {modo}. Debe ser 'PERIODICA' o 'FINIQUITO'")
 
     def calculate_vacaciones_completas(
-        self, input_data: Dict[str, Any], sbl_vacaciones: float
-    ) -> Dict[str, Any]:
+        self, input_data: dict[str, Any], sbl_vacaciones: float
+    ) -> dict[str, Any]:
         """
         Calcula el resultado completo de vacaciones para la liquidación.
 
@@ -266,7 +266,7 @@ class VacacionesCalculator:
             resultado["dias_liquidados"] = dias_a_pagar
             resultado["nota"] = comp_result["motivo"]
             resultado["norma"] = comp_result["norma_aplicada"]
-            
+
             # Si es periódica, actualizar el saldo de pendientes en el objeto resultado (informativo)
             if modo.upper() == "PERIODICA":
                  resultado["dias_pendientes"] = dias_vacaciones_pendientes - dias_a_pagar

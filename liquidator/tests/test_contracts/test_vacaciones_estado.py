@@ -4,11 +4,12 @@ Cubre: creación mínima, validación de consistencia, fracciones de día,
 valores negativos, integración con LiquidacionInput.
 """
 
-import pytest
 from decimal import Decimal
+
+import pytest
 from pydantic import ValidationError
 
-from liquidator.contracts.input_model import VacacionesEstado, PeriodoDisfrute
+from liquidator.contracts.input_model import PeriodoDisfrute, VacacionesEstado
 
 
 class TestVacacionesEstadoMinimo:

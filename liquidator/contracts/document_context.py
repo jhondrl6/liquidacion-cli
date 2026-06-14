@@ -33,7 +33,7 @@ Uso::
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, Literal, Optional
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -96,10 +96,10 @@ class ComplianceInfo(BaseModel):
     status: ComplianceStatus = "GO"
     failures: list[dict[str, Any]] = Field(default_factory=list)
     warnings: list[dict[str, Any]] = Field(default_factory=list)
-    override: Optional[dict[str, Any]] = None
+    override: dict[str, Any] | None = None
 
     @classmethod
-    def from_compliance_report(cls, report: dict[str, Any] | None) -> "ComplianceInfo":
+    def from_compliance_report(cls, report: dict[str, Any] | None) -> ComplianceInfo:
         """Construye desde el ``compliance_report`` del motor.
 
         Tolerante a variantes:
@@ -189,7 +189,7 @@ class DocumentContext(BaseModel):
         result: dict[str, Any],
         *,
         generado_por: str = "Jhond",
-    ) -> "DocumentContext":
+    ) -> DocumentContext:
         """Construye un ``DocumentContext`` desde el ``LiquidacionResult``.
 
         Args:
@@ -277,7 +277,7 @@ def _extract_metadata(meta: dict[str, Any]) -> dict[str, Any]:
     return {k: v for k, v in out.items() if v is not None}
 
 
-def _extract_params_version(meta: dict[str, Any]) -> Optional[str]:
+def _extract_params_version(meta: dict[str, Any]) -> str | None:
     """Consolida ``params_version`` desde ``parametros_por_segmento``."""
     por_seg = meta.get("parametros_por_segmento")
     if isinstance(por_seg, dict) and por_seg:

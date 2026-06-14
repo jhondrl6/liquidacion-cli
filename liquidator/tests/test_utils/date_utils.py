@@ -3,7 +3,6 @@ from __future__ import annotations
 from datetime import date, datetime
 
 
-
 def parse_date(value: str) -> date:
     """Parsea una fecha ISO (YYYY-MM-DD) a date; lanza ValueError si es inválida."""
     return datetime.strptime(value, "%Y-%m-%d").date()
@@ -22,7 +21,7 @@ def days_between_inclusive(start: date, end: date) -> int:
     return (end - start).days + 1
 
 
-def get_semester_bounds(d: date) -> Tuple[date, date]:
+def get_semester_bounds(d: date) -> tuple[date, date]:
     """Retorna (inicio_semestre, fin_semestre) para la fecha dada."""
     if d.month <= 6:
         start = date(d.year, 1, 1)

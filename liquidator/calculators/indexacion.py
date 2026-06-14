@@ -31,12 +31,10 @@ from __future__ import annotations
 
 import json
 from datetime import date
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import ROUND_HALF_UP, Decimal
 from pathlib import Path
-from typing import Dict, Union
 
-
-Fecha = Union[date, str]
+Fecha = date | str
 
 
 class IPCIndexador:
@@ -75,10 +73,10 @@ class IPCIndexador:
 
     def __init__(
         self,
-        ipc_index: Dict[str, Union[Decimal, float, int, str]],
+        ipc_index: dict[str, Decimal | float | int | str],
         base_year: int = 2010,
     ) -> None:
-        self.data: Dict[str, Decimal] = {
+        self.data: dict[str, Decimal] = {
             k: Decimal(str(v)) for k, v in ipc_index.items()
         }
         self.base_year = base_year
@@ -122,7 +120,7 @@ class IPCIndexador:
     # Constructores alternativos
     # ------------------------------------------------------------------
     @classmethod
-    def from_json(cls, path: Union[str, Path], base_year: int = 2010) -> "IPCIndexador":
+    def from_json(cls, path: str | Path, base_year: int = 2010) -> IPCIndexador:
         """Carga un :class:`IPCIndexador` desde un JSON con indice acumulado.
 
         Acepta dos formatos:
@@ -197,7 +195,7 @@ class IPCIndexador:
 
     def indexar(
         self,
-        vh: Union[Decimal, int, str],
+        vh: Decimal | int | str,
         fecha_origen: Fecha,
         fecha_referencia: Fecha,
     ) -> Decimal:

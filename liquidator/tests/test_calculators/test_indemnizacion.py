@@ -4,11 +4,10 @@ Tests para el módulo de cálculo de indemnizaciones.
 Verifica que los cálculos sean correctos y que las reglas legales se apliquen adecuadamente.
 """
 
+
 import pytest
-from datetime import datetime, timedelta
-from unittest.mock import MagicMock
+
 from liquidator.calculators.indemnizacion_calculator import IndemnizacionCalculator
-from liquidator.utils.date_utils import calculate_days_between
 
 
 class TestIndemnizacionCalculator:

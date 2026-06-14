@@ -4,11 +4,10 @@ Tests para el módulo de cálculo de vacaciones.
 Verifica que los cálculos sean correctos y que las reglas legales se apliquen adecuadamente.
 """
 
+
 import pytest
-from datetime import datetime, timedelta
-from unittest.mock import MagicMock
+
 from liquidator.calculators.vacaciones_calculator import VacacionesCalculator
-from liquidator.utils.date_utils import calculate_days_between
 
 
 class TestVacacionesCalculator:
@@ -200,37 +199,37 @@ class TestVacacionesCalculator:
         """
         TEST TEMPORAL DE AUDITORÍA FORENSE - Fecha: 2025-12-02
         TODO: REMOVER después de validación de auditoría completa (Ticket: #AUDIT-720-2025)
-        
+
         Propósito: Documentar impacto del error crítico de fórmula /30 vs /720 (Art. 186-192 CST)
-        
+
         Antecedente: Se reportó una "corrección" que cambió el denominador de 720 a 30.
         Esta auditoría forense comprueba que /720 es el valor legalmente correcto.
-        
+
         Caso de prueba: SBL=$2,000,000, 15 días vacaciones
         - Fórmula correcta (/720): $41,667 (legal según Art. 186-192 CST)
         - Fórmula errónea (/30): $1,000,000 (error de +2,300%)
         """
         sbl = 2000000
         dias = 15
-        
+
         # Cálculos de comparación para auditoría
         valor_correcto_720 = round((sbl * dias) / 720)  # $41,667 (legal)
         valor_erroneo_30 = round((sbl * dias) / 30)     # $1,000,000 (error)
-        
+
         diferencia_porcentual = ((valor_erroneo_30 - valor_correcto_720) / valor_correcto_720) * 100
-        
+
         # Documentación forense del impacto
         assert valor_correcto_720 == 41667, f"Valor legal Art.186-192 CST debería ser: {valor_correcto_720}"
         assert valor_erroneo_30 == 1000000, f"Valor erróneo con /30 sería: {valor_erroneo_30}"
         assert diferencia_porcentual >= 2299, f"Diferencia de impacto: +{diferencia_porcentual:.0f}%"
-        
+
         # Verificación crítica: El calculador debe usar la fórmula legal (/720)
         valor_calculado = calculator.calculate_valor_vacaciones(sbl, dias)
         assert valor_calculado == valor_correcto_720, \
             f"CRÍTICO: Calculador debe usar /720 (legal). Esperado: ${valor_correcto_720:,}, Obtenido: ${valor_calculado:,}"
-        
+
         # Evidencia de corrección
-        print(f"\n[AUDITORÍA FORENSE] Validación de corrección de fórmula de vacaciones:")
+        print("\n[AUDITORÍA FORENSE] Validación de corrección de fórmula de vacaciones:")
         print(f"  • SBL: ${sbl:,}")
         print(f"  • Días: {dias}")
         print(f"  • Fórmula correcta (720): ${valor_correcto_720:,} ✓ LEGAL (Art. 186-192 CST)")

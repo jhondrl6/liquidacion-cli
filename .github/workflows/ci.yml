@@ -1,0 +1,37 @@
+name: ci
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+
+      - name: Compile check
+        run: python -m compileall liquidator
+
+      - name: Lint (ruff)
+        run: ruff check liquidator/
+
+      - name: Type check (mypy)
+        run: mypy liquidator/ --ignore-missing-imports || true
+
+      - name: Tests (pytest)
+        run: pytest liquidator/tests -q --tb=short
+
+      - name: KB freshness
+        run: python scripts/check_kb_freshness.py

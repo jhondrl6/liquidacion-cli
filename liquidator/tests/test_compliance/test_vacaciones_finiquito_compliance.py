@@ -12,14 +12,13 @@ Patrón: 4 clases siguiendo convención S29/S30 (addendum recipe):
 """
 
 import json
-from pathlib import Path
 from decimal import Decimal
+from pathlib import Path
 
 import pytest
 
-from liquidator.compliance.rule_evaluator import RuleEvaluator
 from liquidator.compliance.compliance_engine import ComplianceEngine
-
+from liquidator.compliance.rule_evaluator import RuleEvaluator
 
 # ---------------------------------------------------------------------------
 # Fixtures

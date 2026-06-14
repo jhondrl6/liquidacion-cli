@@ -16,7 +16,7 @@ Uso:
 
 from __future__ import annotations
 
-from typing import Any, Dict, Optional
+from typing import Any
 
 
 class PreRenderValidationError(Exception):
@@ -41,7 +41,7 @@ class PreRenderValidationError(Exception):
 # 'indemnizacion' porque la indemnización por despido (Art. 64) NO aplica,
 # pero la indemnización por preaviso (Art. 46) SÍ puede aplicar.
 
-REQUISITOS_POR_MOTIVO: Dict[str, Dict[str, Any]] = {
+REQUISITOS_POR_MOTIVO: dict[str, dict[str, Any]] = {
     "renuncia_voluntaria": {
         "requiere": ["vacaciones"],
         "no_requiere": ["indemnizacion"],
@@ -115,7 +115,7 @@ REQUISITOS_POR_MOTIVO: Dict[str, Dict[str, Any]] = {
 }
 
 
-def obtener_nota_render(motivo: str) -> Optional[str]:
+def obtener_nota_render(motivo: str) -> str | None:
     """Retorna la nota jurídica para un motivo dado, o None si no existe."""
     entrada = REQUISITOS_POR_MOTIVO.get(motivo)
     if entrada is None:
@@ -135,7 +135,7 @@ class PreRenderValidator:
     def validar_requisitos_por_motivo(
         self,
         inp: Any,
-        desglose: Dict[str, Any],
+        desglose: dict[str, Any],
     ) -> None:
         """Valida requisitos de la matriz REQUISITOS_POR_MOTIVO.
 

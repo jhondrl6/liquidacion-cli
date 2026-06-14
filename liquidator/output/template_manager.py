@@ -3,11 +3,10 @@ Template Manager Module
 Loads and manages Markdown templates for document generation
 """
 
-import os
 from pathlib import Path
-from typing import Dict, Any, Optional
-from jinja2 import Environment, FileSystemLoader, Template
+from typing import Any
 
+from jinja2 import Environment, FileSystemLoader, Template
 
 # Default: directorio de plantillas del paquete (liquidator/templates/).
 # Antes del packaging v2.0, el default era "templates" relativo a cwd,
@@ -19,7 +18,7 @@ _DEFAULT_TEMPLATES_DIR = Path(__file__).resolve().parent.parent / "templates"
 class TemplateManager:
     """Manages loading and rendering of Markdown templates"""
 
-    def __init__(self, templates_dir: Optional[str] = None):
+    def __init__(self, templates_dir: str | None = None):
         """
         Initialize the template manager
 
@@ -58,7 +57,7 @@ class TemplateManager:
             except Exception:
                 pass
 
-    def get_template(self, template_name: str) -> Optional[Template]:
+    def get_template(self, template_name: str) -> Template | None:
         """
         Get a specific template by name
 
@@ -70,7 +69,7 @@ class TemplateManager:
         """
         return self.templates.get(template_name)
 
-    def render_template(self, template_name: str, context: Dict[str, Any]) -> str:
+    def render_template(self, template_name: str, context: dict[str, Any]) -> str:
         """
         Render a template with the given context
 

@@ -15,7 +15,7 @@ Los comandos degradan gracefulmente cuando una dependencia no está lista.
 import json
 import sys
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Any
 
 import click
 
@@ -26,28 +26,28 @@ from liquidator.validators.input_validator import validate_input
 
 # --- Helpers ------------------------------------------------------------------
 
-def _load_params(year: int) -> Dict[str, Any]:
+def _load_params(year: int) -> dict[str, Any]:
     """Carga params/<year>.json via ParamsProvider (Tarea 1.E)."""
     try:
         provider = ParamsProvider.for_year(year)
         return provider.to_dict()
     except FileNotFoundError as exc:
-        raise click.ClickException(str(exc))
+        raise click.ClickException(str(exc)) from exc
 
 
-def _resolve_input(input_path: Path) -> Dict[str, Any]:
+def _resolve_input(input_path: Path) -> dict[str, Any]:
     """Resuelve y parsea el archivo de entrada JSON."""
     parser = InputParser()
     try:
         return parser.parse(str(input_path))
     except FileNotFoundError:
-        raise click.ClickException(f"Archivo no encontrado: {input_path}")
+        raise click.ClickException(f"Archivo no encontrado: {input_path}") from None
     except ValueError as exc:
-        raise click.ClickException(str(exc))
+        raise click.ClickException(str(exc)) from exc
 
 
 def _write_output_artifacts(
-    result: Dict[str, Any],
+    result: dict[str, Any],
     out_dir: Path,
     input_stem: str,
     is_blocked: bool,
@@ -150,7 +150,7 @@ def liquidar(
     input_path: Path,
     out_dir: Path,
     override: bool,
-    override_reason: Optional[str],
+    override_reason: str | None,
     json_only: bool,
 ) -> None:
     """Liquida a partir de un JSON de entrada.
@@ -261,7 +261,7 @@ def validate(input_path: Path, params_year: int) -> None:
         sys.exit(1)
 
     click.echo(f"Validacion contra params/{params_year}.json\n")
-    click.echo(f"  Campos requeridos: OK")
+    click.echo("  Campos requeridos: OK")
     click.echo(f"  Modo:              {payload.get('modo', '?')}")
     click.echo(f"  Tipo contrato:     {payload.get('tipo_contrato', '?')}")
     click.echo(f"  Fecha ingreso:     {payload.get('fecha_ingreso', '?')}")
@@ -299,7 +299,7 @@ def validate(input_path: Path, params_year: int) -> None:
     default=None,
     help="Anio especifico (default: muestra 2025 y 2026).",
 )
-def info(year: Optional[int]) -> None:
+def info(year: int | None) -> None:
     """Muestra parametros vigentes y estado del sistema.
 
     Sin --year: muestra parametros de 2025 y 2026.
@@ -329,16 +329,16 @@ def info(year: Optional[int]) -> None:
         click.echo(f"    Tasa int. cesantias:   {tasa_int:>12}")
         click.echo(f"    Dias base:             {dias_base:>12}")
 
-    click.echo(f"\n  Suite de tests:")
-    click.echo(f"    R-OP-05 (params):      RESUELTO (S13) — 0 collection errors")
-    click.echo(f"    R-OP-06 (utils):       RESUELTO (S13) — 7/7 tests verdes")
-    click.echo(f"    R-OP-02 Causa 2:       PENDIENTE (9 fails en test_versioning.py)")
-    click.echo(f"\\n  Pendientes Fase 1:")
-    click.echo(f"    Tarea 1.C  — Schemas Pydantic de entrada/salida (CERRADA S16)")
-    click.echo(f"    Tarea 1.D  — JSONGenerator con schema_path")
-    click.echo(f"    Tarea 1.E  — ParamsProvider year-aware (CERRADA — este comando lo usa)")
-    click.echo(f"    Tarea 1.G  — R-OP-03 schema fix (1 minuto)")
-    click.echo(f"\n  Ver REGISTRY.md para trazabilidad completa.")
+    click.echo("\n  Suite de tests:")
+    click.echo("    R-OP-05 (params):      RESUELTO (S13) — 0 collection errors")
+    click.echo("    R-OP-06 (utils):       RESUELTO (S13) — 7/7 tests verdes")
+    click.echo("    R-OP-02 Causa 2:       PENDIENTE (9 fails en test_versioning.py)")
+    click.echo("\\n  Pendientes Fase 1:")
+    click.echo("    Tarea 1.C  — Schemas Pydantic de entrada/salida (CERRADA S16)")
+    click.echo("    Tarea 1.D  — JSONGenerator con schema_path")
+    click.echo("    Tarea 1.E  — ParamsProvider year-aware (CERRADA — este comando lo usa)")
+    click.echo("    Tarea 1.G  — R-OP-03 schema fix (1 minuto)")
+    click.echo("\n  Ver REGISTRY.md para trazabilidad completa.")
 
 
 # ------------------------------------------------------------------------------

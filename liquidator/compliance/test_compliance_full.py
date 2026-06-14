@@ -4,6 +4,7 @@ Test integrado V001…V010 – SESIONES 7 y 8
 
 import json
 from pathlib import Path
+
 from liquidator.compliance.compliance_engine import ComplianceEngine
 
 FIXTURES = Path(__file__).parent.parent / "fixtures"

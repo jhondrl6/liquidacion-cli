@@ -3,7 +3,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
-from typing import Dict, Optional
 
 from liquidator.utils.file_utils import read_json_file
 
@@ -23,10 +22,10 @@ class Plazo:
     dia: int
     mes: int
     descripcion: str
-    norma_ref: Optional[str]
+    norma_ref: str | None
     aplica_a: tuple[str, ...]
     calcula_fecha_limite: bool
-    sancion_mora: Optional[str] = None
+    sancion_mora: str | None = None
 
     @property
     def requiere_pago_inmediato(self) -> bool:
@@ -39,22 +38,22 @@ class PlazosManager:
     def __init__(
         self,
         *,
-        source_path: Optional[Path | str] = None,
-        data: Optional[Dict[str, Dict[str, Dict[str, object]]]] = None,
+        source_path: Path | str | None = None,
+        data: dict[str, dict[str, dict[str, object]]] | None = None,
     ) -> None:
         self._source_path = Path(source_path) if source_path else self._DEFAULT_PATH
         raw = data or self._load_raw(self._source_path)
-        self._plazos: Dict[str, Plazo] = self._build_plazos(raw.get("plazos_pago", {}))
+        self._plazos: dict[str, Plazo] = self._build_plazos(raw.get("plazos_pago", {}))
 
-    def _load_raw(self, path: Path) -> Dict[str, Dict[str, object]]:
+    def _load_raw(self, path: Path) -> dict[str, dict[str, object]]:
         if not path.exists():
             raise PlazosManagerError(f"No se encontró el archivo de plazos: {path}")
         return read_json_file(path)
 
     def _build_plazos(
-        self, registros: Dict[str, Dict[str, object]]
-    ) -> Dict[str, Plazo]:
-        plazos: Dict[str, Plazo] = {}
+        self, registros: dict[str, dict[str, object]]
+    ) -> dict[str, Plazo]:
+        plazos: dict[str, Plazo] = {}
         for concepto, info in registros.items():
             aplica_a = tuple(info.get("aplica_a", []))
             plazo = Plazo(

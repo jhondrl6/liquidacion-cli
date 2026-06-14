@@ -13,7 +13,6 @@ from datetime import date
 
 from liquidator.core.params_provider import ParamsProvider
 
-
 # ---- current() ---------------------------------------------------------------
 
 def test_params_provider_current_carga_mas_reciente():
@@ -48,7 +47,7 @@ def test_params_provider_for_year_inexistente():
     """for_year() con un año sin archivo debe lanzar FileNotFoundError."""
     try:
         ParamsProvider.for_year(1900)
-        assert False, "Debió lanzar FileNotFoundError"
+        raise AssertionError("Debió lanzar FileNotFoundError")
     except FileNotFoundError:
         pass
 

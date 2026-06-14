@@ -5,7 +5,7 @@ import json
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 
 @dataclass(frozen=True)
@@ -14,7 +14,7 @@ class VersionInfo:
     version: str
     hash_sha256: str
     fecha_carga: str
-    metadata: Optional[Dict[str, Any]] = None
+    metadata: dict[str, Any] | None = None
 
 
 class ParamsVersioning:
@@ -25,7 +25,7 @@ class ParamsVersioning:
     """
 
     def __init__(self) -> None:
-        self._versions: Dict[int, VersionInfo] = {}
+        self._versions: dict[int, VersionInfo] = {}
 
     def calculate_file_hash(self, path: Path) -> str:
         hasher = hashlib.sha256()
@@ -34,12 +34,12 @@ class ParamsVersioning:
                 hasher.update(chunk)
         return hasher.hexdigest()
 
-    def calculate_data_hash(self, data: Dict[str, Any]) -> str:
+    def calculate_data_hash(self, data: dict[str, Any]) -> str:
         serialized = json.dumps(data, sort_keys=True, ensure_ascii=False)
         return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
 
     def register_version(
-        self, year: int, path: Path, data: Optional[Dict[str, Any]] = None
+        self, year: int, path: Path, data: dict[str, Any] | None = None
     ) -> VersionInfo:
         file_hash = self.calculate_file_hash(path)
         version_str = data.get("version", "1.0") if data else "1.0"
@@ -54,7 +54,7 @@ class ParamsVersioning:
         self._versions[year] = info
         return info
 
-    def get_version(self, year: int) -> Optional[VersionInfo]:
+    def get_version(self, year: int) -> VersionInfo | None:
         return self._versions.get(year)
 
     def verify_integrity(self, year: int, current_path: Path) -> bool:
@@ -64,7 +64,7 @@ class ParamsVersioning:
         current_hash = self.calculate_file_hash(current_path)
         return current_hash == info.hash_sha256
 
-    def to_dict(self) -> Dict[int, Dict[str, Any]]:
+    def to_dict(self) -> dict[int, dict[str, Any]]:
         return {
             year: {
                 "year": info.year,

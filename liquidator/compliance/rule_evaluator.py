@@ -4,14 +4,14 @@ Cada función recibe (input_data, result, params) y retorna
 {"result": "PASS|WARN|FAIL", "evidence": str}
 """
 
+from collections.abc import Callable
 from datetime import datetime
 from decimal import Decimal
-from typing import Dict, Any, Callable
 
 
 class RuleEvaluator:
     @staticmethod
-    def build(rule_id: str, meta: Dict) -> Callable:
+    def build(rule_id: str, meta: dict) -> Callable:
         """Factory: devuelve la función que evalúa la regla."""
         mapping = {
             "V001": _v001_params_consistency,
@@ -34,14 +34,14 @@ class RuleEvaluator:
 
 
 # ---------- implementaciones individuales ----------
-def _v001_params_consistency(input_data: Dict, result: Dict, params: Dict) -> Dict:
+def _v001_params_consistency(input_data: dict, result: dict, params: dict) -> dict:
     expected_smmlv = 1423500
     if params.get("SMMLV") != expected_smmlv:
         return {"result": "FAIL", "evidence": f"SMMLV esperado {expected_smmlv}"}
     return {"result": "PASS", "evidence": "SMMLV=1423500 coincide con params/2025.json"}
 
 
-def _v002_valid_contract(input_data: Dict, result: Dict, params: Dict) -> Dict:
+def _v002_valid_contract(input_data: dict, result: dict, params: dict) -> dict:
     tipo = input_data.get("tipo_contrato", "")
     if tipo.lower() == "prestación_servicios":
         return {
@@ -51,7 +51,7 @@ def _v002_valid_contract(input_data: Dict, result: Dict, params: Dict) -> Dict:
     return {"result": "PASS", "evidence": f"Tipo de contrato es {tipo}"}
 
 
-def _v003_aux_transport(input_data: Dict, result: Dict, params: Dict) -> Dict:
+def _v003_aux_transport(input_data: dict, result: dict, params: dict) -> dict:
     reside = input_data.get("reside_en_lugar_trabajo")
     if reside is True:
         return {
@@ -61,7 +61,7 @@ def _v003_aux_transport(input_data: Dict, result: Dict, params: Dict) -> Dict:
     return {"result": "WARN", "evidence": "Verificar si auxilio de transporte aplica"}
 
 
-def _v004_cesantias_formula(input_data: Dict, result: Dict, params: Dict) -> Dict:
+def _v004_cesantias_formula(input_data: dict, result: dict, params: dict) -> dict:
     desglose = result.get("desglose", {})
     ces_val = desglose.get("cesantias", {}).get("valor")
     sbl = desglose.get("SBL_GENERAL")
@@ -75,14 +75,14 @@ def _v004_cesantias_formula(input_data: Dict, result: Dict, params: Dict) -> Dic
     return {"result": "PASS", "evidence": "Cálculo coincide con fórmula legal"}
 
 
-def _v005_intereses_rate(input_data: Dict, result: Dict, params: Dict) -> Dict:
+def _v005_intereses_rate(input_data: dict, result: dict, params: dict) -> dict:
     tasa = params.get("TASA_INT_CESANTIAS")
     if tasa != 0.12:
         return {"result": "FAIL", "evidence": f"Tasa intereses {tasa} ≠ 12%"}
     return {"result": "PASS", "evidence": "Tasa 12% aplicada correctamente"}
 
 
-def _v006_prima_proportional(input_data: Dict, result: Dict, params: Dict) -> Dict:
+def _v006_prima_proportional(input_data: dict, result: dict, params: dict) -> dict:
     # simplificación: si periodo no coincide exactamente con semestre → WARN
     fecha_corte = datetime.fromisoformat(result["meta"]["fecha_corte"])
     if fecha_corte.month not in (6, 12) or fecha_corte.day != 30:
@@ -93,12 +93,12 @@ def _v006_prima_proportional(input_data: Dict, result: Dict, params: Dict) -> Di
     return {"result": "PASS", "evidence": "Prima semestre proporcional verificada"}
 
 
-def _v007_vacaciones_excluded(input_data: Dict, result: Dict, params: Dict) -> Dict:
+def _v007_vacaciones_excluded(input_data: dict, result: dict, params: dict) -> dict:
     modo = result["meta"]["modo"]
     vac_data = result["desglose"].get("vacaciones", {})
     vac_val = vac_data.get("valor", 0)
     vac_dias = vac_data.get("dias_liquidados", 0)
-    
+
     if modo == "PERIÓDICA":
         # En modo PERIÓDICA es permitido compensar parcialmente por acuerdo mutuo (Art. 189 CST)
         if vac_val > 0:
@@ -116,11 +116,11 @@ def _v007_vacaciones_excluded(input_data: Dict, result: Dict, params: Dict) -> D
                     "evidence": "Vacaciones en modo PERIÓDICA deben justificarse por acuerdo mutuo (Art. 189 CST)",
                 }
         return {"result": "PASS", "evidence": "No hay compensación de vacaciones en modo PERIÓDICA"}
-    
+
     return {"result": "PASS", "evidence": "Vacaciones manejadas correctamente según modo de liquidación"}
 
 
-def _v008_payment_deadlines(input_data: Dict, result: Dict, params: Dict) -> Dict:
+def _v008_payment_deadlines(input_data: dict, result: dict, params: dict) -> dict:
     for key in ("cesantias", "intereses_cesantias", "prima"):
         concepto = result["desglose"].get(key, {})
         if "plazo_pago_legal" not in concepto:
@@ -131,7 +131,7 @@ def _v008_payment_deadlines(input_data: Dict, result: Dict, params: Dict) -> Dic
     }
 
 
-def _v009_legal_support(input_data: Dict, result: Dict, params: Dict) -> Dict:
+def _v009_legal_support(input_data: dict, result: dict, params: dict) -> dict:
     for key, concepto in result["desglose"].items():
         if not isinstance(concepto, dict):
             continue
@@ -140,7 +140,7 @@ def _v009_legal_support(input_data: Dict, result: Dict, params: Dict) -> Dict:
     return {"result": "PASS", "evidence": "Cada renglón incluye referencia normativa"}
 
 
-def _v010_hashes_versioning(input_data: Dict, result: Dict, params: Dict) -> Dict:
+def _v010_hashes_versioning(input_data: dict, result: dict, params: dict) -> dict:
     meta = result["meta"]
     required = ("params_version", "input_hash", "output_hash")
     for k in required:
@@ -149,7 +149,7 @@ def _v010_hashes_versioning(input_data: Dict, result: Dict, params: Dict) -> Dic
     return {"result": "PASS", "evidence": "Hashes y versionamiento presentes"}
 
 
-def _v011_indexacion_ipc(input_data: Dict, result: Dict, params: Dict) -> Dict:
+def _v011_indexacion_ipc(input_data: dict, result: dict, params: dict) -> dict:
     """Regla V011 — Indexacion IPC para prestaciones no pagadas oportunamente.
 
     Tarea 2.X (Fase 2-bis, addendum SL2630-2024).
@@ -234,8 +234,8 @@ def _v011_indexacion_ipc(input_data: Dict, result: Dict, params: Dict) -> Dict:
 
 
 def _v012_preaviso_termino_fijo(
-    input_data: Dict, result: Dict, params: Dict
-) -> Dict:
+    input_data: dict, result: dict, params: dict
+) -> dict:
     """Regla V012 — Preaviso Art. 46 CST para contrato a término fijo vencido.
 
     Tarea 2.Y (Fase 2, addendum preaviso).
@@ -344,8 +344,8 @@ def _v012_preaviso_termino_fijo(
 
 
 def _v013_preaviso_declarado(
-    input_data: Dict, result: Dict, params: Dict
-) -> Dict:
+    input_data: dict, result: dict, params: dict
+) -> dict:
     """Regla V013 — Consistencia de declaración de preaviso.
 
     Tarea 2.Y (Fase 2, addendum preaviso).
@@ -377,7 +377,7 @@ def _v013_preaviso_declarado(
     fecha_preaviso = contrato.get(
         "fecha_preaviso", input_data.get("fecha_preaviso")
     )
-    modo = str(input_data.get("modo", "")).upper()
+    str(input_data.get("modo", "")).upper()
 
     # --- Tipo NO FIJO con campos de preaviso: WARN ---
     if tipo != "FIJO":
@@ -460,8 +460,8 @@ def _v013_preaviso_declarado(
 
 
 def _v014_vacaciones_finiquito(
-    input_data: Dict, result: Dict, params: Dict
-) -> Dict:
+    input_data: dict, result: dict, params: dict
+) -> dict:
     """Regla V014 — Vacaciones obligatorias en finiquito (Art. 189-190 CST).
 
     Tarea 2.Z (Fase 2, addendum finiquito/vacaciones).
@@ -547,8 +547,8 @@ def _v014_vacaciones_finiquito(
 
 
 def _v015_vacaciones_declaradas(
-    input_data: Dict, result: Dict, params: Dict
-) -> Dict:
+    input_data: dict, result: dict, params: dict
+) -> dict:
     """Regla V015 — Declaración de vacaciones en finiquito.
 
     Tarea 2.Z (Fase 2, addendum finiquito/vacaciones).

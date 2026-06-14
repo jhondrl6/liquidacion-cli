@@ -4,18 +4,16 @@ Cubre: enum completo, regresión canónica, finiquito con/sin motivo,
 fecha_terminacion_real con/sin motivo, todos los valores del enum.
 """
 
-import pytest
 from datetime import date
 from decimal import Decimal
+
+import pytest
 from pydantic import ValidationError
 
 from liquidator.contracts.input_model import (
     LiquidacionInput,
-    Contrato,
     MotivoTerminacion,
-    VacacionesEstado,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers

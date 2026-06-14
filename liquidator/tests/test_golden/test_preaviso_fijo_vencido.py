@@ -12,12 +12,11 @@ Reparos:
 """
 
 import json
-import pytest
 from pathlib import Path
-from decimal import Decimal
 
-from liquidator.core.engine import LiquidacionEngine, EngineConfig
+import pytest
 
+from liquidator.core.engine import EngineConfig, LiquidacionEngine
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 FIXTURE_PATH = REPO_ROOT / "examples" / "inputs" / "finiquito_fijo_vencido_preaviso.json"
@@ -112,7 +111,7 @@ class TestPreavisoSuficiente:
     def test_alert_preaviso_suficiente(self, engine, fixture_preaviso_suficiente):
         """Se genera alerta indicando que el preaviso fue suficiente."""
         output = engine.process(fixture_preaviso_suficiente)
-        alerts = output.get("validaciones_y_alertas", {})
+        output.get("validaciones_y_alertas", {})
         # Puede ser "preaviso_suficiente" o no existir
         # Lo importante es que NO hay indemnización en desglose
         desglose = output.get("desglose", {})

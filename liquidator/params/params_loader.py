@@ -53,10 +53,10 @@ class ParamsLoader:
         if not path.exists():
             raise ParamsError(f"No se encontró el archivo: {path}")
         try:
-            with open(path, "r", encoding="utf-8") as f:
+            with open(path, encoding="utf-8") as f:
                 return json.load(f)
         except json.JSONDecodeError:
-            raise ParamsError(f"JSON inválido en {path}")
+            raise ParamsError(f"JSON inválido en {path}") from None
 
     # ------------------------------------------------------------------
     # test_params_loader.py (unittest) API  +  shared by test_loader
@@ -75,10 +75,10 @@ class ParamsLoader:
             )
 
         try:
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(file_path, encoding="utf-8") as f:
                 data = json.load(f)
         except json.JSONDecodeError:
-            raise ParamsError("JSON inválido en archivo de parámetros")
+            raise ParamsError("JSON inválido en archivo de parámetros") from None
 
         if validate and self.validator:
             self.validator.validate(data)

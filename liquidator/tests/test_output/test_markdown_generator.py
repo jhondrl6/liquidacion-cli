@@ -16,12 +16,11 @@ from __future__ import annotations
 
 import os
 import tempfile
-from typing import Any, Dict
+from typing import Any
 
 import pytest
 
 from liquidator.output.markdown_generator import MarkdownGenerator
-
 
 # ------------------------------------------------------------------
 # Fixtures
@@ -33,7 +32,7 @@ def generator() -> MarkdownGenerator:
 
 
 @pytest.fixture
-def json_data_legacy() -> Dict[str, Any]:
+def json_data_legacy() -> dict[str, Any]:
     """Datos legacy (forma plana) para tests de retrocompatibilidad."""
     return {
         "meta": {
@@ -94,7 +93,7 @@ def json_data_legacy() -> Dict[str, Any]:
 
 
 @pytest.fixture
-def json_data_segmented() -> Dict[str, Any]:
+def json_data_segmented() -> dict[str, Any]:
     """Datos segmentados (JSONGenerator shape) para tests v2.0."""
     return {
         "meta": {
@@ -191,7 +190,7 @@ class TestMarkdownLegacy:
     def test_generate_markdown_periodica(
         self,
         generator: MarkdownGenerator,
-        json_data_legacy: Dict[str, Any],
+        json_data_legacy: dict[str, Any],
     ) -> None:
         md = generator.generate_markdown(json_data_legacy)
 
@@ -221,7 +220,7 @@ class TestMarkdownLegacy:
     def test_generate_markdown_finiquito(
         self,
         generator: MarkdownGenerator,
-        json_data_legacy: Dict[str, Any],
+        json_data_legacy: dict[str, Any],
     ) -> None:
         data = dict(json_data_legacy)
         data["meta"] = dict(data["meta"])
@@ -248,7 +247,7 @@ class TestMarkdownLegacy:
     def test_save_markdown(
         self,
         generator: MarkdownGenerator,
-        json_data_legacy: Dict[str, Any],
+        json_data_legacy: dict[str, Any],
     ) -> None:
         md = generator.generate_markdown(json_data_legacy)
 
@@ -280,7 +279,7 @@ class TestMarkdownSegmentado:
     def test_segmentado_muestra_anios(
         self,
         generator: MarkdownGenerator,
-        json_data_segmented: Dict[str, Any],
+        json_data_segmented: dict[str, Any],
     ) -> None:
         md = generator.generate_markdown(json_data_segmented)
         assert "2025" in md
@@ -289,7 +288,7 @@ class TestMarkdownSegmentado:
     def test_segmentado_muestra_por_segmento(
         self,
         generator: MarkdownGenerator,
-        json_data_segmented: Dict[str, Any],
+        json_data_segmented: dict[str, Any],
     ) -> None:
         md = generator.generate_markdown(json_data_segmented)
         assert "por segmento" in md.lower()
@@ -297,7 +296,7 @@ class TestMarkdownSegmentado:
     def test_segmentado_contiene_desglose_segmentado(
         self,
         generator: MarkdownGenerator,
-        json_data_segmented: Dict[str, Any],
+        json_data_segmented: dict[str, Any],
     ) -> None:
         md = generator.generate_markdown(json_data_segmented)
         assert "DESGLOSE POR SEGMENTO" in md
@@ -305,7 +304,7 @@ class TestMarkdownSegmentado:
     def test_segmentado_nombres_anonimizados(
         self,
         generator: MarkdownGenerator,
-        json_data_segmented: Dict[str, Any],
+        json_data_segmented: dict[str, Any],
     ) -> None:
         md = generator.generate_markdown(json_data_segmented)
         assert "[ANONIMIZADO]" in md
@@ -321,7 +320,7 @@ class TestComplianceStates:
     def test_no_go_genera_bloqueo(
         self,
         generator: MarkdownGenerator,
-        json_data_segmented: Dict[str, Any],
+        json_data_segmented: dict[str, Any],
     ) -> None:
         md = generator.generate_markdown(
             json_data_segmented, status="NO_GO"
@@ -333,7 +332,7 @@ class TestComplianceStates:
     def test_no_go_no_incluye_datos_trabajador(
         self,
         generator: MarkdownGenerator,
-        json_data_segmented: Dict[str, Any],
+        json_data_segmented: dict[str, Any],
     ) -> None:
         md = generator.generate_markdown(
             json_data_segmented, status="NO_GO"
@@ -344,7 +343,7 @@ class TestComplianceStates:
     def test_no_go_incluye_resumen_compliance(
         self,
         generator: MarkdownGenerator,
-        json_data_segmented: Dict[str, Any],
+        json_data_segmented: dict[str, Any],
     ) -> None:
         md = generator.generate_markdown(
             json_data_segmented, status="NO_GO"
@@ -355,7 +354,7 @@ class TestComplianceStates:
     def test_warn_no_bloquea(
         self,
         generator: MarkdownGenerator,
-        json_data_segmented: Dict[str, Any],
+        json_data_segmented: dict[str, Any],
     ) -> None:
         md = generator.generate_markdown(
             json_data_segmented, status="WARN"
@@ -366,7 +365,7 @@ class TestComplianceStates:
     def test_override_approved_no_bloquea(
         self,
         generator: MarkdownGenerator,
-        json_data_segmented: Dict[str, Any],
+        json_data_segmented: dict[str, Any],
     ) -> None:
         md = generator.generate_markdown(
             json_data_segmented, status="OVERRIDE_APPROVED"
@@ -377,7 +376,7 @@ class TestComplianceStates:
     def test_status_lee_de_meta_si_no_explicito(
         self,
         generator: MarkdownGenerator,
-        json_data_segmented: Dict[str, Any],
+        json_data_segmented: dict[str, Any],
     ) -> None:
         md = generator.generate_markdown(json_data_segmented)
         assert "LIQUIDACIÓN PERIÓDICA" in md
@@ -386,7 +385,7 @@ class TestComplianceStates:
     def test_no_go_desde_meta(
         self,
         generator: MarkdownGenerator,
-        json_data_segmented: Dict[str, Any],
+        json_data_segmented: dict[str, Any],
     ) -> None:
         data = dict(json_data_segmented)
         data["meta"] = dict(data["meta"])
@@ -405,7 +404,7 @@ class TestPlanValidation:
     def test_markdown_genera_para_canonico(
         self,
         generator: MarkdownGenerator,
-        json_data_segmented: Dict[str, Any],
+        json_data_segmented: dict[str, Any],
     ) -> None:
         out = generator.generate_markdown(
             json_data_segmented, status="GO"
@@ -417,7 +416,7 @@ class TestPlanValidation:
     def test_markdown_genera_bloqueado(
         self,
         generator: MarkdownGenerator,
-        json_data_segmented: Dict[str, Any],
+        json_data_segmented: dict[str, Any],
     ) -> None:
         data = dict(json_data_segmented)
         data["compliance_report"] = {
@@ -447,7 +446,7 @@ class TestRobustness:
     def test_desglose_vacio_no_falla(
         self,
         generator: MarkdownGenerator,
-        json_data_legacy: Dict[str, Any],
+        json_data_legacy: dict[str, Any],
     ) -> None:
         data = dict(json_data_legacy)
         data["desglose"] = {}
@@ -458,7 +457,7 @@ class TestRobustness:
     def test_falta_contrato_usa_meta_como_fallback(
         self,
         generator: MarkdownGenerator,
-        json_data_legacy: Dict[str, Any],
+        json_data_legacy: dict[str, Any],
     ) -> None:
         data = dict(json_data_legacy)
         data.pop("contrato", None)
@@ -470,7 +469,7 @@ class TestRobustness:
     def test_validaciones_y_alertas_vacio_no_falla(
         self,
         generator: MarkdownGenerator,
-        json_data_segmented: Dict[str, Any],
+        json_data_segmented: dict[str, Any],
     ) -> None:
         data = dict(json_data_segmented)
         data["validaciones_y_alertas"] = {}
@@ -480,7 +479,7 @@ class TestRobustness:
     def test_trabajador_sin_reside_en_lugar(
         self,
         generator: MarkdownGenerator,
-        json_data_legacy: Dict[str, Any],
+        json_data_legacy: dict[str, Any],
     ) -> None:
         data = dict(json_data_legacy)
         data["trabajador"] = {"nombre": "X", "documento": "1"}
@@ -507,7 +506,7 @@ class TestHelpers:
     def test_format_plazos_periodica(
         self,
         generator: MarkdownGenerator,
-        json_data_legacy: Dict[str, Any],
+        json_data_legacy: dict[str, Any],
     ) -> None:
         result = generator._format_plazos(
             json_data_legacy["desglose"], "PERIODICA"
@@ -519,7 +518,7 @@ class TestHelpers:
     def test_format_plazos_finiquito(
         self,
         generator: MarkdownGenerator,
-        json_data_legacy: Dict[str, Any],
+        json_data_legacy: dict[str, Any],
     ) -> None:
         desglose = dict(json_data_legacy["desglose"])
         desglose["indemnizacion"] = {
@@ -574,7 +573,7 @@ class TestPII:
     def test_bloqueo_no_incluye_pii(
         self,
         generator: MarkdownGenerator,
-        json_data_segmented: Dict[str, Any],
+        json_data_segmented: dict[str, Any],
     ) -> None:
         data = dict(json_data_segmented)
         data["trabajador"] = {

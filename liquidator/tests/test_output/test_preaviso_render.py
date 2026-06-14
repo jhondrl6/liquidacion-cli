@@ -9,11 +9,11 @@ Verifica que el template comprobante_finiquito.md renderiza correctamente:
 Origen: Addendum preaviso 2026-06-13, Tarea 3.H.
 """
 
-import pytest
 from pathlib import Path
 
-from liquidator.output.template_manager import TemplateManager
+import pytest
 
+from liquidator.output.template_manager import TemplateManager
 
 # ---------------------------------------------------------------------------
 # Fixtures

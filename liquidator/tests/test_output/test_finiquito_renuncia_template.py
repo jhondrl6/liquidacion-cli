@@ -8,12 +8,11 @@ Verifica que el template comprobante_finiquito.md renderiza correctamente:
 Origen: Addendum finiquito/vacaciones 2026-06-11 §C, Tarea 3.G.
 """
 
-import pytest
 from pathlib import Path
-from decimal import Decimal
+
+import pytest
 
 from liquidator.output.template_manager import TemplateManager
-
 
 # ---------------------------------------------------------------------------
 # Fixtures

@@ -1,7 +1,9 @@
 import json
-import pytest
 from pathlib import Path
-from liquidator.params.params_loader import ParamsLoader, ParamsError, ParamsSource
+
+import pytest
+
+from liquidator.params.params_loader import ParamsError, ParamsLoader, ParamsSource
 from liquidator.params.params_validator import ParamsValidator
 
 

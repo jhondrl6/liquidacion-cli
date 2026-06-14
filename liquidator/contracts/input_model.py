@@ -36,7 +36,7 @@ from __future__ import annotations
 
 from datetime import date
 from decimal import Decimal
-from enum import Enum
+from enum import StrEnum
 from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator, model_validator
@@ -93,7 +93,7 @@ class Contrato(BaseModel):
     dias_preaviso: int | None = None  # días de anticipación efectivos
 
     @model_validator(mode="after")
-    def _terminacion_real_requiere_motivo(self) -> "Contrato":
+    def _terminacion_real_requiere_motivo(self) -> Contrato:
         """Si hay fecha de terminación real, debe venir con motivo.
 
         Regla de integridad: no se puede declarar que el contrato terminó
@@ -106,7 +106,7 @@ class Contrato(BaseModel):
         return self
 
     @model_validator(mode="after")
-    def _preaviso_consistencia(self) -> "Contrato":
+    def _preaviso_consistencia(self) -> Contrato:
         """Reglas de consistencia para preaviso (Tarea 1.C-quater).
 
         Regla 1 — Preaviso solo aplica a término fijo (Art. 46 CST).
@@ -151,7 +151,7 @@ class Contrato(BaseModel):
         return self
 
 
-class MotivoTerminacion(str, Enum):
+class MotivoTerminacion(StrEnum):
     """Motivos de terminación del contrato laboral (Arts. 45-49 CST).
 
     Tarea 1.C-ter (addendum finiquito/vacaciones 2026-06-11).
@@ -200,7 +200,7 @@ class VacacionesEstado(BaseModel):
     fechas_disfrute: list[PeriodoDisfrute] | None = None
 
     @model_validator(mode="after")
-    def _consistencia(self) -> "VacacionesEstado":
+    def _consistencia(self) -> VacacionesEstado:
         """Si el empleador pasó dias_causados_proporcionales, validar
         que dias_pendientes no exceda el máximo causable."""
         causados = self.dias_causados_proporcionales
@@ -271,7 +271,7 @@ class PeriodoNoPagado(BaseModel):
     fecha_referencia_indexacion: date  # hasta cuándo se indexa (default: hoy)
 
     @model_validator(mode="after")
-    def _consistencia_fechas(self) -> "PeriodoNoPagado":
+    def _consistencia_fechas(self) -> PeriodoNoPagado:
         """Las fechas deben seguir orden logico:
         fecha_causacion <= fecha_exigibilidad <= fecha_referencia_indexacion.
 
@@ -322,7 +322,7 @@ class Salario(BaseModel):
     historial_salarial: list[MesValor] | None = None
 
     @model_validator(mode="after")
-    def _consistencia(self) -> "Salario":
+    def _consistencia(self) -> Salario:
         """Garantiza que `variable=True` siempre tenga cómo anualizar.
 
         Sin esta regla, un input con `variable=True` que solo trae
@@ -374,7 +374,7 @@ class LiquidacionInput(BaseModel):
     def _corte_mayor_ingreso(cls, v: Contrato) -> Contrato:
         """Garantiza que el periodo de cálculo no se invierta.
 
-        Sin esta regla, un input con `fecha_corte < fecha_ingreso` 
+        Sin esta regla, un input con `fecha_corte < fecha_ingreso`
         produciría duraciones negativas y división por cero en los
         calculadores. La regla es dura (no overrideable en v2.0).
         """
@@ -383,7 +383,7 @@ class LiquidacionInput(BaseModel):
         return v
 
     @model_validator(mode="after")
-    def _finiquito_requiere_motivo(self) -> "LiquidacionInput":
+    def _finiquito_requiere_motivo(self) -> LiquidacionInput:
         """Modo FINIQUITO exige motivo_terminacion explícito.
 
         Sin esta regla, un finiquito podría generarse sin saber si

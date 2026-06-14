@@ -24,7 +24,6 @@ from liquidator.contracts.input_model import (
     Trabajador,
 )
 
-
 # --- Fixtures reutilizables -------------------------------------------------
 
 

@@ -1,10 +1,12 @@
 import json
-import pytest
 from pathlib import Path
+
+import pytest
+
 from liquidator.params.params_validator import (
+    HAS_JSONSCHEMA,
     ParamsValidator,
     ValidationError,
-    HAS_JSONSCHEMA,
 )
 
 

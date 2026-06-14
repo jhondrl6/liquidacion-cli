@@ -1,12 +1,9 @@
 from __future__ import annotations
 
-from typing import Dict, List, Tuple
-
+from liquidator.utils import ValidationError
 from liquidator.validators.contract_validator import validate_contract
 from liquidator.validators.date_validator import validate_dates
 from liquidator.validators.salary_validator import validate_salary_components
-from liquidator.utils import ValidationError
-
 
 REQUIRED_FIELDS = [
     "modo",
@@ -17,7 +14,7 @@ REQUIRED_FIELDS = [
 ]
 
 
-def _validate_required(input_data: Dict) -> None:
+def _validate_required(input_data: dict) -> None:
     missing = [f for f in REQUIRED_FIELDS if f not in input_data]
     if missing:
         raise ValidationError(
@@ -25,14 +22,14 @@ def _validate_required(input_data: Dict) -> None:
         )
 
 
-def validate_input(input_data: Dict, params: Dict) -> Tuple[List[str], List[str]]:
+def validate_input(input_data: dict, params: dict) -> tuple[list[str], list[str]]:
     """Validador compuesto de entrada.
 
-    Retorna (warnings, notes) donde warnings son potencialmente 
+    Retorna (warnings, notes) donde warnings son potencialmente
     bloqueantes según política, y notes son observaciones informativas.
     """
-    warnings: List[str] = []
-    notes: List[str] = []
+    warnings: list[str] = []
+    notes: list[str] = []
 
     _validate_required(input_data)
 

@@ -1,7 +1,7 @@
 import pytest
 
-from liquidator.validators import validate_contract
 from liquidator.utils import ContractError
+from liquidator.validators import validate_contract
 
 
 def test_validate_contract_ok():

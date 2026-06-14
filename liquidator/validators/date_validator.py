@@ -1,23 +1,22 @@
 from __future__ import annotations
 
 from datetime import date
-from typing import Dict, List, Tuple
 
-from liquidator.utils import DateError, parse_date, days_between_inclusive
+from liquidator.utils import DateError, days_between_inclusive, parse_date
 
 
-def _extract_dates(input_data: Dict) -> Tuple[date, date]:
+def _extract_dates(input_data: dict) -> tuple[date, date]:
     try:
         fi = parse_date(input_data.get("fecha_ingreso"))
         fc = parse_date(input_data.get("fecha_corte"))
     except Exception as exc:
-        raise DateError(f"Fechas inválidas: {exc}")
+        raise DateError(f"Fechas inválidas: {exc}") from exc
     return fi, fc
 
 
-def validate_dates(input_data: Dict) -> List[str]:
+def validate_dates(input_data: dict) -> list[str]:
     """Valida formato y coherencia temporal de fechas. Retorna advertencias."""
-    warnings: List[str] = []
+    warnings: list[str] = []
     fi, fc = _extract_dates(input_data)
 
     if fi > fc:

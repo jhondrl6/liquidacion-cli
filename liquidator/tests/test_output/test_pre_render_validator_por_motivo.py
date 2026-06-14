@@ -6,21 +6,21 @@ para cada motivo de terminación del contrato laboral.
 Origen: Addendum finiquito/vacaciones 2026-06-11 §C, Tarea 3.G.
 """
 
-import pytest
 from decimal import Decimal
-from typing import Any, Dict
+from typing import Any
 
-from liquidator.output.pre_render_validator import (
-    PreRenderValidator,
-    PreRenderValidationError,
-    REQUISITOS_POR_MOTIVO,
-    obtener_nota_render,
-)
+import pytest
+
 from liquidator.contracts.input_model import (
     LiquidacionInput,
     MotivoTerminacion,
 )
-
+from liquidator.output.pre_render_validator import (
+    REQUISITOS_POR_MOTIVO,
+    PreRenderValidationError,
+    PreRenderValidator,
+    obtener_nota_render,
+)
 
 # ---------------------------------------------------------------------------
 # Helper: crear input mínimo para tests
@@ -35,7 +35,7 @@ def _make_input(
     preaviso_entregado: bool | None = None,
 ) -> LiquidacionInput:
     """Crea un LiquidacionInput mínimo para tests."""
-    data: Dict[str, Any] = {
+    data: dict[str, Any] = {
         "trabajador": {"nombre": "X", "documento": "1"},
         "empleador": {"nombre": "Y", "documento": "2"},
         "contrato": {

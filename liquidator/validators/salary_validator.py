@@ -1,9 +1,6 @@
 from __future__ import annotations
 
-from typing import Dict, List
-
 from liquidator.utils import SalaryError
-
 
 REQUIRED_NUMERIC = [
     "salario_mensual",
@@ -25,9 +22,9 @@ def _ensure_numeric_nonnegative(name: str, value) -> None:
     raise SalaryError(f"{name} debe ser numérico.")
 
 
-def validate_salary_components(input_data: Dict, params: Dict) -> List[str]:
+def validate_salary_components(input_data: dict, params: dict) -> list[str]:
     """Valida montos salariales y reglas de auxilios. Retorna advertencias."""
-    warnings: List[str] = []
+    warnings: list[str] = []
 
     for field in REQUIRED_NUMERIC:
         if field not in input_data:

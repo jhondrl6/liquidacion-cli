@@ -1,6 +1,7 @@
 import json
+
 import pytest
-from pathlib import Path
+
 from liquidator.params.params_versioning import ParamsVersioning, VersionInfo
 
 

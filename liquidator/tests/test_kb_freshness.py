@@ -156,7 +156,6 @@ def test_params_futuro_sera_detectado() -> None:
     el script debe detectarlo. Simulamos creando un archivo temporal y
     ejecutando el script — luego limpiamos."""
     import tempfile
-    import os
 
     with tempfile.TemporaryDirectory() as tmp:
         tmp_params = Path(tmp) / "params"

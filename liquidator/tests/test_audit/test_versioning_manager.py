@@ -2,10 +2,9 @@
 Tests para el módulo de versioning manager.
 """
 
-import pytest
 import tempfile
-import json
 from pathlib import Path
+
 from liquidator.audit.versioning_manager import VersioningManager
 
 

@@ -1,4 +1,4 @@
-from typing import Any, Optional, List, Dict
+from typing import Any
 
 
 class ValidationError(Exception):
@@ -32,7 +32,7 @@ class ParamsError(LiquidacionError):
 class ValidationOutput:
     """Standard output format for validation results"""
 
-    def __init__(self, is_valid: bool, errors: Optional[List[Any]] = None, warnings: Optional[List[Any]] = None):
+    def __init__(self, is_valid: bool, errors: list[Any] | None = None, warnings: list[Any] | None = None):
         self.is_valid = is_valid
         self.errors = errors or []
         self.warnings = warnings or []

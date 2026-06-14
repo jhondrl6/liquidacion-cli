@@ -8,18 +8,11 @@ from __future__ import annotations
 
 import json
 from datetime import date
-from decimal import Decimal
 from pathlib import Path
 
 import pytest
 
 from liquidator.core.params_provider import ParamsProvider
-from liquidator.core.salario_resolver import (
-    SalarioResolver,
-    SegmentoCalculo,
-    segmentar_periodo,
-)
-from liquidator.contracts.input_model import Salario
 from liquidator.core.workflow_orchestrator import WorkflowOrchestrator
 
 # ---------------------------------------------------------------------------

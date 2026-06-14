@@ -22,14 +22,13 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 from unittest.mock import patch
 
 import pytest
 from click.testing import CliRunner
 
 from liquidator.cli.main import main
-
 
 # ===========================================================================
 # Fixtures y helpers
@@ -59,7 +58,7 @@ def input_json(tmp_path: Path) -> Path:
     return p
 
 
-def _fake_engine_result(status: str) -> Dict[str, Any]:
+def _fake_engine_result(status: str) -> dict[str, Any]:
     """Construye un ``engine.process()`` simulado con el status dado."""
     return {
         "meta": {
@@ -204,7 +203,7 @@ class TestRamaNoGo:
         ):
             runner.invoke(
                 main,
-                ["liquidar", str(input_path := input_json),
+                ["liquidar", str(input_json),
                  "--out-dir", str(out_dir)],
             )
         # Debe existir liquidacion_BLOQUEADA.json

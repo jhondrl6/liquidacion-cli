@@ -2,8 +2,8 @@
 
 from .contract_validator import validate_contract
 from .date_validator import validate_dates
-from .salary_validator import validate_salary_components
 from .input_validator import validate_input
+from .salary_validator import validate_salary_components
 
 __all__ = [
     "validate_contract",

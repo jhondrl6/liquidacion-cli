@@ -1,7 +1,7 @@
 import pytest
 
-from liquidator.validators import validate_dates
 from liquidator.utils import DateError
+from liquidator.validators import validate_dates
 
 
 def test_validate_dates_ok():

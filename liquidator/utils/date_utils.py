@@ -1,4 +1,5 @@
-from datetime import datetime, date, timedelta
+from datetime import date, datetime, timedelta
+
 from .cache import global_cache
 
 
@@ -21,7 +22,7 @@ def calculate_days_between(start_date: str, end_date: str) -> int:
     cached_result = global_cache.get(cache_key)
     if cached_result is not None:
         return cached_result
-    
+
     start = datetime.strptime(start_date, "%Y-%m-%d").date()
     end = datetime.strptime(end_date, "%Y-%m-%d").date()
 

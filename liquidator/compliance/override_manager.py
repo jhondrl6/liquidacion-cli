@@ -4,9 +4,9 @@ Permite bypass de validaciones críticas con registro de auditoría completo.
 """
 
 import uuid
+from dataclasses import asdict, dataclass
 from datetime import datetime
-from typing import Dict, Any, List, Optional
-from dataclasses import dataclass, asdict
+from typing import Any
 
 
 @dataclass
@@ -17,7 +17,7 @@ class OverrideRecord:
     timestamp: str
     operator_id: str
     justification: str
-    compliance_checks_overridden: List[str]
+    compliance_checks_overridden: list[str]
     original_status: str
     new_status: str
     input_hash: str
@@ -27,9 +27,9 @@ class OverrideManager:
     """Gestor de autorizaciones de override humano."""
 
     def __init__(self):
-        self.override_records: List[OverrideRecord] = []
+        self.override_records: list[OverrideRecord] = []
 
-    def validate_override_request(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+    def validate_override_request(self, input_data: dict[str, Any]) -> dict[str, Any]:
         """
         Valida si una solicitud de override es válida.
 
@@ -39,7 +39,7 @@ class OverrideManager:
         Returns:
             Dict con resultado de validación
         """
-        result: Dict[str, Any] = {"is_valid": False, "errors": [], "warnings": []}
+        result: dict[str, Any] = {"is_valid": False, "errors": [], "warnings": []}
 
         # Verificar si se solicita override
         if not input_data.get("human_override", False):
@@ -72,7 +72,7 @@ class OverrideManager:
         self,
         operator_id: str,
         justification: str,
-        checks_overridden: List[str],
+        checks_overridden: list[str],
         original_status: str,
         input_hash: str,
     ) -> OverrideRecord:
@@ -104,8 +104,8 @@ class OverrideManager:
         return override_record
 
     def apply_override_to_compliance_report(
-        self, compliance_report: Dict[str, Any], override_record: OverrideRecord
-    ) -> Dict[str, Any]:
+        self, compliance_report: dict[str, Any], override_record: OverrideRecord
+    ) -> dict[str, Any]:
         """
         Aplica override al reporte de cumplimiento.
 
@@ -143,8 +143,8 @@ class OverrideManager:
         return updated_report
 
     def get_override_history(
-        self, operator_id: Optional[str] = None, date_range: Optional[tuple] = None
-    ) -> List[Dict[str, Any]]:
+        self, operator_id: str | None = None, date_range: tuple | None = None
+    ) -> list[dict[str, Any]]:
         """
         Obtiene historial de overrides con filtros opcionales.
 
@@ -170,7 +170,7 @@ class OverrideManager:
 
         return [asdict(record) for record in filtered_records]
 
-    def generate_override_report(self) -> Dict[str, Any]:
+    def generate_override_report(self) -> dict[str, Any]:
         """
         Genera reporte estadístico de overrides.
 

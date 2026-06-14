@@ -5,6 +5,7 @@ Tests for Template Manager
 import os
 import tempfile
 import unittest
+
 from liquidator.output.template_manager import TemplateManager
 
 

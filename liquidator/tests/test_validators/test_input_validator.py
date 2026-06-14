@@ -1,7 +1,7 @@
 import pytest
 
-from liquidator.validators import validate_input
 from liquidator.utils import ValidationError
+from liquidator.validators import validate_input
 
 
 def test_validate_input_ok():

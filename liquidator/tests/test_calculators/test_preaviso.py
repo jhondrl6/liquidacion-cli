@@ -11,10 +11,10 @@ Reparos cerrados:
   (c) Preaviso contractual (pacto > 30d) NO se implementa en v2.0.
 """
 
-import pytest
-from decimal import Decimal
-from liquidator.calculators.indemnizacion_calculator import IndemnizacionCalculator
 
+import pytest
+
+from liquidator.calculators.indemnizacion_calculator import IndemnizacionCalculator
 
 # ---------------------------------------------------------------------------
 # Fixtures

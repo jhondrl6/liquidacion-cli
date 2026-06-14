@@ -4,16 +4,16 @@ Convierte documentos Markdown a PDF profesionales con estilos corporativos
 """
 
 import json
-from pathlib import Path
-from typing import Dict, Any, Optional, Union
 import logging
 from datetime import datetime
+from pathlib import Path
+from typing import Any
 
 from liquidator.output.template_manager import TemplateManager
 
 try:
     import markdown
-    from weasyprint import HTML, CSS
+    from weasyprint import CSS, HTML
     from weasyprint.text.fonts import FontConfiguration
 except Exception as e:  # pragma: no cover - dependencias externas
     logging.warning(f"Dependencias de PDF no disponibles: {e}")
@@ -43,10 +43,10 @@ class PDFGenerator:
 
     def __init__(
         self,
-        templates_dir: Optional[Path] = None,
-        styles_dir: Optional[Path] = None,
-        fonts_dir: Optional[Path] = None,
-        template_manager: Optional[TemplateManager] = None,
+        templates_dir: Path | None = None,
+        styles_dir: Path | None = None,
+        fonts_dir: Path | None = None,
+        template_manager: TemplateManager | None = None,
     ):
         """
         Inicializar generador de PDF
@@ -99,7 +99,7 @@ class PDFGenerator:
             return template_path.read_text(encoding="latin-1")
 
     def _render_markdown_template(
-        self, template_name: str, context: Dict[str, Any]
+        self, template_name: str, context: dict[str, Any]
     ) -> str:
         """Renderizar plantilla Markdown con contexto dinámico"""
 
@@ -123,7 +123,7 @@ class PDFGenerator:
             return f"comprobante_{template_name}.md"
         return template_name
 
-    def _format_currency_value(self, value: Union[int, float]) -> str:
+    def _format_currency_value(self, value: int | float) -> str:
         try:
             numeric = float(value)
         except (TypeError, ValueError):
@@ -138,10 +138,10 @@ class PDFGenerator:
             self.logger.warning(f"Archivo CSS no encontrado: {css_path}")
             return ""
 
-        with open(css_path, "r", encoding="utf-8") as f:
+        with open(css_path, encoding="utf-8") as f:
             return f.read()
 
-    def _process_template(self, template: str, data: Dict[str, Any]) -> str:
+    def _process_template(self, template: str, data: dict[str, Any]) -> str:
         """Procesar plantilla Markdown con datos"""
         # Variables comunes
         default_vars = {
@@ -164,7 +164,7 @@ class PDFGenerator:
         template = self._process_complex_structures(template, template_vars)
 
         return template
-    def _process_complex_structures(self, template: str, data: Dict[str, Any]) -> str:
+    def _process_complex_structures(self, template: str, data: dict[str, Any]) -> str:
         """Procesar estructuras complejas como tablas dinámicas"""
         # Procesar tabla de prestaciones si existe
         if "desglose" in data and "tabla_prestaciones" in template:
@@ -178,7 +178,7 @@ class PDFGenerator:
 
         return template
 
-    def _generate_prestaciones_table(self, desglose: Dict[str, Any]) -> str:
+    def _generate_prestaciones_table(self, desglose: dict[str, Any]) -> str:
         """Generar tabla HTML de prestaciones"""
         rows = []
 
@@ -258,7 +258,7 @@ class PDFGenerator:
         </table>
         """
 
-    def _generate_trabajador_info(self, trabajador: Dict[str, Any]) -> str:
+    def _generate_trabajador_info(self, trabajador: dict[str, Any]) -> str:
         """Generar información del trabajador"""
         return f"""
         <div class="trabajador-info">
@@ -277,7 +277,7 @@ class PDFGenerator:
     def _generate_html_document(
         self,
         html_content: str,
-        data: Dict[str, Any],
+        data: dict[str, Any],
         page_title: str = "Liquidación de Nómina",
     ) -> str:
         """Generar documento HTML completo con estilos"""
@@ -319,7 +319,7 @@ class PDFGenerator:
 
         return html_doc
 
-    def _generate_header_content(self, data: Dict[str, Any]) -> str:
+    def _generate_header_content(self, data: dict[str, Any]) -> str:
         """Generar contenido del encabezado"""
         empresa = data.get("empresa", {})
         return f"""
@@ -331,7 +331,7 @@ class PDFGenerator:
         </div>
         """
 
-    def _generate_footer_content(self, data: Dict[str, Any]) -> str:
+    def _generate_footer_content(self, data: dict[str, Any]) -> str:
         """Generar contenido del pie de página"""
         return f"""
         <div class="footer-content">
@@ -340,7 +340,7 @@ class PDFGenerator:
         </div>
         """
 
-    def _build_template_context(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    def _build_template_context(self, data: dict[str, Any]) -> dict[str, Any]:
         meta = data.get("meta", {})
         trabajador = data.get("trabajador", {})
         empresa = data.get("empresa") or data.get("empleador") or {}
@@ -413,13 +413,13 @@ class PDFGenerator:
 
         return context
 
-    def _format_observaciones(self, alertas: Dict[str, Any]) -> str:
+    def _format_observaciones(self, alertas: dict[str, Any]) -> str:
         if not alertas:
             return "Sin observaciones."
         lineas = [f"- {mensaje}" for mensaje in alertas.values() if mensaje]
         return "\n".join(lineas) or "Sin observaciones."
 
-    def _format_plazos(self, desglose: Dict[str, Any]) -> str:
+    def _format_plazos(self, desglose: dict[str, Any]) -> str:
         items = []
         mapping = {
             "cesantias": "Cesantías",
@@ -434,15 +434,15 @@ class PDFGenerator:
 
     def generate_pdf(
         self,
-        data: Dict[str, Any],
+        data: dict[str, Any],
         template_name: str = "periodica",
-        output_path: Optional[Path] = None,
+        output_path: Path | None = None,
         page_title: str = "Liquidación de Nómina",
     ) -> Path:
         """
         Generar PDF desde datos de liquidación. If dependencies are not available,
         creates a placeholder PDF with information about the process.
-        
+
         Args:
             data: Datos de la liquidación
             template_name: Nombre de plantilla Markdown
@@ -503,7 +503,7 @@ class PDFGenerator:
                 else:
                     # Change extension to .txt if dependencies aren't available
                     output_path = output_path.with_suffix('.txt')
-                
+
                 with open(output_path, 'w', encoding='utf-8') as f:
                     f.write("REPORTE DE LIQUIDACIÓN - ARCHIVO DE PLANTILLA\n\n")
                     f.write(
@@ -550,7 +550,7 @@ class PDFGenerator:
     def generate_pdf_from_markdown(
         self,
         markdown_file: Path,
-        output_path: Optional[Path] = None,
+        output_path: Path | None = None,
         css_file: str = "pdf_styles.css",
     ) -> Path:
         """
@@ -566,7 +566,7 @@ class PDFGenerator:
         """
         try:
             # Leer archivo Markdown
-            with open(markdown_file, "r", encoding="utf-8") as f:
+            with open(markdown_file, encoding="utf-8") as f:
                 markdown_content = f.read()
 
             # Convertir a HTML
@@ -591,15 +591,15 @@ class PDFGenerator:
                     f.write(f"Fuente: {markdown_file}\n\n")
                     f.write("Contenido del documento:\n")
                     f.write(markdown_content)
-                
+
                 return output_path
             else:
                 # Generate actual PDF if dependencies are available
-                from weasyprint import HTML, CSS
+                from weasyprint import CSS, HTML
                 HTML(string=html_doc).write_pdf(str(output_path), stylesheets=[CSS(string="""
                     body { font-family: Arial, sans-serif; }
                 """)])
-                
+
                 return output_path
 
         except Exception as e:
@@ -607,7 +607,7 @@ class PDFGenerator:
             self.logger.error(error_msg)
             raise PDFGeneratorError(error_msg) from e
 
-    def validate_pdf_output(self, pdf_path: Path) -> Dict[str, Any]:
+    def validate_pdf_output(self, pdf_path: Path) -> dict[str, Any]:
         """
         Validar que el PDF generado sea correcto
 
@@ -640,7 +640,7 @@ class PDFGenerator:
 
             # Check if it's a text file (placeholder) or actual PDF
             is_text_file = pdf_path.suffix.lower() == '.txt'
-            
+
             if not is_text_file:
                 # Verificar que es un PDF válido leyendo header
                 with open(pdf_path, "rb") as f:
@@ -660,8 +660,8 @@ class PDFGenerator:
 
 # Función de conveniencia
 def generate_liquidacion_pdf(
-    data: Dict[str, Any],
-    output_path: Optional[Path] = None,
+    data: dict[str, Any],
+    output_path: Path | None = None,
     template_name: str = "periodica",
 ) -> Path:
     """
@@ -681,11 +681,11 @@ def generate_liquidacion_pdf(
 
 
 def generate_pdf_from_json(
-    json_path: Union[str, Path],
-    output_path: Optional[Path] = None,
+    json_path: str | Path,
+    output_path: Path | None = None,
     template_name: str = "periodica",
 ) -> Path:
-    with open(Path(json_path), "r", encoding="utf-8") as f:
+    with open(Path(json_path), encoding="utf-8") as f:
         data = json.load(f)  # type: ignore[name-defined]
     generator = PDFGenerator()
     return generator.generate_pdf(

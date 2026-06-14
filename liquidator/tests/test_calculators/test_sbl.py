@@ -10,8 +10,10 @@ Cubre:
 - Casos especiales y de borde
 """
 
-import pytest
 from decimal import Decimal
+
+import pytest
+
 from liquidator.calculators.sbl_calculator import SBLCalculator
 
 

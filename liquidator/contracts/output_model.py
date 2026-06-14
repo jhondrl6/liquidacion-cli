@@ -29,7 +29,7 @@ Extensiones futuras (no en esta tarea):
 """
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import datetime
 from decimal import Decimal
 from typing import Any, Literal
 

@@ -23,12 +23,12 @@ import json
 from datetime import datetime
 from hashlib import sha256
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import Any
 
 from liquidator import __version__
 from liquidator.core.params_provider import ParamsProvider
 
-PathLike = Union[str, Path]
+PathLike = str | Path
 
 
 class JSONGenerator:
@@ -66,13 +66,13 @@ class JSONGenerator:
 
     def __init__(
         self,
-        schema_path: Optional[PathLike] = None,
-        params: Optional[Dict[str, Any]] = None,
+        schema_path: PathLike | None = None,
+        params: dict[str, Any] | None = None,
     ) -> None:
         # `schema_path` puede ser string, Path, o None. Si es un archivo
         # existente, se usará para validar la salida. Si no, se ignora
         # silenciosamente (no falla el generador por ausencia de schema).
-        self.schema_path: Optional[Path] = None
+        self.schema_path: Path | None = None
         if schema_path is not None:
             sp = Path(schema_path)
             if sp.is_file():
@@ -81,14 +81,14 @@ class JSONGenerator:
         # `params` se resuelve siempre a un dict. Si no se inyectan, se
         # toman del ParamsProvider singleton (año mayor disponible). Esto
         # elimina los SMMLV=1423500 hardcodeados del refactor previo.
-        self.params: Dict[str, Any] = (
+        self.params: dict[str, Any] = (
             dict(params) if params is not None else ParamsProvider.current().to_dict()
         )
 
     # ------------------------------------------------------------------
     # API principal
     # ------------------------------------------------------------------
-    def generate_output(self, calculation_result: Dict[str, Any]) -> Dict[str, Any]:
+    def generate_output(self, calculation_result: dict[str, Any]) -> dict[str, Any]:
         """Genera la salida canónica del motor.
 
         ``calculation_result`` debe ser un dict unificado con los datos
@@ -146,7 +146,7 @@ class JSONGenerator:
             "plantilla_version": None,
         }
 
-        output: Dict[str, Any] = {
+        output: dict[str, Any] = {
             "meta": meta,
             "trabajador": input_data.get("trabajador", {}),
             "empleador": input_data.get("empleador", {}),
@@ -174,17 +174,17 @@ class JSONGenerator:
     # ------------------------------------------------------------------
     def generate_json(
         self,
-        input_data: Dict[str, Any],
-        calculation_result: Dict[str, Any],
-        compliance_result: Dict[str, Any],
-        params: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        input_data: dict[str, Any],
+        calculation_result: dict[str, Any],
+        compliance_result: dict[str, Any],
+        params: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """DEPRECATED — usar :meth:`generate_output` con un dict unificado.
 
         Se conserva la firma de 4 argumentos para no romper el engine ni
         los tests de Fase 0. Internamente arma el dict unificado y delega.
         """
-        unified: Dict[str, Any] = {}
+        unified: dict[str, Any] = {}
         if input_data:
             unified["input_data"] = input_data
         if calculation_result:
@@ -198,7 +198,7 @@ class JSONGenerator:
             self.params = dict(params)
         return self.generate_output(unified)
 
-    def save_to_file(self, output: Dict[str, Any], filepath: PathLike) -> None:
+    def save_to_file(self, output: dict[str, Any], filepath: PathLike) -> None:
         """Escribe la salida a disco en formato JSON legible."""
         path = Path(filepath)
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -206,7 +206,7 @@ class JSONGenerator:
             json.dump(output, f, indent=2, ensure_ascii=False, sort_keys=True)
 
     # Alias histórico (tests previos usaban ``save_json``).
-    def save_json(self, output: Dict[str, Any], filepath: PathLike) -> bool:
+    def save_json(self, output: dict[str, Any], filepath: PathLike) -> bool:
         """Alias de :meth:`save_to_file` que retorna ``True`` siempre."""
         self.save_to_file(output, filepath)
         return True
@@ -224,7 +224,7 @@ class JSONGenerator:
         serialized = json.dumps(data, sort_keys=True, ensure_ascii=False, default=str)
         return f"sha256:{sha256(serialized.encode('utf-8')).hexdigest()}"
 
-    def _params_canonical(self) -> Dict[str, Any]:
+    def _params_canonical(self) -> dict[str, Any]:
         """Subconjunto canónico de ``self.params`` que se hashea.
 
         Excluye campos volátiles o muy largos que no aportan a la
@@ -249,7 +249,7 @@ class JSONGenerator:
             }
         }
 
-    def _validate_against_schema(self, output: Dict[str, Any]) -> None:
+    def _validate_against_schema(self, output: dict[str, Any]) -> None:
         """Valida ``output`` contra el JSON Schema en ``self.schema_path``.
 
         Importa ``jsonschema`` lazy para no acoplar el módulo. Si el
@@ -275,7 +275,7 @@ class JSONGenerator:
     # ---- Extractors tolerantes a múltiples shapes ---------------------
 
     @staticmethod
-    def _extract_input(cr: Dict[str, Any]) -> Dict[str, Any]:
+    def _extract_input(cr: dict[str, Any]) -> dict[str, Any]:
         if "input_data" in cr and isinstance(cr["input_data"], dict):
             return cr["input_data"]
         # Fallback: top-level
@@ -286,7 +286,7 @@ class JSONGenerator:
         }
 
     @staticmethod
-    def _extract_calc(cr: Dict[str, Any]) -> Dict[str, Any]:
+    def _extract_calc(cr: dict[str, Any]) -> dict[str, Any]:
         if "calculation_results" in cr and isinstance(cr["calculation_results"], dict):
             return cr["calculation_results"]
         return {
@@ -296,7 +296,7 @@ class JSONGenerator:
         }
 
     @staticmethod
-    def _extract_compliance(cr: Dict[str, Any]) -> Dict[str, Any]:
+    def _extract_compliance(cr: dict[str, Any]) -> dict[str, Any]:
         return (
             cr.get("compliance_report")
             or cr.get("compliance")
@@ -304,18 +304,18 @@ class JSONGenerator:
         )
 
     @staticmethod
-    def _extract_validaciones(cr: Dict[str, Any]) -> Dict[str, Any]:
+    def _extract_validaciones(cr: dict[str, Any]) -> dict[str, Any]:
         return cr.get("validaciones_y_alertas", {}) or {}
 
     @staticmethod
-    def _extract_normas(cr: Dict[str, Any]) -> list:
+    def _extract_normas(cr: dict[str, Any]) -> list:
         normas = cr.get("normas_aplicadas", []) or []
         if not isinstance(normas, list):
             return []
         return [str(n) for n in normas]
 
     @staticmethod
-    def _extract_modo(cr: Dict[str, Any], input_data: Dict[str, Any]) -> str:
+    def _extract_modo(cr: dict[str, Any], input_data: dict[str, Any]) -> str:
         for src in (cr, input_data):
             modo = src.get("modo")
             if modo:
@@ -325,7 +325,7 @@ class JSONGenerator:
 
     @staticmethod
     def _extract_referencias(
-        cr: Dict[str, Any], compliance: Dict[str, Any]
+        cr: dict[str, Any], compliance: dict[str, Any]
     ) -> list:
         refs = cr.get("referencias_normativas")
         if refs:

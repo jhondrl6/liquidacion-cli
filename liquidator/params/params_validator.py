@@ -82,10 +82,10 @@ class ParamsValidator:
             raise ValidationError(f"Schema no encontrado: {path}")
 
         try:
-            with open(path, "r", encoding="utf-8") as f:
+            with open(path, encoding="utf-8") as f:
                 schema = json.load(f)
         except json.JSONDecodeError:
-            raise ValidationError(f"Schema JSON invalido en {path}")
+            raise ValidationError(f"Schema JSON invalido en {path}") from None
 
         self._schema = schema
         self._validator = jsonschema.Draft7Validator(schema)  # type: ignore[name-defined]

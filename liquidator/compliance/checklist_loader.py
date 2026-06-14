@@ -5,7 +5,6 @@ en un objeto Rule ejecutable.
 
 import json
 from pathlib import Path
-from typing import List, Dict, Callable, Optional
 
 from .rule_evaluator import RuleEvaluator
 
@@ -13,7 +12,7 @@ from .rule_evaluator import RuleEvaluator
 class ChecklistLoader:
     """Load & parse legal-compliance checklist."""
 
-    def __init__(self, checklist_path: Optional[Path] = None):
+    def __init__(self, checklist_path: Path | None = None):
         # Default to the checklist in params if no path provided
         if checklist_path is None:
             from liquidator.params.params_loader import ParamsLoader
@@ -22,7 +21,7 @@ class ChecklistLoader:
         else:
             self.path = Path(checklist_path)
 
-    def load(self) -> List[Dict]:
+    def load(self) -> list[dict]:
         """Return list of rule-dicts with an `evaluator: Callable` key."""
         raw = json.loads(self.path.read_text(encoding="utf-8"))
         rules = []

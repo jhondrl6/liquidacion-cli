@@ -1,9 +1,8 @@
 from pathlib import Path
 
-from liquidator.core.workflow_orchestrator import WorkflowOrchestrator
 from liquidator.core.input_parser import parse_input_file
+from liquidator.core.workflow_orchestrator import WorkflowOrchestrator
 from liquidator.params.params_loader import ParamsLoader
-
 
 EXAMPLES = Path(__file__).resolve().parents[3] / "examples"
 

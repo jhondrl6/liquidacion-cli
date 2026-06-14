@@ -5,14 +5,15 @@ Este módulo implementa las reglas para calcular indemnizaciones por terminació
 sin justa causa, aplicación de topes legales y cálculo de salarios pendientes.
 """
 
-from typing import Dict, Any
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import ROUND_HALF_UP, Decimal
+from typing import Any
+
+from ..legal.topes_manager import TopesManager
+from ..utils.currency_utils import round_currency
 from ..utils.date_utils import (
     calculate_days_between,
     calculate_years_of_service,
 )
-from ..utils.currency_utils import round_currency
-from ..legal.topes_manager import TopesManager
 
 
 class IndemnizacionCalculator:
@@ -25,7 +26,7 @@ class IndemnizacionCalculator:
     - Calcular salarios pendientes
     """
 
-    def __init__(self, params: Dict[str, Any]):
+    def __init__(self, params: dict[str, Any]):
         """
         Inicializa el calculador con los parámetros legales vigentes.
 
@@ -42,7 +43,7 @@ class IndemnizacionCalculator:
         fecha_corte: str,
         tipo_contrato: str,
         motivo_terminacion: str,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Calcula la indemnización por terminación sin justa causa.
 
@@ -123,7 +124,7 @@ class IndemnizacionCalculator:
 
     def _calculate_indemnizacion_indefinido(
         self, sbl_general: float, fecha_ingreso: str, fecha_corte: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Calcula indemnización para contrato indefinido.
 
@@ -178,7 +179,7 @@ class IndemnizacionCalculator:
 
     def _calculate_indemnizacion_termino_fijo(
         self, sbl_general: float, fecha_ingreso: str, fecha_corte: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Calcula indemnización para contrato a término fijo.
 
@@ -268,7 +269,7 @@ class IndemnizacionCalculator:
         salario_mensual: float,
         dias_pendientes: int,
         recargos_pendientes: float = 0.0,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Calcula el salario pendiente por pagar.
 
@@ -307,8 +308,8 @@ class IndemnizacionCalculator:
         }
 
     def calculate_indemnizacion_completa(
-        self, input_data: Dict[str, Any], sbl_general: float
-    ) -> Dict[str, Any]:
+        self, input_data: dict[str, Any], sbl_general: float
+    ) -> dict[str, Any]:
         """
         Calcula el resultado completo de indemnización para la liquidación.
 
@@ -381,7 +382,7 @@ class IndemnizacionCalculator:
         self,
         sbl: float,
         dias_preaviso_efectivos: int,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Calcula la indemnización por preaviso insuficiente en contrato a
         término fijo, según Art. 46 CST.

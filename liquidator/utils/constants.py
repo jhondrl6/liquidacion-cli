@@ -20,7 +20,7 @@ ERROR_MSG_INVALID_DATE = "Formato de fecha inválido. Use YYYY-MM-DD"
 
 # Compliance constants
 COMPLIANCE_POLICY_STANDARD = "standard"
-COMPLIANCE_POLICY_STRICT = "strict" 
+COMPLIANCE_POLICY_STRICT = "strict"
 COMPLIANCE_POLICY_LENIENT = "lenient"
 
 # Validation constants

@@ -19,10 +19,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
-from typing import List
 
 from liquidator.contracts.input_model import Salario
-
 
 # ---------------------------------------------------------------------------
 # Dataclass auxiliar
@@ -116,7 +114,7 @@ class SalarioResolver:
 def segmentar_periodo(
     fecha_ingreso: date,
     fecha_corte: date,
-) -> List[SegmentoCalculo]:
+) -> list[SegmentoCalculo]:
     """Parte un rango de fechas en segmentos dentro de cada año calendario.
 
     Cada segmento tiene ``dias`` = días INCLUSIVOS (la fecha de corte del
@@ -134,7 +132,7 @@ def segmentar_periodo(
             f"fecha_corte ({fecha_corte}) < fecha_ingreso ({fecha_ingreso})"
         )
 
-    segmentos: List[SegmentoCalculo] = []
+    segmentos: list[SegmentoCalculo] = []
     cursor = fecha_ingreso
 
     while cursor <= fecha_corte:

@@ -2,11 +2,11 @@
 Tests para el módulo de audit logger.
 """
 
-import pytest
-import tempfile
 import json
+import tempfile
 from pathlib import Path
-from liquidator.audit.audit_logger import AuditLogger, AuditEventType
+
+from liquidator.audit.audit_logger import AuditEventType, AuditLogger
 
 
 class TestAuditLogger:
@@ -32,7 +32,7 @@ class TestAuditLogger:
         assert len(log_files) == 1
 
         # Verificar contenido del log
-        with open(log_files[0], "r", encoding="utf-8") as f:
+        with open(log_files[0], encoding="utf-8") as f:
             log_lines = f.readlines()
 
         assert len(log_lines) == 1
@@ -59,7 +59,7 @@ class TestAuditLogger:
         )
 
         log_files = list(Path(self.temp_dir).glob("*.log"))
-        with open(log_files[0], "r", encoding="utf-8") as f:
+        with open(log_files[0], encoding="utf-8") as f:
             log_entry = json.loads(f.readlines()[0])
 
         assert log_entry["event_type"] == "calculation_started"
@@ -77,7 +77,7 @@ class TestAuditLogger:
         )
 
         log_files = list(Path(self.temp_dir).glob("*.log"))
-        with open(log_files[0], "r", encoding="utf-8") as f:
+        with open(log_files[0], encoding="utf-8") as f:
             log_entry = json.loads(f.readlines()[0])
 
         assert log_entry["event_type"] == "override_applied"
@@ -95,7 +95,7 @@ class TestAuditLogger:
         )
 
         log_files = list(Path(self.temp_dir).glob("*.log"))
-        with open(log_files[0], "r", encoding="utf-8") as f:
+        with open(log_files[0], encoding="utf-8") as f:
             log_entry = json.loads(f.readlines()[0])
 
         assert log_entry["event_type"] == "error_occurred"
@@ -136,7 +136,7 @@ class TestAuditLogger:
         )
 
         log_files = list(Path(self.temp_dir).glob("*.log"))
-        with open(log_files[0], "r", encoding="utf-8") as f:
+        with open(log_files[0], encoding="utf-8") as f:
             log_entry = json.loads(f.readlines()[0])
 
         summary = log_entry["input_summary"]

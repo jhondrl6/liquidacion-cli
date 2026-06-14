@@ -16,10 +16,10 @@ Author: Sistema de Liquidación de Nómina
 Version: 1.0.0
 """
 
-from datetime import datetime, date
-from typing import Dict, Any, Tuple, Optional
-from decimal import Decimal, ROUND_HALF_UP
 import logging
+from datetime import date, datetime
+from decimal import ROUND_HALF_UP, Decimal
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +32,7 @@ class PrestacionesCalculator:
     de fórmulas contra casos conocidos.
     """
 
-    def __init__(self, params: Dict[str, Any]):
+    def __init__(self, params: dict[str, Any]):
         """
         Inicializa el calculador con parámetros oficiales.
 
@@ -75,7 +75,7 @@ class PrestacionesCalculator:
             fecha_ing = datetime.strptime(fecha_ingreso, "%Y-%m-%d").date()
             fecha_cor = datetime.strptime(fecha_corte, "%Y-%m-%d").date()
         except ValueError as e:
-            raise ValueError(f"Formato de fecha inválido: {e}")
+            raise ValueError(f"Formato de fecha inválido: {e}") from e
 
         if fecha_cor < fecha_ing:
             raise ValueError(
@@ -98,7 +98,7 @@ class PrestacionesCalculator:
         dias_servicio: int,
         fecha_ingreso: str,
         fecha_corte: str,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Calcula cesantías según Art. 249-250 CST.
 
@@ -190,7 +190,7 @@ class PrestacionesCalculator:
 
     def calculate_intereses_cesantias(
         self, cesantias: float, dias_servicio: int, fecha_ingreso: str, fecha_corte: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Calcula intereses sobre cesantías según Ley 50/1990 Art. 99.
 
@@ -290,7 +290,7 @@ class PrestacionesCalculator:
 
     def calculate_dias_prima(
         self, fecha_ingreso: str, fecha_corte: str
-    ) -> Tuple[int, str]:
+    ) -> tuple[int, str]:
         """
         Calcula días trabajados en el semestre correspondiente.
 
@@ -355,7 +355,7 @@ class PrestacionesCalculator:
 
     def calculate_prima(
         self, sbl_prima: float, fecha_ingreso: str, fecha_corte: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Calcula prima de servicios según Art. 306-308 CST.
 
@@ -459,8 +459,8 @@ class PrestacionesCalculator:
         }
 
     def calculate_all_prestaciones(
-        self, input_data: Dict[str, Any], sbl_general: float, sbl_prima: float
-    ) -> Dict[str, Any]:
+        self, input_data: dict[str, Any], sbl_general: float, sbl_prima: float
+    ) -> dict[str, Any]:
         """
         Calcula todas las prestaciones en un solo llamado.
 

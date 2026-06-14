@@ -3,7 +3,8 @@ import os
 import shutil
 import tempfile
 import unittest
-from liquidator.params.params_loader import ParamsLoader, ParamsError
+
+from liquidator.params.params_loader import ParamsError, ParamsLoader
 
 
 class TestParamsLoader(unittest.TestCase):

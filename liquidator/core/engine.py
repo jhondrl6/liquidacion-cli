@@ -16,17 +16,17 @@ import time
 import uuid
 from copy import deepcopy
 from dataclasses import dataclass
-from datetime import date, timedelta
+from datetime import date
 from decimal import Decimal
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
-from liquidator.params.params_loader import ParamsLoader
-from liquidator.output.json_generator import JSONGenerator
-from liquidator.compliance.compliance_engine import ComplianceEngine
+from liquidator.calculators.indemnizacion_calculator import IndemnizacionCalculator
 from liquidator.calculators.indexacion import IPCIndexador
 from liquidator.calculators.prestaciones_calculator import PrestacionesCalculator
-from liquidator.calculators.indemnizacion_calculator import IndemnizacionCalculator
+from liquidator.compliance.compliance_engine import ComplianceEngine
+from liquidator.output.json_generator import JSONGenerator
+from liquidator.params.params_loader import ParamsLoader
 
 from .input_parser import InputParser
 from .workflow_orchestrator import WorkflowOrchestrator
@@ -58,7 +58,7 @@ def _esta_prescrito(fecha_exigibilidad: date, fecha_referencia: date) -> bool:
     return delta > _PRESCRIPCION_ANIOS * 365 + _PRESCRIPCION_DIAS_TOLERANCIA
 
 
-def _safe_hash(data: Dict[str, Any]) -> str:
+def _safe_hash(data: dict[str, Any]) -> str:
     serialized = json.dumps(data, sort_keys=True, ensure_ascii=False)
     import hashlib
 
@@ -68,13 +68,13 @@ def _safe_hash(data: Dict[str, Any]) -> str:
 @dataclass
 class EngineConfig:
     params_year: int = 2025
-    checklist_path: Optional[Path] = None
+    checklist_path: Path | None = None
 
 
 class LiquidacionEngine:
     """Motor que coordina parsing, cálculos, compliance y auditoría."""
 
-    def __init__(self, config: Optional[EngineConfig] = None):
+    def __init__(self, config: EngineConfig | None = None):
         config = config or EngineConfig()
         self.config = config
         self.params_loader = ParamsLoader()
@@ -90,12 +90,12 @@ class LiquidacionEngine:
     # ------------------------------------------------------------------
     # API pública
     # ------------------------------------------------------------------
-    def process(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+    def process(self, payload: dict[str, Any]) -> dict[str, Any]:
         """Compatibilidad con CLI: alias de :meth:`process_input`."""
 
         return self.process_input(payload)
 
-    def process_input(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+    def process_input(self, payload: dict[str, Any]) -> dict[str, Any]:
         """Ejecuta el flujo completo de liquidación."""
 
         params = self.params_loader.load_params(self.config.params_year)
@@ -183,7 +183,7 @@ class LiquidacionEngine:
 
         return output
 
-    def compliance_check(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+    def compliance_check(self, payload: dict[str, Any]) -> dict[str, Any]:
         params = self.params_loader.load_params(self.config.params_year)
         parsed_data = self.input_parser.parse(payload)
         workflow = WorkflowOrchestrator(params)
@@ -198,11 +198,11 @@ class LiquidacionEngine:
     # ------------------------------------------------------------------
     def _run_compliance(
         self,
-        input_data: Dict[str, Any],
-        params: Dict[str, Any],
-        compliance_payload: Dict[str, Any],
+        input_data: dict[str, Any],
+        params: dict[str, Any],
+        compliance_payload: dict[str, Any],
         input_hash: str,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self.compliance_engine.run(
             input_data,
             params,
@@ -211,8 +211,8 @@ class LiquidacionEngine:
         )
 
     def _apply_compliance_policy(
-        self, input_data: Dict[str, Any], report: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, input_data: dict[str, Any], report: dict[str, Any]
+    ) -> dict[str, Any]:
         policy = str(input_data.get("compliance_policy", "standard")).lower()
         if policy == "strict" and report["summary"].get("warnings", 0) > 0:
             report["compliance_status"] = "NO_GO"
@@ -222,7 +222,7 @@ class LiquidacionEngine:
 
     def _load_audit_utilities(self) -> None:
         try:
-            from liquidator.audit import AuditLogger, AuditEventType, TrailGenerator
+            from liquidator.audit import AuditEventType, AuditLogger, TrailGenerator
 
             self._audit_logger = AuditLogger()
             self._audit_event_type = AuditEventType
@@ -233,7 +233,7 @@ class LiquidacionEngine:
             self._audit_event_type = None
 
     def _log_audit_start(
-        self, session_id: str, input_data: Dict[str, Any], params: Dict[str, Any]
+        self, session_id: str, input_data: dict[str, Any], params: dict[str, Any]
     ) -> None:
         if not self._audit_logger:
             return
@@ -246,7 +246,7 @@ class LiquidacionEngine:
     def _log_audit_complete(
         self,
         session_id: str,
-        compliance_report: Dict[str, Any],
+        compliance_report: dict[str, Any],
         start_time: float,
         *,
         blocked: bool = False,
@@ -268,9 +268,9 @@ class LiquidacionEngine:
     def _persist_trail(
         self,
         session_id: str,
-        input_data: Dict[str, Any],
-        output: Dict[str, Any],
-        compliance_report: Dict[str, Any],
+        input_data: dict[str, Any],
+        output: dict[str, Any],
+        compliance_report: dict[str, Any],
     ) -> None:
         if not self._audit_trail:
             return
@@ -296,10 +296,10 @@ class LiquidacionEngine:
     # ------------------------------------------------------------------
     def _procesar_periodos_no_pagados(
         self,
-        parsed_data: Dict[str, Any],
-        calc_results: Dict[str, Any],
-        alerts: Dict[str, str],
-    ) -> List[Dict[str, Any]]:
+        parsed_data: dict[str, Any],
+        calc_results: dict[str, Any],
+        alerts: dict[str, str],
+    ) -> list[dict[str, Any]]:
         """Si el input declara ``periodos_no_pagados``, calcula VA indexada
         para cada uno, validando prescripción (Art. 488 CST).
 
@@ -344,7 +344,7 @@ class LiquidacionEngine:
             calc_results["desglose"] = {}
         total_actual = Decimal(str(calc_results.get("total", 0)))
 
-        renglones: List[Dict[str, Any]] = []
+        renglones: list[dict[str, Any]] = []
         n_prescritos = 0
         n_indexados = 0
 
@@ -453,10 +453,10 @@ class LiquidacionEngine:
     # ------------------------------------------------------------------
     def _calcular_vacaciones_si_finiquito(
         self,
-        parsed_data: Dict[str, Any],
-        params: Dict[str, Any],
-        calc_results: Dict[str, Any],
-        alerts: Dict[str, str],
+        parsed_data: dict[str, Any],
+        params: dict[str, Any],
+        calc_results: dict[str, Any],
+        alerts: dict[str, str],
     ) -> None:
         """Hook de vacaciones compensadas en finiquito (Tarea 2.B-ter).
 
@@ -515,10 +515,10 @@ class LiquidacionEngine:
     # ------------------------------------------------------------------
     def _calcular_preaviso_si_fijo_vencido(
         self,
-        parsed_data: Dict[str, Any],
-        params: Dict[str, Any],
-        calc_results: Dict[str, Any],
-        alerts: Dict[str, str],
+        parsed_data: dict[str, Any],
+        params: dict[str, Any],
+        calc_results: dict[str, Any],
+        alerts: dict[str, str],
     ) -> None:
         """Hook de indemnización por preaviso insuficiente (Tarea 2.B-cuater).
 

@@ -3,7 +3,6 @@ from pathlib import Path
 from liquidator.core.engine import LiquidacionEngine
 from liquidator.core.input_parser import parse_input_file
 
-
 EXAMPLES = Path(__file__).resolve().parents[3] / "examples"
 
 

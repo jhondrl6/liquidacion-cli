@@ -25,11 +25,9 @@ from pydantic import ValidationError
 
 from liquidator.contracts.document_context import (
     ComplianceInfo,
-    ComplianceStatus,
     DocumentContext,
     RenglonDesglose,
 )
-
 
 # ===========================================================================
 # Helpers

@@ -17,12 +17,12 @@ Decisiones de implementación (DoD):
   nuevos, `variable=True` con historial, `sbl_por_anio`, `MesValor` con
   mes/valor inválidos, y shape de `MesValor` válido.
 """
-import pytest
 from decimal import Decimal
+
+import pytest
 from pydantic import ValidationError
 
-from liquidator.contracts.input_model import Salario, MesValor
-
+from liquidator.contracts.input_model import MesValor, Salario
 
 # --- Regresión (DoD plan §6.2: input v1.x sigue funcionando idéntico) --------
 

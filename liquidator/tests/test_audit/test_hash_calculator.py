@@ -2,7 +2,6 @@
 Tests para el módulo de hash calculator.
 """
 
-import pytest
 from liquidator.audit.hash_calculator import HashCalculator
 
 

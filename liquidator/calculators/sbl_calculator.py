@@ -8,9 +8,9 @@ Referencia Legal:
 - SBL_PRIMA: Similar a SBL_GENERAL o con reglas específicas según variabilidad
 """
 
-from typing import Dict, List, Optional, Tuple, Any, Union
-from datetime import datetime
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import ROUND_HALF_UP, Decimal
+from typing import Any
+
 from ..utils.constants import DEFAULT_SMMLV
 
 
@@ -19,7 +19,7 @@ class SBLCalculator:
     Calculador de Salario Base de Liquidación en sus diferentes modalidades.
     """
 
-    def __init__(self, params: Dict):
+    def __init__(self, params: dict):
         """
         Inicializa el calculador con parámetros legales.
 
@@ -29,7 +29,7 @@ class SBLCalculator:
         self.params = params
         self.smmlv = params.get("SMMLV", DEFAULT_SMMLV)
         self.limite_auxilio = params.get("LIMITE_AUXILIO", 2 * self.smmlv)
-        self.alertas: List[Dict[str, Any]] = []
+        self.alertas: list[dict[str, Any]] = []
 
     def calculate_sbl_general(
         self,
@@ -41,7 +41,7 @@ class SBLCalculator:
         auxilio_conectividad: int = 0,
         reside_en_lugar_trabajo: bool = False,
         auxilio_conectividad_pactado: bool = False,
-    ) -> Tuple[Decimal, List[Dict[str, Any]]]:
+    ) -> tuple[Decimal, list[dict[str, Any]]]:
         """
         Calcula el SBL_GENERAL para cesantías, prima e indemnización.
 
@@ -156,7 +156,7 @@ class SBLCalculator:
 
     def calculate_sbl_vacaciones(
         self, salario_mensual: int, comisiones_promedio_mensual: float = 0
-    ) -> Tuple[Decimal, List[Dict[str, Any]]]:
+    ) -> tuple[Decimal, list[dict[str, Any]]]:
         """
         Calcula el SBL_VACACIONES.
 
@@ -216,7 +216,7 @@ class SBLCalculator:
         reside_en_lugar_trabajo: bool = False,
         auxilio_conectividad_pactado: bool = False,
         es_salario_variable: bool = False,
-    ) -> Tuple[Decimal, List[Dict]]:
+    ) -> tuple[Decimal, list[dict]]:
         """
         Calcula el SBL_PRIMA para prima de servicios.
 
@@ -272,7 +272,7 @@ class SBLCalculator:
         auxilio_conectividad: int,
         reside_en_lugar_trabajo: bool,
         auxilio_conectividad_pactado: bool,
-    ) -> Dict:
+    ) -> dict:
         """
         Aplica y valida las reglas de auxilio de transporte y conectividad.
 
@@ -286,7 +286,7 @@ class SBLCalculator:
         Returns:
             Dict con resultado de validación y alertas
         """
-        resultado: Dict[str, Any] = {
+        resultado: dict[str, Any] = {
             "auxilio_transporte_aplica": False,
             "auxilio_transporte_valor": 0,
             "auxilio_conectividad_aplica": False,
@@ -346,8 +346,8 @@ class SBLCalculator:
         return resultado
 
     def calculate_promedio_variable(
-        self, salarios_historicos: List[Dict[str, float]], meses_requeridos: int = 12
-    ) -> Tuple[Decimal, List[Dict]]:
+        self, salarios_historicos: list[dict[str, float]], meses_requeridos: int = 12
+    ) -> tuple[Decimal, list[dict]]:
         """
         Calcula el promedio de salarios variables para los últimos N meses.
 
@@ -418,7 +418,7 @@ class SBLCalculator:
 
         return promedio, alertas
 
-    def get_alertas(self) -> List[Dict]:
+    def get_alertas(self) -> list[dict]:
         """
         Retorna todas las alertas generadas durante los cálculos.
 

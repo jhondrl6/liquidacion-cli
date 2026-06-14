@@ -17,12 +17,13 @@ Cambios (plan §6.2 Tarea 1.F):
 
 from __future__ import annotations
 
+import enum
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
+from .pre_render_validator import PreRenderValidationError, PreRenderValidator
 from .template_manager import TemplateManager
-from .pre_render_validator import PreRenderValidator, PreRenderValidationError
 
 # Default: directorio de plantillas del paquete (liquidator/templates/).
 # Ver REGISTRY.md (S14 — Tarea 1.A-plan) y KB_LLM/06 R-OP-07.
@@ -40,7 +41,7 @@ class MarkdownGenerator:
     construido a partir del JSON estructurado.
     """
 
-    def __init__(self, templates_dir: Optional[str] = None):
+    def __init__(self, templates_dir: str | None = None):
         """Inicializa el generador Markdown.
 
         Args:
@@ -56,8 +57,8 @@ class MarkdownGenerator:
 
     def generate_markdown(
         self,
-        json_data: Dict[str, Any],
-        status: Optional[str] = None,
+        json_data: dict[str, Any],
+        status: str | None = None,
     ) -> str:
         """Genera el documento Markdown.
 
@@ -119,8 +120,8 @@ class MarkdownGenerator:
     # ------------------------------------------------------------------
 
     def _build_context(
-        self, data: Dict[str, Any], status: str
-    ) -> Dict[str, Any]:
+        self, data: dict[str, Any], status: str
+    ) -> dict[str, Any]:
         """Construye el contexto que el template Jinja2 recibe.
 
         Soporta dos formas de ``desglose``:
@@ -251,8 +252,8 @@ class MarkdownGenerator:
     # ------------------------------------------------------------------
 
     def _normalize_desglose(
-        self, desglose: Dict[str, Any]
-    ) -> Tuple[Dict[str, Dict[str, Any]], Dict[str, Dict[str, Any]]]:
+        self, desglose: dict[str, Any]
+    ) -> tuple[dict[str, dict[str, Any]], dict[str, dict[str, Any]]]:
         """Normaliza el desglose a dos representaciones.
 
         Returns:
@@ -262,8 +263,8 @@ class MarkdownGenerator:
             - ``flat``: dict {concepto: {valor, dias_liquidados, ...}}
               para compatibilidad con los templates existentes.
         """
-        flat: Dict[str, Dict[str, Any]] = {}
-        segmented: Dict[str, Dict[str, Any]] = {}
+        flat: dict[str, dict[str, Any]] = {}
+        segmented: dict[str, dict[str, Any]] = {}
 
         if not desglose:
             return segmented, flat
@@ -288,8 +289,8 @@ class MarkdownGenerator:
 
     @staticmethod
     def _aggregate_segments(
-        segmented: Dict[str, Dict[str, Any]]
-    ) -> Dict[str, Dict[str, Any]]:
+        segmented: dict[str, dict[str, Any]]
+    ) -> dict[str, dict[str, Any]]:
         """Agrega valores a través de segmentos anuales.
 
         Cada segmento tiene la forma ``{concepto: valor_numérico, ...}``
@@ -297,12 +298,12 @@ class MarkdownGenerator:
         JSONGenerator). Se suman los valores de cada concepto y se crea
         un flat con ``{"valor": suma, "dias_liquidados": suma_dias, ...}``.
         """
-        flat: Dict[str, Dict[str, Any]] = {}
+        flat: dict[str, dict[str, Any]] = {}
         if not segmented:
             return flat
 
         # Recorrer segmentos y sumar
-        accum: Dict[str, float] = {}
+        accum: dict[str, float] = {}
         for year_data in segmented.values():
             for concept, value in year_data.items():
                 if value is None:
@@ -328,7 +329,7 @@ class MarkdownGenerator:
 
     @staticmethod
     def _resolve_status(
-        data: Dict[str, Any], explicit: Optional[str]
+        data: dict[str, Any], explicit: str | None
     ) -> str:
         """Resuelve el compliance status efectivo.
 
@@ -350,13 +351,13 @@ class MarkdownGenerator:
     # Validación del contexto
     # ------------------------------------------------------------------
 
-    def _validate_context(self, data: Dict[str, Any]) -> List[str]:
+    def _validate_context(self, data: dict[str, Any]) -> list[str]:
         """Valida que ``data`` contenga las claves mínimas para renderizar.
 
         Returns:
             Lista de descripciones de campos faltantes. Vacía si OK.
         """
-        issues: List[str] = []
+        issues: list[str] = []
         meta = data.get("meta")
         if not isinstance(meta, dict):
             issues.append("meta (faltante o no es dict)")
@@ -372,7 +373,7 @@ class MarkdownGenerator:
     # Renderizado de estados especiales
     # ------------------------------------------------------------------
 
-    def _render_blocked(self, data: Dict[str, Any]) -> str:
+    def _render_blocked(self, data: dict[str, Any]) -> str:
         """Renderiza plantilla de bloqueo para NO_GO.
 
         NO incluye datos del trabajador (sanitización PII implícita).
@@ -426,7 +427,7 @@ class MarkdownGenerator:
 
         return "\n".join(lines)
 
-    def _render_context_error(self, missing: List[str]) -> str:
+    def _render_context_error(self, missing: list[str]) -> str:
         """Renderiza error de contexto faltante (sin PII)."""
         return (
             "# ERROR DE CONTEXTO\n\n"
@@ -441,7 +442,7 @@ class MarkdownGenerator:
     # PreRenderValidator (Tarea 3.G)
     # ------------------------------------------------------------------
 
-    def _validar_pre_render(self, data: Dict[str, Any]) -> None:
+    def _validar_pre_render(self, data: dict[str, Any]) -> None:
         """Valida requisitos por motivo de terminación (Tarea 3.G).
 
         Construye un wrapper mínimo para el PreRenderValidator a partir
@@ -478,9 +479,8 @@ class MarkdownGenerator:
             motivo_str = str(motivo)
 
         # Crear wrapper con motivo como string (el validator acepta string)
-        from enum import Enum
 
-        class _MotivoEnum(str, Enum):
+        class _MotivoEnum(enum.StrEnum):
             VALOR = motivo_str
 
         wrapper = _InputWrapper(_MotivoEnum.VALOR)
@@ -508,7 +508,7 @@ class MarkdownGenerator:
     # ------------------------------------------------------------------
 
     def _format_desglose_segmentado(
-        self, segmented: Dict[str, Dict[str, Any]]
+        self, segmented: dict[str, dict[str, Any]]
     ) -> str:
         """Formatea el desglose por año como tabla Markdown.
 
@@ -519,7 +519,7 @@ class MarkdownGenerator:
             return ""
 
         # Recoger todos los conceptos únicos a través de los años
-        all_concepts: List[str] = []
+        all_concepts: list[str] = []
         seen = set()
         for year_data in segmented.values():
             for concept in year_data:
@@ -531,7 +531,7 @@ class MarkdownGenerator:
         anios_sorted = sorted(segmented.keys())
         header = "| Concepto | " + " | ".join(anios_sorted) + " | Total |"
         sep = "|----------|" + "|".join("---------:" for _ in anios_sorted) + "|------:|"
-        rows: List[str] = [header, sep]
+        rows: list[str] = [header, sep]
 
         for concept in all_concepts:
             vals = []
@@ -577,7 +577,7 @@ class MarkdownGenerator:
     # ------------------------------------------------------------------
 
     def _format_observaciones(
-        self, validaciones: Dict[str, str]
+        self, validaciones: dict[str, str]
     ) -> str:
         """Formatea validaciones como lista Markdown."""
         if not validaciones:
@@ -585,10 +585,10 @@ class MarkdownGenerator:
         return "\n".join(f"- {v}" for v in validaciones.values())
 
     def _format_plazos(
-        self, desglose: Dict[str, Dict[str, Any]], modo: str
+        self, desglose: dict[str, dict[str, Any]], modo: str
     ) -> str:
         """Formatea plazos de pago como lista Markdown."""
-        items: List[str] = []
+        items: list[str] = []
 
         ces = desglose.get("cesantias", {})
         ints = desglose.get("intereses_cesantias", {})

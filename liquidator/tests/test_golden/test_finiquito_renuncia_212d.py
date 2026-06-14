@@ -15,9 +15,8 @@ Verifica que el motor:
 from __future__ import annotations
 
 import json
-from decimal import Decimal
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 import pytest
 
@@ -28,7 +27,7 @@ INPUT_PATH = REPO_ROOT / "examples" / "inputs" / "finiquito_renuncia_212d.json"
 
 
 @pytest.fixture
-def input_data() -> Dict[str, Any]:
+def input_data() -> dict[str, Any]:
     return json.loads(INPUT_PATH.read_text(encoding="utf-8"))
 
 
@@ -46,7 +45,7 @@ class TestVacacionesCompensadasFiniquito:
     """Caso golden del addendum: renuncia voluntaria con 7.5 dias."""
 
     def test_vacaciones_compensadas_presente_en_desglose(
-        self, engine: LiquidacionEngine, input_data: Dict[str, Any]
+        self, engine: LiquidacionEngine, input_data: dict[str, Any]
     ):
         out = engine.process_input(input_data)
         desglose = out.get("desglose", {})
@@ -56,7 +55,7 @@ class TestVacacionesCompensadasFiniquito:
         )
 
     def test_vacaciones_compensadas_valor_550000(
-        self, engine: LiquidacionEngine, input_data: Dict[str, Any]
+        self, engine: LiquidacionEngine, input_data: dict[str, Any]
     ):
         """7.5 dias x (2.200.000 / 30) = 550.000 exacto."""
         out = engine.process_input(input_data)
@@ -67,7 +66,7 @@ class TestVacacionesCompensadasFiniquito:
         assert renglon["dias"] == 7.5
 
     def test_vacaciones_compensadas_evidencia_legal(
-        self, engine: LiquidacionEngine, input_data: Dict[str, Any]
+        self, engine: LiquidacionEngine, input_data: dict[str, Any]
     ):
         """Renglon debe llevar la trazabilidad legal completa."""
         out = engine.process_input(input_data)
@@ -78,7 +77,7 @@ class TestVacacionesCompensadasFiniquito:
         assert renglon["formula"] == "SBL / 30 × días_pendientes"
 
     def test_vacaciones_compensadas_contribuye_al_total(
-        self, engine: LiquidacionEngine, input_data: Dict[str, Any]
+        self, engine: LiquidacionEngine, input_data: dict[str, Any]
     ):
         """El total debe reflejar las vacaciones compensadas.
         Verificamos que el total_liquidacion supera las cesantias+intereses+prima
@@ -102,7 +101,7 @@ class TestVacacionesCompensadasFiniquito:
         )
 
     def test_alerta_vacaciones_compensadas(
-        self, engine: LiquidacionEngine, input_data: Dict[str, Any]
+        self, engine: LiquidacionEngine, input_data: dict[str, Any]
     ):
         out = engine.process_input(input_data)
         alertas = out.get("validaciones_y_alertas", {})

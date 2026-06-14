@@ -2,12 +2,10 @@
 Tests para el módulo de trail generator.
 """
 
-import pytest
 import tempfile
-import json
 from pathlib import Path
 
-from liquidator.audit.trail_generator import TrailGenerator, AuditTrail
+from liquidator.audit.trail_generator import AuditTrail, TrailGenerator
 
 
 class TestTrailGenerator:

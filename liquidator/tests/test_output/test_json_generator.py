@@ -18,23 +18,18 @@ Validaciones (plan §6.2 líneas 1497-1508 + extensiones):
 from __future__ import annotations
 
 import json
-import os
-import tempfile
-from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 import pytest
 
 from liquidator import __version__
-from liquidator.core.params_provider import ParamsProvider
 from liquidator.output.json_generator import JSONGenerator
-
 
 # ---- Fixtures --------------------------------------------------------------
 
 
 @pytest.fixture
-def sample_params() -> Dict[str, Any]:
+def sample_params() -> dict[str, Any]:
     """Params sintéticos para inyección en tests (aislados del repo)."""
     return {
         "SMMLV": 999_999,
@@ -51,7 +46,7 @@ def sample_params() -> Dict[str, Any]:
 
 
 @pytest.fixture
-def sample_input_data() -> Dict[str, Any]:
+def sample_input_data() -> dict[str, Any]:
     """Input sintético con la forma de ``parsed_data`` del engine."""
     return {
         "modo": "PERIODICA",
@@ -74,7 +69,7 @@ def sample_input_data() -> Dict[str, Any]:
 
 
 @pytest.fixture
-def sample_calc_results() -> Dict[str, Any]:
+def sample_calc_results() -> dict[str, Any]:
     """``calculation_results`` sintético (forma de ``WorkflowResult``)."""
     return {
         "desglose": {
@@ -101,7 +96,7 @@ def sample_calc_results() -> Dict[str, Any]:
 
 
 @pytest.fixture
-def sample_compliance() -> Dict[str, Any]:
+def sample_compliance() -> dict[str, Any]:
     """Compliance report sintético compatible con engine real."""
     return {
         "compliance_status": "GO",
@@ -113,7 +108,7 @@ def sample_compliance() -> Dict[str, Any]:
 
 
 @pytest.fixture
-def sample_validaciones() -> Dict[str, str]:
+def sample_validaciones() -> dict[str, str]:
     return {
         "auxilio_transporte_excluido": "Residencia en el lugar de trabajo.",
     }
@@ -130,12 +125,12 @@ def sample_normas() -> list:
 
 @pytest.fixture
 def unified_calculation_result(
-    sample_input_data: Dict[str, Any],
-    sample_calc_results: Dict[str, Any],
-    sample_compliance: Dict[str, Any],
-    sample_validaciones: Dict[str, str],
+    sample_input_data: dict[str, Any],
+    sample_calc_results: dict[str, Any],
+    sample_compliance: dict[str, Any],
+    sample_validaciones: dict[str, str],
     sample_normas: list,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Dict unificado con todo lo que el engine pasa al JSONGenerator."""
     return {
         "input_data": sample_input_data,

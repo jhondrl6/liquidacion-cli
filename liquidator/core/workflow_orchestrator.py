@@ -7,19 +7,19 @@ salarial SL2630-2024 — cada año calendario se liquida con el SBL de ESE año.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import datetime
 from decimal import Decimal
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 try:
     from liquidator.contracts.input_model import Salario
 except ImportError:
     Salario = None  # type: ignore[assignment]
 
-from liquidator.calculators.sbl_calculator import SBLCalculator
-from liquidator.calculators.prestaciones_calculator import PrestacionesCalculator
-from liquidator.calculators.vacaciones_calculator import VacacionesCalculator
 from liquidator.calculators.indemnizacion_calculator import IndemnizacionCalculator
+from liquidator.calculators.prestaciones_calculator import PrestacionesCalculator
+from liquidator.calculators.sbl_calculator import SBLCalculator
+from liquidator.calculators.vacaciones_calculator import VacacionesCalculator
 from liquidator.core.salario_resolver import (
     SalarioResolver,
     SegmentoCalculo,
@@ -29,16 +29,16 @@ from liquidator.core.salario_resolver import (
 
 @dataclass(frozen=True)
 class WorkflowResult:
-    calculation_results: Dict[str, Any]
-    compliance_payload: Dict[str, Any]
-    validaciones_y_alertas: Dict[str, str]
-    normas_aplicadas: List[str]
+    calculation_results: dict[str, Any]
+    compliance_payload: dict[str, Any]
+    validaciones_y_alertas: dict[str, str]
+    normas_aplicadas: list[str]
 
 
 class WorkflowOrchestrator:
     """Coordina todos los cálculos requeridos para la liquidación."""
 
-    def __init__(self, params: Dict[str, Any]):
+    def __init__(self, params: dict[str, Any]):
         self.params = params
         self.sbl_calc = SBLCalculator(params)
         self.prest_calc = PrestacionesCalculator(params)
@@ -49,7 +49,7 @@ class WorkflowOrchestrator:
     # API pública
     # ------------------------------------------------------------------
 
-    def execute(self, input_data: Dict[str, Any]) -> WorkflowResult:
+    def execute(self, input_data: dict[str, Any]) -> WorkflowResult:
         modo = input_data.get("modo", "PERIÓDICA")
         fecha_ingreso = input_data.get("fecha_ingreso")
         fecha_corte = input_data.get("fecha_corte")
@@ -245,7 +245,7 @@ class WorkflowOrchestrator:
 
         # Calcular total dinámico
         total_liquidacion = 0
-        for concepto, datos in desglose.items():
+        for _, datos in desglose.items():
             if isinstance(datos, dict) and "valor" in datos:
                 valor = datos.get("valor", 0)
                 if isinstance(valor, (int, float)) and valor > 0:
@@ -273,7 +273,7 @@ class WorkflowOrchestrator:
     # 2.B-bis — anualización salarial (SL2630-2024)
     # ------------------------------------------------------------------
 
-    def _extraer_salario_mensual(self, input_data: Dict[str, Any]) -> float:
+    def _extraer_salario_mensual(self, input_data: dict[str, Any]) -> float:
         """Extrae ``salario_mensual`` del input, soportando formato plano y
         anidado (``salario.SBL`` de la Tarea 1.C-bis)."""
         # Forma 2 (anidada) — Pydantic Salario
@@ -284,7 +284,7 @@ class WorkflowOrchestrator:
         return float(input_data.get("salario_mensual", 0))
 
     def _build_salario_resolver(
-        self, input_data: Dict[str, Any]
+        self, input_data: dict[str, Any]
     ) -> SalarioResolver | None:
         """Construye un ``SalarioResolver`` si el input tiene los campos
         de anualización (1.C-bis). Retorna ``None`` si no aplica."""
@@ -308,7 +308,7 @@ class WorkflowOrchestrator:
         fecha_ingreso: str,
         fecha_corte: str,
         modo: str,
-    ) -> tuple[Dict[str, Any], Dict[str, Any], Dict[str, Any]]:
+    ) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
         """Calcula cesantías, intereses y prima por año calendario.
 
         SL2630-2024: cada año se liquida con el SBL de ESE año.
@@ -402,11 +402,11 @@ class WorkflowOrchestrator:
 
     def _build_alerts(
         self,
-        alertas_raw: List[Dict[str, Any]],
-        vacaciones_data: Dict[str, Any],
+        alertas_raw: list[dict[str, Any]],
+        vacaciones_data: dict[str, Any],
         modo: str,
-    ) -> Dict[str, str]:
-        alertas: Dict[str, str] = {}
+    ) -> dict[str, str]:
+        alertas: dict[str, str] = {}
         mapping = {"EXCLUSION": "excluido", "WARNING": "advertencia", "INFO": "info"}
 
         for alerta in alertas_raw:

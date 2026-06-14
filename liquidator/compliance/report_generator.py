@@ -3,18 +3,17 @@ Ensambla el compliance_report final a partir
 de los resultados individuales de cada regla.
 """
 
-from datetime import datetime, timezone
-from typing import List, Dict, Optional
+from datetime import UTC, datetime
 
 
 class ComplianceReportGenerator:
     @staticmethod
     def build(
-        rules: List[Dict],
-        input_data: Dict,
-        calculation_result: Optional[Dict],
-        params: Dict,
-    ) -> Dict:
+        rules: list[dict],
+        input_data: dict,
+        calculation_result: dict | None,
+        params: dict,
+    ) -> dict:
         """Genera el reporte consolidado de cumplimiento."""
 
         summary = {"passed": 0, "warnings": 0, "failures": 0}
@@ -59,7 +58,7 @@ class ComplianceReportGenerator:
             "checks": checks,
             "blocking_failures": blocking,
             "params_version": params.get("version"),
-            "timestamp": datetime.now(tz=timezone.utc).isoformat(),
+            "timestamp": datetime.now(tz=UTC).isoformat(),
             "input_hash": "",
             "output_hash": "",
             "operator_action": {

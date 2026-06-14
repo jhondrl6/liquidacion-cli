@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any
 
 from liquidator.utils.file_utils import read_json_file
 
@@ -20,9 +21,9 @@ class Norma:
     id: str
     nombre: str
     descripcion: str
-    texto_relevante: Optional[str] = None
-    url: Optional[str] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    texto_relevante: str | None = None
+    url: str | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class NormasRepository:
@@ -33,17 +34,17 @@ class NormasRepository:
     def __init__(
         self,
         *,
-        source_path: Optional[Path | str] = None,
-        data: Optional[Dict[str, Any]] = None,
+        source_path: Path | str | None = None,
+        data: dict[str, Any] | None = None,
     ) -> None:
         self._source_path = Path(source_path) if source_path else self._DEFAULT_PATH
         if data is None:
             data = self._load_data(self._source_path)
-        self._normas: Dict[str, Norma] = self._build_normas(data.get("normas", []))
+        self._normas: dict[str, Norma] = self._build_normas(data.get("normas", []))
         self._plazos = data.get("plazos_pago", {})
         self._limites = data.get("limites_legales", {})
 
-    def _load_data(self, path: Path) -> Dict[str, Any]:
+    def _load_data(self, path: Path) -> dict[str, Any]:
         if not path.exists():
             raise NormasRepositoryError(f"No se encontró el archivo de normas: {path}")
         raw = read_json_file(path)
@@ -53,8 +54,8 @@ class NormasRepository:
             )
         return raw
 
-    def _build_normas(self, registros: Iterable[Dict[str, Any]]) -> Dict[str, Norma]:
-        normas: Dict[str, Norma] = {}
+    def _build_normas(self, registros: Iterable[dict[str, Any]]) -> dict[str, Norma]:
+        normas: dict[str, Norma] = {}
         for registro in registros:
             norma_id = registro.get("id")
             if not norma_id:
@@ -74,7 +75,7 @@ class NormasRepository:
             raise NormasRepositoryError("No se pudieron construir normas válidas.")
         return normas
 
-    def list_normas(self) -> List[Norma]:
+    def list_normas(self) -> list[Norma]:
         return list(self._normas.values())
 
     def get_norma(self, norma_id: str) -> Norma:
@@ -91,10 +92,10 @@ class NormasRepository:
             )
         return norma.texto_relevante
 
-    def get_url(self, norma_id: str) -> Optional[str]:
+    def get_url(self, norma_id: str) -> str | None:
         return self.get_norma(norma_id).url
 
-    def search(self, keyword: str) -> List[Norma]:
+    def search(self, keyword: str) -> list[Norma]:
         keyword_lower = keyword.lower()
         return [
             norma
@@ -103,7 +104,7 @@ class NormasRepository:
             or keyword_lower in norma.descripcion.lower()
         ]
 
-    def get_plazo_definicion(self, concepto: str) -> Dict[str, Any]:
+    def get_plazo_definicion(self, concepto: str) -> dict[str, Any]:
         try:
             return dict(self._plazos[concepto])
         except KeyError as exc:
@@ -111,7 +112,7 @@ class NormasRepository:
                 f"No se encontró el concepto de plazo '{concepto}'."
             ) from exc
 
-    def get_limite(self, clave: str) -> Dict[str, Any]:
+    def get_limite(self, clave: str) -> dict[str, Any]:
         try:
             return dict(self._limites[clave])
         except KeyError as exc:

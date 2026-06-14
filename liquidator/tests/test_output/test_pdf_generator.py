@@ -3,11 +3,11 @@ Tests unitarios para el generador de PDF
 Verifica la generación correcta de PDFs para liquidaciones de nómina
 """
 
-import unittest
 import tempfile
-import json
+import unittest
 from pathlib import Path
-from unittest.mock import patch, mock_open, MagicMock
+from unittest.mock import patch
+
 import pytest
 
 # Importar el generador de PDF

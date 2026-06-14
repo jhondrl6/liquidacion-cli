@@ -12,16 +12,15 @@ Ver plan §6.2 Tarea 1.C-quater (línea 1271) y
 Planificación/REGISTRY.md (addendum preaviso).
 """
 
-import pytest
 from datetime import date
+
+import pytest
 from pydantic import ValidationError
 
 from liquidator.contracts.input_model import (
-    Contrato,
     LiquidacionInput,
     MotivoTerminacion,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers

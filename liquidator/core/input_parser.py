@@ -1,9 +1,8 @@
 import json
-from pathlib import Path
-from typing import Dict, Any, Union
+from typing import Any
 
 
-def parse_input_file(file_path: str) -> Dict[str, Any]:
+def parse_input_file(file_path: str) -> dict[str, Any]:
     """
     Parse input data from a JSON file.
 
@@ -14,12 +13,12 @@ def parse_input_file(file_path: str) -> Dict[str, Any]:
         Parsed input data as dictionary
     """
     try:
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, encoding="utf-8") as f:
             return json.load(f)
     except FileNotFoundError:
-        raise FileNotFoundError(f"Input file not found: {file_path}")
+        raise FileNotFoundError(f"Input file not found: {file_path}") from None
     except json.JSONDecodeError as e:
-        raise ValueError(f"Invalid JSON in input file {file_path}: {e}")
+        raise ValueError(f"Invalid JSON in input file {file_path}: {e}") from e
 
 
 class InputParser:
@@ -28,7 +27,7 @@ class InputParser:
     def __init__(self):
         pass
 
-    def parse(self, input_data: Union[Dict[str, Any], str]) -> Dict[str, Any]:
+    def parse(self, input_data: dict[str, Any] | str) -> dict[str, Any]:
         """
         Parse input data from dictionary or file path.
 
@@ -48,7 +47,7 @@ class InputParser:
                 "Input data must be either a dictionary or a file path string"
             )
 
-    def validate_structure(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+    def validate_structure(self, input_data: dict[str, Any]) -> dict[str, Any]:
         """
         Validate and normalize input data structure.
 

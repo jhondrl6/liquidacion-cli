@@ -1,9 +1,7 @@
-import os
 from pathlib import Path
 
 from liquidator.core.input_parser import InputParser, parse_input_file
 from liquidator.params.params_loader import ParamsLoader
-
 
 FIXTURES_DIR = Path(__file__).resolve().parents[3] / "examples"
 

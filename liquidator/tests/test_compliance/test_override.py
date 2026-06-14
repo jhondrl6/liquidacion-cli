@@ -4,8 +4,6 @@ Tests para el módulo de override manager.
 
 from datetime import datetime
 
-import pytest
-
 from liquidator.compliance.override_manager import OverrideManager, OverrideRecord
 
 
@@ -27,7 +25,7 @@ class TestOverrideManager:
             self.valid_override_data
         )
 
-        assert result["is_valid"] == True
+        assert result["is_valid"]
         assert len(result["errors"]) == 0
 
     def test_validate_override_request_missing_fields(self):
@@ -35,7 +33,7 @@ class TestOverrideManager:
         invalid_data = {"human_override": True}
         result = self.override_manager.validate_override_request(invalid_data)
 
-        assert result["is_valid"] == False
+        assert not result["is_valid"]
         assert "operator_id" in str(result["errors"])
         assert "override_reason" in str(result["errors"])
 
@@ -45,7 +43,7 @@ class TestOverrideManager:
         data["override_reason"] = "Corto"
         result = self.override_manager.validate_override_request(data)
 
-        assert result["is_valid"] == True  # Solo warning, no error
+        assert result["is_valid"]  # Solo warning, no error
         assert len(result["warnings"]) > 0
 
     def test_create_override_record(self):
@@ -101,7 +99,7 @@ class TestOverrideManager:
         # Verificar que el check V001 fue marcado como overriden
         v001_check = next(c for c in updated_report["checks"] if c["id"] == "V001")
         assert v001_check["result"] == "OVERRIDDEN"
-        assert v001_check["override_applied"] == True
+        assert v001_check["override_applied"]
 
     def test_get_override_history(self):
         """Test obtención de historial de overrides."""
