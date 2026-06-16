@@ -5,9 +5,9 @@ Sistema de logging de auditoría para trazabilidad completa de ejecuciones.
 import json
 import logging
 from datetime import datetime
-from pathlib import Path
-from typing import Dict, Any, List, Optional
 from enum import Enum
+from pathlib import Path
+from typing import Any
 
 
 class AuditEventType(Enum):
@@ -79,7 +79,7 @@ class AuditLogger:
         event_type: AuditEventType,
         session_id: str,
         message: str,
-        extra_data: Optional[Dict[str, Any]] = None,
+        extra_data: dict[str, Any] | None = None,
     ):
         """
         Registra un evento de auditoría.
@@ -107,7 +107,7 @@ class AuditLogger:
         self.logger.log(log_level, message, extra=log_data)
 
     def log_calculation_start(
-        self, session_id: str, input_data: Dict[str, Any], params_version: str
+        self, session_id: str, input_data: dict[str, Any], params_version: str
     ):
         """Registra inicio de cálculo."""
         self.log_event(
@@ -145,7 +145,7 @@ class AuditLogger:
         self,
         session_id: str,
         operator_id: str,
-        checks_overridden: List[str],
+        checks_overridden: list[str],
         justification: str,
     ):
         """Registra aplicación de override."""
@@ -166,7 +166,7 @@ class AuditLogger:
         session_id: str,
         error_type: str,
         error_message: str,
-        stack_trace: Optional[str] = None,
+        stack_trace: str | None = None,
     ):
         """Registra error en el sistema."""
         self.log_event(
@@ -180,7 +180,7 @@ class AuditLogger:
             },
         )
 
-    def _summarize_input(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+    def _summarize_input(self, input_data: dict[str, Any]) -> dict[str, Any]:
         """Crea resumen seguro del input para logging."""
         summary = {
             "modo": input_data.get("modo"),
@@ -200,7 +200,7 @@ class AuditLogger:
 
         return summary
 
-    def get_session_logs(self, session_id: str) -> List[Dict[str, Any]]:
+    def get_session_logs(self, session_id: str) -> list[dict[str, Any]]:
         """
         Obtiene todos los logs de una sesión específica.
 
@@ -216,7 +216,7 @@ class AuditLogger:
         log_file = self.log_directory / f"audit_{datetime.now().strftime('%Y%m')}.log"
 
         if log_file.exists():
-            with open(log_file, "r", encoding="utf-8") as f:
+            with open(log_file, encoding="utf-8") as f:
                 for line in f:
                     try:
                         log_entry = json.loads(line.strip())

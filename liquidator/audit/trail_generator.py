@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any
 from uuid import uuid4
 
 
@@ -25,7 +25,7 @@ class TrailGenerator:
         self.trail_directory.mkdir(parents=True, exist_ok=True)
 
     def create_audit_trail(
-        self, session_id: str, input_data: Dict[str, Any]
+        self, session_id: str, input_data: dict[str, Any]
     ) -> AuditTrail:
         """Create a new audit trail."""
         trail = AuditTrail(session_id)
@@ -35,8 +35,8 @@ class TrailGenerator:
     def complete_audit_trail(
         self,
         trail: AuditTrail,
-        output_data: Dict[str, Any],
-        compliance_report: Dict[str, Any],
+        output_data: dict[str, Any],
+        compliance_report: dict[str, Any],
     ) -> None:
         """Complete an audit trail with execution results."""
         trail.output_data = output_data
@@ -68,9 +68,9 @@ class TrailGenerator:
 
     def generate_and_save_trail(
         self,
-        input_data: Dict[str, Any],
-        output_data: Dict[str, Any],
-        compliance_report: Dict[str, Any],
+        input_data: dict[str, Any],
+        output_data: dict[str, Any],
+        compliance_report: dict[str, Any],
     ) -> str:
         """Full pipeline: create, complete and save audit trail."""
         session_id = str(uuid4())

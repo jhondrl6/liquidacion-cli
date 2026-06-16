@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, Any, Optional
+from typing import Any
 
 
 class VersioningManager:
@@ -22,7 +22,7 @@ class VersioningManager:
         # Currently, we assume all 2025 parameters versions are compatible
         return params_version.startswith("2025")
 
-    def get_version_info(self) -> Dict[str, Any]:
+    def get_version_info(self) -> dict[str, Any]:
         """Get complete version information."""
         return {
             "generator_version": self.current_generator_version,
@@ -38,8 +38,8 @@ class VersioningManager:
             raise ValueError(f"Incompatible parameters version: {new_version}")
 
     def check_for_updates(
-        self, remote_version_url: Optional[str] = None
-    ) -> Dict[str, Any]:
+        self, remote_version_url: str | None = None
+    ) -> dict[str, Any]:
         """Check if updates are available."""
         # Placeholder for future implementation
         return {
