@@ -50,11 +50,24 @@ logs/
 # [FIX]
 !logs/.gitkeep
 # [FIX] auditoría histórica (gitignored; .gitkeep tracked)
-audit/
-# [FIX S14] subdirs concretos (logs/, reports/, trails/)
+# Nota: NO usamos `audit/` como patrón porque Git ignora todos los archivos
+# bajo un dir ignorado, y los `!` no los re-incluyen. Usamos `audit/**`
+# (recursivo) y luego re-incluimos con `!` los templates que sí queremos
+# trackear.
 audit/**
 # [FIX] mantener marcador
 !audit/.gitkeep
+# [FIX S43] Tarea 4.F: trackear SOLO los templates de audit/validacion_v2/
+# (README + 3 input.json placeholder). El resto (output.json, comparativa.md,
+# notas.md con datos reales) sigue gitignored para evitar PII en el repo.
+!audit/validacion_v2/
+!audit/validacion_v2/README.md
+!audit/validacion_v2/caso_1/
+!audit/validacion_v2/caso_2/
+!audit/validacion_v2/caso_3/
+!audit/validacion_v2/caso_1/input.json
+!audit/validacion_v2/caso_2/input.json
+!audit/validacion_v2/caso_3/input.json
 # [FIX S14] mirror histórico de auditoría en docs/
 docs/audit/
 # [FIX S14] subdirs (logs/, reports/, trails/)

@@ -252,6 +252,7 @@ class WorkflowOrchestrator:
                     total_liquidacion += valor
 
         calculation_results["total"] = total_liquidacion
+        calculation_results["total_liquidacion"] = total_liquidacion
 
         compliance_payload = {
             "meta": {

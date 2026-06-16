@@ -1,0 +1,8 @@
+{
+  "modo": "PERIODICA",
+  "fecha_ingreso": "YYYY-MM-DD",
+  "fecha_corte": "YYYY-MM-DD",
+  "salario_mensual": 0,
+  "tipo_contrato": "INDEFINIDO",
+  "auxilio_transporte": false
+}

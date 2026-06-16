@@ -12,8 +12,8 @@
 
 ## Estado actual (leer primero)
 
-- **Última sesión cerrada:** **S41 — 2026-06-14, Tarea 4.E (Tag y release v2.0.0)**. Tag `v2.0.0` creado (annotated) y pusheado a `origin` (https://github.com/jhondrl6/liquidacion-cli.git). 0 código modificado, 0 regresiones.
-- **Próxima tarea a ejecutar:** **Fase 4 — Tarea 4.F** (3 liquidaciones reales verificadas por Jhond). DoD bloqueante manual: seleccionar 3 liquidaciones reales, calcular con `liquidacion liquidar`, comparar con cálculo manual, guardar en `audit/validacion_v2/<caso>/`. Sin esto, Fase 4 NO se cierra.
+- **Última sesión cerrada:** **S42 — 2026-06-14, Tarea 4.F (en curso, suspendida)**. Infraestructura `audit/validacion_v2/` creada (README + 3 templates). Bug `total_liquidacion` fixeado en `workflow_orchestrator.py` L254. Tests golden: 5 FAIL en `test_finiquito_renuncia_212d` (vacaciones compensadas). Suite completa pendiente. **PENDIENTE: usuario debe proveer 3 liquidaciones reales.**
+- **Próxima tarea a ejecutar:** **Fase 4 — Tarea 4.F** (continuar). Pasos: (1) verificar suite completa con fix de `total_liquidacion`, (2) entender/fixear 5 fails golden, (3) usuario provee 3 liquidaciones reales → comparativa → cierre.
 - **Bloqueos activos:** ninguno de Fase 0 (cerrada). PENDIENTE (pospuesto por usuario en S3): eliminación de `__pycache__/`, `htmlcov/`, `.coverage`, `liquidacion_nomina_colombia.egg-info/`, `documentos_legales_rurales/` (vacío). **Issue resuelto post-S26:** `.env.backup*` del .gitignore ahora SÍ matchea — `.gitignore` reescrito sin inline comments (R-OP-09 cerrado). **Issue post-S10:** `pytest` con `uv run --with pytest …` SÍ funciona en WSL. **Issue post-S11:** `python3` directo denegado por sandbox — mitigación: `uv run --with <pkg> python3 <script>`. **Issue legal post-S11:** nulidad del Decreto 1469/2025 pendiente (R-LEG-07) — SMMLV 2026 vigente por D. 159/2026; vigilar antes de v2.0 release.
 
 ---
