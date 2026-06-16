@@ -109,6 +109,33 @@ class LiquidacionEngine:
         workflow = WorkflowOrchestrator(params)
         workflow_result = workflow.execute(parsed_data)
 
+        # --- 2.B-ter / 2.B-cuater: pre-compliance hooks (Tarea 4.F) ---
+        # CRÍTICO: estos hooks deben correr ANTES de _run_compliance porque
+        # V014 (CRITICAL blocking, agregada en S33 por Tarea 2.Z) evalúa el
+        # desglose. Si el hook corre después, V014 falla al no ver el
+        # renglón, marca NO_GO, y el hook nunca corre (el early-return de
+        # L121-133 lo salta) — dead-block permanente. La regresión fue
+        # introducida en S33 y pasó inadvertida durante 9 sesiones porque
+        # los cierres por tarea solo validaban sus tests nuevos, no la
+        # regresión del golden de 2.B-ter.
+        #
+        # El orchestrator comparte la referencia de `desglose` entre
+        # `calculation_results` y `compliance_payload`, por lo que mutar
+        # uno muta el otro. Por eso pasamos calculation_results (que tiene
+        # el `total` poblado por el orchestrator) y los alerts; V014
+        # verá el renglón inyectado y pasará.
+        if parsed_data.get("modo") == "FINIQUITO":
+            self._calcular_vacaciones_si_finiquito(
+                parsed_data, params,
+                workflow_result.calculation_results,
+                workflow_result.validaciones_y_alertas,
+            )
+            self._calcular_preaviso_si_fijo_vencido(
+                parsed_data, params,
+                workflow_result.calculation_results,
+                workflow_result.validaciones_y_alertas,
+            )
+
         input_hash = _safe_hash(parsed_data)
         compliance_report = self._run_compliance(
             parsed_data, params, workflow_result.compliance_payload, input_hash
@@ -145,18 +172,6 @@ class LiquidacionEngine:
             # Sumar los VA al total y exponer en calc_results para que
             # el JSONGenerator los incluya en desglose.
             calc_results["periodos_indexados"] = periodos_indexados
-
-        # --- 2.B-ter (Fase 2): vacaciones compensadas en finiquito ---
-        if parsed_data.get("modo") == "FINIQUITO":
-            self._calcular_vacaciones_si_finiquito(
-                parsed_data, params, calc_results, alerts
-            )
-
-        # --- 2.B-cuater (Fase 2, S30): indemnizacion preaviso Art. 46 ---
-        if parsed_data.get("modo") == "FINIQUITO":
-            self._calcular_preaviso_si_fijo_vencido(
-                parsed_data, params, calc_results, alerts
-            )
 
         # 1.D — delegamos al JSONGenerator con el dict unificado y los
         # params que el engine ya cargó (ParamsLoader -> dict). El
