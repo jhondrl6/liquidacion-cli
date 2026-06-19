@@ -58,10 +58,13 @@ audit/**
 # [FIX] mantener marcador
 !audit/.gitkeep
 # [FIX S43] Tarea 4.F: trackear SOLO los templates de audit/validacion_v2/
-# (README + 3 input.json placeholder). El resto (output.json, comparativa.md,
-# notas.md con datos reales) sigue gitignored para evitar PII en el repo.
+# (README + STRATEGY.md + TEMPLATE_input.json + 3 input.json placeholder).
+# El resto (output.json, comparativa.md, notas.md con datos reales) sigue
+# gitignored para evitar PII en el repo.
 !audit/validacion_v2/
 !audit/validacion_v2/README.md
+!audit/validacion_v2/STRATEGY.md
+!audit/validacion_v2/TEMPLATE_input.json
 !audit/validacion_v2/caso_1/
 !audit/validacion_v2/caso_2/
 !audit/validacion_v2/caso_3/

@@ -1,8 +1,15 @@
 {
-  "modo": "PERIODICA",
+  "_pendiente_datos_reales": "Caso 2 (Avanzado FINIQUITO con cambio de SBL). PENDIENTE: el usuario debe proveer fechas, SBL por año, motivo_terminacion, vacaciones_pendientes, y cálculo manual. Ver audit/validacion_v2/STRATEGY.md §2 (perfil) y §3 (formulario) para qué datos se necesitan. Ver audit/validacion_v2/TEMPLATE_input.json para el schema completo Forma 1 (plana). Una vez lleno, correr el comando de STRATEGY.md §4.",
+  "_perfil_caso": "Avanzado",
+  "_modo_esperado": "FINIQUITO",
+  "_features_objetivo": ["salario_variable_sbl_por_anio", "vacaciones_compensadas_finiquito", "auxilio_transporte_condicional", "addendum_sl2630_end_to_end"],
+
+  "modo": "FINIQUITO",
   "fecha_ingreso": "YYYY-MM-DD",
   "fecha_corte": "YYYY-MM-DD",
   "salario_mensual": 0,
   "tipo_contrato": "INDEFINIDO",
-  "auxilio_transporte": false
+  "auxilio_transporte": false,
+  "motivo_terminacion": "renuncia_voluntaria",
+  "dias_vacaciones_pendientes": 0
 }

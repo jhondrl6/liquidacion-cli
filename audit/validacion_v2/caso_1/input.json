@@ -1,4 +1,9 @@
 {
+  "_pendiente_datos_reales": "Caso 1 (Básico PERIODICA). PENDIENTE: el usuario debe proveer fecha_ingreso, fecha_corte, salario_mensual reales + cálculo manual. Ver audit/validacion_v2/STRATEGY.md §2 (perfil) y §3 (formulario) para qué datos se necesitan. Ver audit/validacion_v2/TEMPLATE_input.json para el schema completo Forma 1 (plana). Una vez lleno, correr el comando de STRATEGY.md §4.",
+  "_perfil_caso": "Básico",
+  "_modo_esperado": "PERIODICA",
+  "_features_objetivo": ["calculo_proporcional_basico", "sin_segmentacion", "sin_salario_variable", "sin_ipc"],
+
   "modo": "PERIODICA",
   "fecha_ingreso": "YYYY-MM-DD",
   "fecha_corte": "YYYY-MM-DD",

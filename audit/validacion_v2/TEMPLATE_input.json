@@ -1,0 +1,32 @@
+{
+  "_template_": "Schema completo Forma 1 (plana) — compatible con InputParser legacy. NO incluye TODOS los campos posibles, solo los más usados en los 3 casos de 4.F. Ver audit/validacion_v2/STRATEGY.md §3 para saber qué campos llenar en cada caso. Renombrar a 'input.json' y completar valores reales antes de correr el CLI.",
+  "_comentarios_eliminar_antes_de_correr_": "Las claves que empiezan con '_' son metadatos para vos; el motor las ignora. Borrá las líneas que no uses.",
+
+  "modo": "PERIODICA | FINIQUITO | VACACIONES",
+
+  "fecha_ingreso": "YYYY-MM-DD",
+  "fecha_corte": "YYYY-MM-DD",
+
+  "salario_mensual": 0,
+  "auxilio_transporte": false,
+  "reside_en_lugar_trabajo": false,
+  "auxilio_conectividad": 0,
+  "comisiones_promedio_mensual": 0,
+  "horas_extras_promedio_mensual": 0,
+  "bonificaciones_promedio_mensual": 0,
+  "salarios_historicos": [],
+
+  "tipo_contrato": "INDEFINIDO | FIJO | OBRA_LABOR | PRESTACION",
+
+  "dias_vacaciones_pendientes": 0,
+  "dias_vacaciones_para_compensar_dinero": 0,
+
+  "nombre": "ANONIMIZADO_o_real",
+  "documento": "ANONIMIZADO_o_real",
+
+  "enforce_compliance": true,
+  "compliance_policy": "standard",
+  "human_override": false,
+  "operator_id": "",
+  "override_reason": ""
+}
