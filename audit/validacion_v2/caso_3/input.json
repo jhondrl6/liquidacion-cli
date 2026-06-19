@@ -1,16 +1,33 @@
 {
-  "_pendiente_datos_reales": "Caso 3 (Complejo FINIQUITO + IPC + segmentación). PENDIENTE: el usuario debe proveer fechas, SBL por año, motivo_terminacion, periodos_no_pagados, y cálculo manual. Ver audit/validacion_v2/STRATEGY.md §2 (perfil) y §3 (formulario) para qué datos se necesitan. Ver audit/validacion_v2/TEMPLATE_input.json para el schema completo Forma 1 (plana). Una vez lleno, correr el comando de STRATEGY.md §4.",
+  "_pendiente_datos_reales": "Caso 3 (Complejo FINIQUITO con IPC + segmentación multi-año + compliance compuesta). PENDIENTE: el usuario debe proveer fechas (con cruce 1-Ene, contrato > 1 año), SBL por año, motivo_terminacion, 1+ periodos_no_pagados (con fechas causación/exigibilidad/referencia), y cálculo manual. Ver audit/validacion_v2/STRATEGY.md §2 (perfil) y §3 (formulario). Ver audit/validacion_v2/TEMPLATE_input.json para el schema Forma 1 completo. Una vez lleno, correr STRATEGY.md §4.",
   "_perfil_caso": "Complejo",
   "_modo_esperado": "FINIQUITO",
   "_features_objetivo": ["periodos_no_pagados_ipc", "segmentacion_multianio", "prescripcion_art_488_cst", "compliance_compuesta_v011_a_v015"],
+  "_forma_input": "PLANA EN RAÍZ (Forma 1 legacy, ver TEMPLATE_input.json cabecera).",
+  "_decision_clave": "Si tipo_contrato=FIJO: agregar preaviso_entregado, dias_preaviso, fecha_preaviso, fecha_vencimiento_termino_fijo (Art. 46 CST, Tarea 1.C-quater S25). Si INDEFINIDO (default): omitir bloque preaviso completo. modelo valida: preaviso solo aplica a FIJO.",
 
   "modo": "FINIQUITO",
   "fecha_ingreso": "YYYY-MM-DD",
   "fecha_corte": "YYYY-MM-DD",
+  "fecha_terminacion_real": "YYYY-MM-DD",
   "salario_mensual": 0,
   "tipo_contrato": "INDEFINIDO",
   "auxilio_transporte": false,
   "motivo_terminacion": "renuncia_voluntaria",
-  "dias_vacaciones_pendientes": 0,
-  "periodos_no_pagados": []
+  "vacaciones": {
+    "dias_pendientes": 0,
+    "dias_disfrutados": 0
+  },
+  "sbl_por_anio": {
+    "YYYY": 0
+  },
+  "periodos_no_pagados": [
+    {
+      "concepto": "cesantias",
+      "valor_historico": 0,
+      "fecha_causacion": "YYYY-MM-DD",
+      "fecha_exigibilidad": "YYYY-MM-DD",
+      "fecha_referencia_indexacion": "YYYY-MM-DD"
+    }
+  ]
 }

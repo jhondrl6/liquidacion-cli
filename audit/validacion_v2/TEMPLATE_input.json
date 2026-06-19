@@ -1,6 +1,7 @@
 {
-  "_template_": "Schema completo Forma 1 (plana) — compatible con InputParser legacy. NO incluye TODOS los campos posibles, solo los más usados en los 3 casos de 4.F. Ver audit/validacion_v2/STRATEGY.md §3 para saber qué campos llenar en cada caso. Renombrar a 'input.json' y completar valores reales antes de correr el CLI.",
-  "_comentarios_eliminar_antes_de_correr_": "Las claves que empiezan con '_' son metadatos para vos; el motor las ignora. Borrá las líneas que no uses.",
+  "_template_": "Schema Forma 1 (plana) — la que acepta el WorkflowOrchestrator actual. Ver audit/validacion_v2/STRATEGY.md §3 para saber qué campos llenar en cada caso. Renombrar a 'input.json' y completar valores reales antes de correr el CLI. Campos con '_' son metadatos para vos; el motor los ignora.",
+  "_forma_": "PLANA EN RAÍZ (Forma 1 legacy). NO anidar campos (NO usar contrato.fecha_ingreso, salario.SBL, etc.). Los campos del schema Forma 2 (motivo_terminacion, vacaciones, periodos_no_pagados, sbl_por_anio, historial_salarial, preaviso_*) van en la RAÍZ del JSON. Evidencia: examples/inputs/finiquito_renuncia_212d.json y prescripcion_indexada.json (S28, S29).",
+  "_referencias_": "Campos base 1.C + extensiones 1.C-bis (SL2630 SBL variable, S23) + 1.C-ter (finiquito/vacaciones, S24) + 1.C-quater (preaviso Art. 46, S25) + 2.X (IPC, S28). Verificar contra liquidator/contracts/input_model.py antes de confiar.",
 
   "modo": "PERIODICA | FINIQUITO | VACACIONES",
 
@@ -14,7 +15,6 @@
   "comisiones_promedio_mensual": 0,
   "horas_extras_promedio_mensual": 0,
   "bonificaciones_promedio_mensual": 0,
-  "salarios_historicos": [],
 
   "tipo_contrato": "INDEFINIDO | FIJO | OBRA_LABOR | PRESTACION",
 
@@ -28,5 +28,46 @@
   "compliance_policy": "standard",
   "human_override": false,
   "operator_id": "",
-  "override_reason": ""
+  "override_reason": "",
+
+  "_seccion_finiquito_": "Tarea 1.C-ter (S24). Requeridos en modo=FINIQUITO. Omitir en PERIODICA.",
+  "motivo_terminacion": "renuncia_voluntaria | despido_sin_justa_causa | despido_con_justa_causa | termino_fijo_vencido | obra_o_labor_terminada | mutuo_acuerdo | muerte_trabajador | muerte_empleador | suspension_deficitaria | cierre_empresa",
+  "fecha_terminacion_real": "YYYY-MM-DD",
+
+  "_seccion_vacaciones_": "Tarea 1.C-ter (S24). Objeto tipado VacacionesEstado. Usar dias_pendientes para finiquito con vacaciones compensadas. dias_causados_proporcionales es opcional (motor lo calcula).",
+  "vacaciones": {
+    "dias_causados_proporcionales": null,
+    "dias_disfrutados": 0,
+    "dias_pendientes": 0,
+    "fechas_disfrute": null
+  },
+
+  "_seccion_periodos_no_pagados_": "Tarea 2.X (S28, indexación IPC). Lista de prestaciones de años anteriores NO pagadas oportunamente. Cada item activa cálculo de VA con IPCIndexador. Si la lista está vacía o ausente, motor no activa indexación (opt-in).",
+  "periodos_no_pagados": [
+    {
+      "concepto": "cesantias | prima | intereses_cesantias | vacaciones",
+      "valor_historico": 0,
+      "fecha_causacion": "YYYY-MM-DD",
+      "fecha_exigibilidad": "YYYY-MM-DD",
+      "fecha_referencia_indexacion": "YYYY-MM-DD"
+    }
+  ],
+
+  "_seccion_salario_variable_": "Tarea 1.C-bis (S23, Addendum SL2630-2024). SOLO si el SBL cambió mid-periodo. Si salario_mensual es constante, dejar sbl_por_anio={} e historial_salarial=[]. Si variable=true, al menos UNO de los dos es obligatorio.",
+  "sbl_por_anio": {
+    "YYYY": 0
+  },
+  "historial_salarial": [
+    {
+      "año": 0,
+      "mes": 1,
+      "valor": 0
+    }
+  ],
+
+  "_seccion_preaviso_": "Tarea 1.C-quater (S25, Addendum preaviso Art. 46 CST). SOLO contratos tipo=FIJO. En INDEFINIDO/OBRA_LABOR/PRESTACION dejar TODO en null. Reglas: preaviso_entregado=true exige fecha_preaviso. FINIQUITO+FIJO+vencido exige preaviso_entregado declarado.",
+  "fecha_vencimiento_termino_fijo": null,
+  "preaviso_entregado": null,
+  "fecha_preaviso": null,
+  "dias_preaviso": null
 }
