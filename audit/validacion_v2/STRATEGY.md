@@ -76,11 +76,13 @@ existentes en `examples/inputs/`:
 - **Motivo de terminación:** `renuncia_voluntaria` o
   `mutuo_acuerdo` (descarta indemnización Art. 64 — R-LEG-01).
 - **Features a ejercitar:**
-  - `Salario.historial_salarial` o `Salario.sbl_por_anio`
-    (anualización por año calendario, Addendum SL2630-2024).
-  - `VacacionesEstado.dias_pendientes` + cálculo Art. 189-190 CST
+  - `historial_salarial` o `sbl_por_anio` (en raíz del JSON, NO
+    anidados bajo `salario.`; anualización por año calendario,
+    Addendum SL2630-2024).
+  - `vacaciones.dias_pendientes` (en raíz bajo sub-objeto `vacaciones:{}`,
+    NO anidado bajo `VacacionesEstado.`) + cálculo Art. 189-190 CST
     (vacaciones compensadas en finiquito).
-  - `Salario.auxilio_transporte` condicional según SMMLV vigente del año.
+  - `auxilio_transporte` (en raíz) condicional según SMMLV vigente del año.
 - **Por qué este caso:** es la **única validación end-to-end** del
   Addendum SL2630-2024 contra datos reales. El schema está
   implementado (1.C-bis S23, 2.B-bis S27) pero no hay golden file
@@ -102,7 +104,10 @@ existentes en `examples/inputs/`:
 - **Vacaciones pendientes:** 0 (para mantener foco en IPC, no en
   vacaciones compensadas).
 - **Features a ejercitar:**
-  - `periodos_no_pagados` con `PeriodoNoPagado` (varios simultáneos).
+  - `periodos_no_pagados` (lista en raíz, con sub-objetos del modelo
+    `PeriodoNoPagado` con 5 campos: `concepto`, `valor_historico`,
+    `fecha_causacion`, `fecha_exigibilidad`,
+    `fecha_referencia_indexacion`; varios simultáneos).
   - Indexación IPC con `IPCIndexador` (Tarea 2.X S28).
   - Validación de prescripción Art. 488 CST (3 años desde
     `fecha_exigibilidad`).
