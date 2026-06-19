@@ -899,6 +899,75 @@
 - **Acción:** grep periódico por patrones `\\d{6,12}` (documentos)
   y por nombres propios. Cualquier match se sanitiza o se borra.
 
+## R-LEG-08 (NUEVO, S48, 2026-06-18) — WorkflowOrchestrator no soporta Forma 2 anidada como input de usuario (Tarea 2.A pendiente)
+
+- **Severidad:** MEDIA (arquitectura, no bloqueante hoy; documenta
+  inconsistencia schema-input vs realidad operacional).
+- **Origen:** Sesión S48 (Tarea 4.F planning, 2026-06-18). Se detectó
+  inconsistencia entre el schema Pydantic formal (`LiquidacionInput`
+  en `liquidator/contracts/input_model.py` L345-370, que ES Forma 2
+  anidada con sub-objetos `trabajador`, `empleador`, `contrato`,
+  `salario`) y el input que el WorkflowOrchestrator realmente acepta
+  del usuario (Forma 1 plana legacy, parseada por
+  `liquidator/core/input_parser.py`).
+- **Estado v2.0.0:** El `InputParser` (94 líneas, minimalista) lee
+  17 campos en raíz del JSON plano y los pasa al WorkflowOrchestrator.
+  El JSON completo llega al engine vía `json.load()`, así que campos
+  extendidos del schema Forma 2 (`motivo_terminacion`,
+  `fecha_terminacion_real`, `vacaciones: {}`, `periodos_no_pagados: []`,
+  `sbl_por_anio`, `historial_salarial`, `preaviso_*`) se preservan en
+  el dict raíz y son consumidos por el engine directamente. El
+  schema Pydantic `LiquidacionInput` ES el contrato INTERNO del
+  orquestador, NO el input de usuario. Esto está documentado
+  explícitamente en `examples/inputs/prescripcion_indexada.json`
+  línea 16.
+- **Implicación:** La Forma 2 anidada (`{trabajador: {...}, contrato:
+  {fecha_ingreso: ...}, salario: {SBL: ...}}`) NO es input válido
+  para el motor v2.0.0. Usuarios que intenten usar Forma 2 (típico
+  si leen el schema formal sin leer el `InputParser`) verán
+  resultados incorrectos o errores silenciosos (campos no leídos
+  quedan en `null`).
+- **Tarea 2.A (Fase 2, PENDIENTE):** migrar `WorkflowOrchestrator`
+  para que acepte Forma 2 anidada como input de usuario directo
+  (sin pasar por `InputParser` legacy). Requerirá:
+  1. Validar el JSON contra `LiquidacionInput` (Pydantic) al recibir
+     input de usuario.
+  2. Eliminar o deprecar `InputParser.validate_structure()` (mantener
+     solo para backward compat hasta confirmar 0 callers en v3+).
+  3. Actualizar todos los `examples/inputs/*.json` a Forma 2.
+  4. Actualizar `KB_LLM/04_schema_entrada.md` (actualmente describe
+     ambas formas; tras Tarea 2.A solo documenta Forma 2 como oficial).
+- **Mitigación temporal (vigente hasta Tarea 2.A):** la KB
+  `Contexto/KB_LLM/04_schema_entrada.md` documenta explícitamente
+  ambas formas. Los examples reales usan Forma 1 plana con campos
+  extendidos en raíz. El TEMPLATE_input.json (4.F, S48) documenta
+  el contrato Forma 1 completo. STRATEGY.md (4.F) usa notación plana
+  en raíz (corregido en S48 — antes usaba notación anidada
+  incorrecta: `Salario.historial_salarial` en lugar de
+  `historial_salarial` en raíz).
+- **Evidencia verbatim:**
+  - `liquidator/core/input_parser.py:50-94` — validador minimalista,
+    17 campos en raíz, no hace mapeo Forma 1 → Forma 2.
+  - `liquidator/contracts/input_model.py:345-370` — `LiquidacionInput`
+    es Forma 2 anidada (sub-objetos `trabajador`, `empleador`,
+    `contrato`, `salario`).
+  - `examples/inputs/prescripcion_indexada.json:16` — `_nota_caso`
+    documenta "El formato Forma 2 (anidado con contrato/salario/
+    trabajador) NO es soportado por el WorkflowOrchestrator actual".
+  - `examples/inputs/finiquito_renuncia_212d.json:13` — idem.
+  - `Planificación/REGISTRY.md` línea 245-246 (actualizado S48) —
+    Trampas conocidas apunta a este R-LEG-08.
+  - `audit/validacion_v2/TEMPLATE_input.json` cabecera (S48) —
+    documenta Forma 1 plana + campos extendidos en raíz.
+  - `audit/validacion_v2/STRATEGY.md` §2/§3 (corregido S48) — usa
+    notación plana, no anidada.
+- **Acción realizada S48:** documentar este riesgo (este commit) +
+  corregir notación en `STRATEGY.md` + ampliar `TEMPLATE_input.json`
+  con los 6 grupos de campos Forma 1 extendidos en raíz. Tarea 2.A
+  sigue PENDIENTE y NO bloquea v2.0.0 release (que funciona
+  correctamente con Forma 1 plana + campos extendidos en raíz,
+  evidenciado por 3+ examples reales que pasan el motor).
+
 ## Última validación contra código
 
 - **Fecha:** 2026-06-13 (sesión S12 — cierre de Tarea 1.A).

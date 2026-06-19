@@ -242,8 +242,13 @@ uv run --with pytest --with python-dateutil --with jsonschema python3 -m pytest 
   R-OP-11 (campos plazos_pago opcionales) → RESUELTOS S20-S21.
 - Art. 189 párr. 1° CST → VERIFICADO SUIN S29 (reparo cerrado).
 - Art. 46 CST preaviso → VERIFICADO SUIN S30 (reparo cerrado).
-- `WorkflowOrchestrator` no soporta Forma 2 anidada → fix en Tarea 2.A
-  (Fase 2; ejemplos SBL indexada usan Forma 1 como mitigación temporal).
+- `WorkflowOrchestrator` no soporta Forma 2 anidada como input de
+  usuario → fix en Tarea 2.A (Fase 2; ejemplos SBL indexada usan
+  Forma 1 plana con campos extendidos en raíz como mitigación
+  temporal). Ver **R-LEG-08** en `Contexto/KB_LLM/06_riesgos_modelo.md`
+  (canonizado S48, Tarea 4.F planning). El `InputParser` legacy lee
+  17 campos en raíz y pasa el dict completo al engine, que consume
+  los campos extendidos del schema Forma 2 directamente.
 
 > **Detalle completo de R-OP/LEG/R-SEC**: ver
 > [`Contexto/KB_LLM/06_riesgos_modelo.md`](../Contexto/KB_LLM/06_riesgos_modelo.md)
