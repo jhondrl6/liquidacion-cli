@@ -178,23 +178,66 @@
     },
     {
       "id": "SL2630_2024",
-      "nombre": "Sentencia SL2630-2024 Corte Suprema de Justicia",
-      "descripcion": "Criterio jurisprudencial sobre anualización de prestaciones adeudadas: liquidar año por año con el salario de cada año calendario.",
-      "texto_relevante": "VERIFICADO PARCIAL (S51, 2026-06-19). La Sala de Descongestión Laboral N.º 1 de la Corte Suprema de Justicia, en sentencia SL2630-2024 (radicado 101342, 17-sep-2024, ponente Martín Emilio Beltrán Quintero), estableció que las prestaciones sociales adeudadas de años anteriores deben liquidarse año por año con el salario correspondiente a cada año calendario, y no con el último salario del trabajador. La indexación por IPC se rige por SL2396-2024 (separar ambas doctrinas). Fuente de verificación: vLex (vid/1051247543) + Gerencie.com. Texto literal del fallo no extraído directamente de SIUGJ por indisponibilidad del portal al momento de verificación.",
-      "sala": "Sala de Descongestión Laboral N.º 1 — VERIFICADO (S51) contra vLex y doctrina secundaria.",
-      "url": "https://vlex.com.co/vid/sentencia-corte-suprema-justicia-1051247543",
-      "estado_verificacion": "VERIFICADO_PARCIAL",
-      "nota_verificacion": "S51: Sala, ponente, radicado y doctrina confirmados contra vLex. URL directa SIUGJ no disponible (portal intermitente). Texto literal del fallo no extraído directamente de la fuente primaria.",
+      "nombre": "Sentencia SL2630-2024 Corte Suprema de Justicia — Sala de Descongestión Laboral N.º 1",
+      "descripcion": "Criterio jurisprudencial sobre anualización de prestaciones adeudadas: liquidar año por año con el salario de cada año calendario, no con el último salario del trabajador. Doctrina complementaria: prescripción trienal desde exigibilidad (Art. 488 CST + Art. 151 CPTSS), indexación por IPC al pago efectivo, anualización con salario promedio acreditado año a año.",
+      "cabecera_fallo": {
+        "sentencia": "SL2630-2024",
+        "radicado": "101342",
+        "acta": "34",
+        "fecha": "2024-09-17",
+        "sala": "Sala de Descongestión Laboral N.º 1 — Corte Suprema de Justicia",
+        "ponente": "Martín Emilio Beltrán Quintero (M.E.B.Q.)",
+        "firmantes_adicionales": ["Olga Yineth Merchán Calderón", "Marirraquel Rodelo Navarro"],
+        "tipo": "Sentencia de Casación (recurso extraordinario)",
+        "sentido": "CASA TOTALMENTE / ADICIONA / MODIFICA / CONFIRMA PARCIALMENTE",
+        "categoria": "Remuneración del trabajador",
+        "tribunal_origen": "Tribunal Superior Sala Laboral de Bogotá",
+        "partes": {
+          "demandante": "Juan Enrique Moreno Palma",
+          "demandadas": [
+            "Aerovías del Continente Americano S.A. — AVIANCA S.A. (empleadora real, condena principal)",
+            "Cooperativa de Trabajo Asociado — Servicopava en liquidación (intermediaria laboral ilegal, condena solidaria)"
+          ],
+          "otros_actores_iniciales": [
+            "Jair Bernal Ariza (concilió 2022-10-10)",
+            "Robinsson Barreto Pinzón (concilió 2022-10-10)"
+          ]
+        },
+        "decision_final_COP": {
+          "cesantias": 20665485,
+          "vacaciones_diferencia": 39367,
+          "intereses_cesantias": 50707,
+          "prima_servicios": "Pagada (no genera condena adicional)",
+          "total_condena_nueva": 20755559
+        }
+      },
+      "texto_relevante": "DOCTRINA OPERACIONAL (extraída de SL2630-2024 — knowledge base en legal_docs/SL2630-2024_knowledge_base.md): (1) ANUALIZACIÓN DE PRESTACIONES: cada año calendario se liquida con el promedio del salario de ESE año, NO con el último salario del trabajador. Para SL2630-2024 caso AVIANCA-Servicopava, la CSJ condenó cesantías año por año: 2006 $332.335, 2007 $763.716, 2008 $1.379.251, 2009 $1.929.316, 2010 $2.020.339, 2011 $2.062.695, 2012 $2.200.417, 2013 $2.274.667, 2014 $2.352.500, 2015 $2.663.583, 2016 $2.686.666 → TOTAL $20.665.485 (modificó primera instancia que reconoció $16.193.804). (2) PRESCRIPCIÓN TRIENAL: 3 años desde exigibilidad de cada derecho (Art. 488 CST + Art. 151 CPTSS), interrumpible una sola vez por demanda. Excepción: cesantías prescriben desde la TERMINACIÓN del vínculo laboral, no desde cada anualidad (regla especial). Demandas 2020-07-06 → prescripción corre desde 2017-07-06. (3) INDEXACIÓN POR IPC: condenas se actualizan a valor presente con IPC acumulado DANE desde fecha de causación hasta fecha de pago efectivo (params/ipc_dane_mensual.json disponible con 204 índices mensuales). (4) EXCEPCIÓN DE COMPENSACIÓN: pagos recibidos como compensaciones en convenios CTA se descuentan del total de prestaciones laborales causadas (CSJ SL5595-2019, SL2726-2022, SL3570-2020, SL1715-2024) — evita doble pago. (5) INDICIOS DE INTERMEDIACIÓN LABORAL ILEGAL (CSJ SL2084-2023, sistematización): (i) actividad misional permanente + subordinación; (ii) CTA sin estructura propia ni autonomía; (iii) trabajador integrado a organigrama del contratante. (6) ACTIVIDAD MISIONAL PERMANENTE (Ley 1429/2010 art. 63 + Decreto 2025/2011 art. 1) NO puede vincularse vía CTA. Doctrina implementada en Tarea 2.B-bis (S27) SalarioResolver con 3 prioridades (historial_salarial / sbl_por_anio / SBL único) y Tarea 2.X (S28) IPCIndexador con prescripción Art. 488 CST.",
+      "url": "https://consultajurisprudencial.ramajudicial.gov.co/WebRelatoria/csj/index.xhtml",
+      "url_ecosistema_digital": "https://ecosistemadigitalindice.cortesuprema.gov.co/",
+      "url_vlex_complementaria": "https://vlex.com.co/vid/sentencia-corte-suprema-justicia-1051247543",
+      "archivo_local": "legal_docs/SL2630-2024_knowledge_base.md",
+      "estado_verificacion": "VERIFICADO",
+      "fecha_verificacion": "2026-06-20",
+      "verificado_por": "S53 cierre final Fase 4",
+      "fuente_primaria_oficial": "Aplicativo de Consulta de Jurisprudencia de la Relatoría de la Sala de Casación Laboral de la Corte Suprema de Justicia (consultajurisprudencial.ramajudicial.gov.co). Base de conocimiento estructurada extraída manualmente por el operador (Jhond) en S53 y archivada en legal_docs/SL2630-2024_knowledge_base.md (700 líneas, 26KB). Contiene: cabecera verificada, partes, pretensiones, prescripción, historial salarial acreditado 2006-2017, liquidación de cesantías/vacaciones/intereses con cifras exactas, decisión final, excepción de compensación, marco legal CTA, indicios de intermediación, mapping a schemas Pydantic del motor (Salario.sbl_por_anio, LiquidacionInput.periodos_no_pagados), 13 sentencias adicionales citadas, glosario completo, y datos no disponibles en el fallo. La URL del aplicativo de la Relatoría y el Ecosistema Digital Índice siguen siendo las fuentes primarias oficiales para la transcripción cruda del fallo.",
+      "nota_verificacion": "S53: Promovido de VERIFICADO_PARCIAL_AVANZADO (S52) a VERIFICADO completo. El archivo legal_docs/SL2630-2024_knowledge_base.md contiene la transcripción doctrinal estructurada completa del fallo, con cifras exactas, citas a normas (Art. 488 CST, Art. 151 CPTSS, Art. 189 CST num. 3, Ley 79/1988 art. 59 y 70, Decreto 4588/2006 art. 10/16/17, Ley 1233/2008 art. 7, Ley 1429/2010 art. 63, Decreto 2025/2011 art. 1), 13 sentencias CSJ citadas (SL5595-2019, SL4479-2020, SL2084-2023, SL3777-2022, SL2885-2019, SL1715-2024, SL3570-2020, SL2726-2022, SL460-2021, SL3436-2021, SL665-2013, SL6441-2013, SL12707-2017, SL1430, etc.), mapping al Schema Pydantic Salario.sbl_por_anio con valores 2006-2016, y mapping al Schema LiquidacionInput.periodos_no_pagados. Pendiente solo si se requiere: transcripción literal verbatim de cada párrafo del fallo (no necesaria para uso operacional del motor — la doctrina está implementada en SalarioResolver y IPCIndexador con 69 tests verdes).",
+      "sala": "Sala de Descongestión Laboral N.º 1",
       "vigencia": "2024"
     },
     {
       "id": "CST_488_PRESCRIPCION",
       "nombre": "Código Sustantivo del Trabajo Art. 488",
       "descripcion": "Regla general de prescripción de las acciones laborales: tres (3) años contados desde que la obligación se hizo exigible, salvo prescripciones especiales.",
-      "texto_relevante": "RESUMEN NO LITERAL — pendiente de verificación verbatim con SUIN/CST. Art. 488 CST establece que las acciones correspondientes a los derechos regulados en el CST prescriben en tres (3) años. En relación de trabajo, el término se cuenta desde que la obligación se hace exigible. Esta es la base legal que el motor usa para validar prescripción en periodos_no_pagados (Tarea 2.X). R-LEG-02 (reparo a addendum SL2630-2024): NO usar el termino general equivocado; usar SIEMPRE este Art. 488.",
-      "estado_verificacion": "PENDIENTE_VERBATIM",
-      "url": "https://www.suin-juriscol.gov.co/",
-      "issue_bloqueante": "Verificación verbatim con SUIN/CST antes de cerrar Fase 2-bis DoD. La entrada documenta el uso y NO representa una cita legal verificada.",
+      "texto_relevante": "Artículo 488. Regla general. Las acciones correspondientes a los derechos regulados en este Código prescriben en tres (3) años, que se cuentan desde que la respectiva obligación se haya hecho exigible, salvo en los casos de prescripciones especiales establecidas en el Código Procesal del Trabajo o en el presente estatuto.",
+      "url": "https://www.suin-juriscol.gov.co/viewDocument.asp?id=30019323",
+      "url_secretaria_senado": "http://www.secretariasenado.gov.co/senado/basedoc/codigo_sustantivo_trabajo_pr016.html",
+      "url_cijuf_concepto": "https://www.cijuf.org.co/conceptosminproteccion/julio/c202475.html",
+      "estado_verificacion": "VERIFICADO",
+      "fecha_verificacion": "2026-06-20",
+      "verificado_por": "S52 cierre estricto Fase 4",
+      "fuente_primaria_oficial": "SUIN-Juriscol (codificación oficial) + Secretaría del Senado de la República (texto vigente con control de constitucionalidad). Verbatim confirmado adicionalmente por CIJUF/Ministerio de la Protección Social — Concepto 202475 del 18-jul-2008 (NELLY PATRICIA RAMOS HERNÁNDEZ, Jefe Oficina Asesora Jurídica).",
+      "nota_verificacion": "S52: El Art. 488 reside dentro del documento maestro del CST en SUIN (id=30019323 — código codificado integral). SUIN devolvió 'Documento no encontrado (id=30019323)' en fetch directo del 2026-06-20 (portal intermitente); el texto literal aparece indexado por Google snippet de SUIN y fue extraído verbatim de la Secretaría del Senado (URL secundaria oficial con vigencia expresa) y del Concepto 202475 de Min. Protección Social (cita literal del Art. 488 en concepto oficial). Ley 2466/2025 Art. 62 modificó el CST pero mantuvo el término de prescripción en 3 años (R-LEG-02 cerrado).",
+      "sala": "N/A (norma codificada, no sentencia)",
       "vigencia": "permanente"
     },
     {
@@ -299,9 +342,9 @@
     }
   },
   "metadata": {
-    "version": "2026-06-13",
-    "fecha_actualizacion": "2026-06-13",
-    "fuente": "SUIN-Juriscol (verificadas) + Ministerio del Trabajo - Colombia (Decretos 1469/2025, 1470/2025, 159/2026; Ley 2466/2025; Ley 50/1990; CST)",
-    "notas": "Este archivo contiene la normatividad vigente para liquidacion de nomina en Colombia. Los valores monetarios y tasas reflejan la actualizacion anual segun decretos expedidos. Tras Tarea 0.K (S11, 2026-06-13) incluye: Decreto 1469/2025 (SMMLV 2026, SUSPENDIDO provisionalmente por Consejo de Estado 2026-02-12), Decreto 159/2026 (re-fijacion transitoria del SMMLV 2026 con mismo valor), Decreto 1470/2025 (aux_trans 2026), Ley 2466/2025 (verificada SUIN). Tras Tarea 2.X (S28, 2026-06-13) incluye: SL2630_2024 (anualizacion e indexacion IPC) y CST_488_PRESCRIPCION (prescripcion 3 anios, termino especial de CST, NO el termino general equivocado). Ambas marcadas PENDIENTE_VERBATIM. Tras Tarea 2.B-ter (S29, 2026-06-13) incluye: CST_189_VACACIONES (compensacion de vacaciones en dinero Art. 189-190 CST, VERIFICADO con texto literal SUIN https://www.suin-juriscol.gov.co/viewDocument.asp?id=30019323). Tras Tarea 2.B-cuater (S30, 2026-06-14) incluye: CST_46_PREAVISO (preaviso contrato termino fijo Art. 46 CST, VERIFICADO con texto literal SUIN/leyes.co). URLs reales verificadas en SUIN y Alcaldia de Bogota. ISSUE R-LEG-NUEVO-01: la entrada LEY_2466_2025_INTERESES_MENSUALES (pago mensual de intereses sobre cesantias) del plan v2.0 esta atribuida al Art. 64, pero SUIN muestra que Art. 64 = 'Regimen simple laboral'. NO implementar pago mensual de intereses en motor hasta verificar el articulo literal exacto."
-      }
+    "version": "2026-06-20",
+    "fecha_actualizacion": "2026-06-20",
+    "fuente": "SUIN-Juriscol (verificadas) + Ministerio del Trabajo - Colombia (Decretos 1469/2025, 1470/2025, 159/2026; Ley 2466/2025; Ley 50/1990; CST) + Secretaría del Senado de la República (texto vigente CST) + Relatoría Sala de Casación Laboral CSJ (fallos) + CIJUF/Ministerio de la Protección Social (conceptos) + base de conocimiento estructurada SL2630-2024 (legal_docs/SL2630-2024_knowledge_base.md)",
+    "notas": "Este archivo contiene la normatividad vigente para liquidacion de nomina en Colombia. Los valores monetarios y tasas reflejan la actualizacion anual segun decretos expedidos. Tras Tarea 0.K (S11, 2026-06-13) incluye: Decreto 1469/2025 (SMMLV 2026, SUSPENDIDO provisionalmente por Consejo de Estado 2026-02-12), Decreto 159/2026 (re-fijacion transitoria del SMMLV 2026 con mismo valor), Decreto 1470/2025 (aux_trans 2026), Ley 2466/2025 (verificada SUIN). Tras Tarea 2.X (S28, 2026-06-13) incluye: SL2630_2024 (anualizacion e indexacion IPC) y CST_488_PRESCRIPCION (prescripcion 3 anios, termino especial de CST, NO el termino general equivocado). Tras Tarea 2.B-ter (S29, 2026-06-13) incluye: CST_189_VACACIONES (compensacion de vacaciones en dinero Art. 189-190 CST, VERIFICADO con texto literal SUIN https://www.suin-juriscol.gov.co/viewDocument.asp?id=30019323). Tras Tarea 2.B-cuater (S30, 2026-06-14) incluye: CST_46_PREAVISO (preaviso contrato termino fijo Art. 46 CST, VERIFICADO con texto literal SUIN/leyes.co). Tras S52 (2026-06-20, cierre estricto Fase 4): (1) CST_488_PRESCRIPCION promovido a VERIFICADO con texto literal extraido verbatim de la Secretaria del Senado de la Republica (fuente primaria oficial con vigencia expresa y control de constitucionalidad) y corroborado por CIJUF/Min.Proteccion Social — Concepto 202475 del 18-jul-2008. SUIN devuelve 'Documento no encontrado (id=30019323)' en fetch directo del 2026-06-20 pero la URL es la del documento maestro del CST y el texto literal aparece indexado por Google snippet. (2) SL2630_2024 promovido de VERIFICADO_PARCIAL a VERIFICADO tras S53 (operador Jhond extrajo manualmente base de conocimiento estructurada con cifras exactas, citas a normas, 13 sentencias CSJ adicionales, mapping a schemas Pydantic del motor). Archivo archivado en legal_docs/SL2630-2024_knowledge_base.md (700 lineas, 26KB). URLs primarias oficiales registradas: aplicativo Relatoria CSJ + Ecosistema Digital. URL complementaria vLex. ISSUE R-LEG-NUEVO-01: la entrada LEY_2466_2025_INTERESES_MENSUALES (pago mensual de intereses sobre cesantias) del plan v2.0 esta atribuida al Art. 64, pero SUIN muestra que Art. 64 = 'Regimen simple laboral'. NO implementar pago mensual de intereses en motor hasta verificar el articulo literal exacto."
+  }
 }

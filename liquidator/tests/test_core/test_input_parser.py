@@ -17,7 +17,7 @@ def test_parse_input_file_normalizes_fields():
 
 
 def test_input_parser_applies_validation():
-    params = ParamsLoader().load(2025)
+    ParamsLoader().load(2025)
     parser = InputParser()
     payload = parse_input_file(FIXTURES_DIR / "example_finca_rural.json")
 

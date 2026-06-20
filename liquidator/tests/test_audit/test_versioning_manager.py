@@ -49,9 +49,10 @@ class TestVersioningManager:
         """Test que versión inválida lanza ValueError."""
         try:
             self.vm.update_params_version("2024-01-01")
-            assert False, "Debería haber lanzado ValueError"
         except ValueError:
             pass
+        else:
+            raise AssertionError("Debería haber lanzado ValueError")
 
     def test_check_for_updates(self):
         """Test verificar actualizaciones (placeholder)."""

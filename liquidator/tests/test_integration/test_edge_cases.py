@@ -106,7 +106,7 @@ class TestEdgeCasesIntegration:
         assert desglose["SBL_GENERAL"] == sbl_esperado
 
         # Verificar cesantías con el SBL correcto
-        dias_servicio = 365  # 2025-01-01 a 2025-12-31 (inclusive)
+        # dias_servicio = 365  # 2025-01-01 a 2025-12-31 (inclusive)
         # Motor aplica cap 360 para dias_servicio >= 365
         cesantias_esperadas = sbl_esperado  # 360/360 = 1.0x SBL
         assert desglose["cesantias"]["valor"] == cesantias_esperadas

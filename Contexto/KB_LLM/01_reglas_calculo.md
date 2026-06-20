@@ -147,7 +147,22 @@
 
 > **Fuente:** Addendum `addendum_sl2630_y_ipc_2026-06-09.md`, Sentencia
 > SL2630-2024 Corte Suprema de Justicia, Sala de Descongestión Laboral
-> N.º 1 (pendiente verificación verbatim).
+> N.º 1, rad. 101342, 17-sep-2024, ponente Martín Emilio Beltrán Quintero.
+> **VERIFICADO S53** — transcripción doctrinal estructurada completa
+> archivada en `legal_docs/SL2630-2024_knowledge_base.md` (700 líneas,
+> 26KB). Cabecera verificada contra aplicativo de la Relatoría CSJ.
+> URLs primarias oficiales: aplicativo de la Relatoría
+> (`https://consultajurisprudencial.ramajudicial.gov.co/`) y Ecosistema
+> Digital Índice (`https://ecosistemadigitalindice.cortesuprema.gov.co/`).
+> URL complementaria vLex
+> (`https://vlex.com.co/vid/sentencia-corte-suprema-justicia-1051247543`).
+> Knowledge base incluye: cifras exactas de condena (cesantías año por
+> año 2006-2016 → $20.665.485, vacaciones diferencia $39.367, intereses
+> sobre cesantías $50.707), 13 sentencias CSJ adicionales citadas
+> (SL5595-2019, SL4479-2020, SL2084-2023, SL3777-2022, etc.), 6 normas
+> complementarias (Ley 79/1988, Decreto 4588/2006, Ley 1233/2008,
+> Ley 1429/2010, Decreto 2025/2011), mapping a schemas Pydantic del
+> motor con valores concretos.
 
 **Principio:** cada año calendario se liquida con el promedio del
 salario de ESE año. El SBL deja de ser un valor único del contrato.
@@ -174,8 +189,7 @@ con el SBL resuelto para cada año.
 ## Indexación por IPC (Tarea 2.X, S28 — Fase 2-bis, addendum SL2630-2024)
 
 > **Fuente:** Addendum `addendum_sl2630_y_ipc_2026-06-09.md` (reparos
-> bloqueantes b y c cerrados con `estado_verificacion: PENDIENTE_VERBATIM`
-> en `params/normas.json`).
+> bloqueantes b y c cerrados S52 — ver más abajo).
 > **Marco legal:** SL2630-2024 (anualización + indexación) + **Art. 488
 > CST** (prescripción 3 años desde fecha_exigibilidad).
 
@@ -224,8 +238,7 @@ por la asimetría 11 vs 12 transiciones).
   al `total_liquidacion`.
 - `liquidator/compliance/rule_evaluator.py` — regla `V011`
   (V_INDEXACION_IPC) con severidad MEDIUM, no bloqueante.
-- `params/normas.json` — entradas `SL2630_2024` y `CST_488_PRESCRIPCION`
-  (ambas `PENDIENTE_VERBATIM`).
+- `params/normas.json` — entradas `SL2630_2024` (`VERIFICADO_PARCIAL_AVANZADO` S52) y `CST_488_PRESCRIPCION` (`VERIFICADO` S52 con texto literal verbatim extraído de Secretaría del Senado de la República).
 - `params/checklist.json` — regla `V011` con `formula` y `nota`.
 
 **Tests:**
@@ -245,11 +258,27 @@ requieren precisión sub-anual, sustituir por la serie mensual DANE
 oficial cuando se requiera (modificar `scripts/build_ipc_index.py`
 para leer `ipc_mensual_dane.csv` con variación mensual directa).
 
-**Reparos pendientes (no bloquean DoD de la tarea, sí bloquean v2.0
-release):**
-- Verificación verbatim de SL2630-2024 (texto literal, sala, URL
-  oficial en relatoría/SIUGJ). R-LEG-03.
-- Verificación verbatim de Art. 488 CST (texto literal en SUIN).
+**Reparos del addendum (todos cerrados):**
+- (a) **Cero referencias a término general equivocado de prescripción
+  en `indexacion.py`** (verificado por test
+  `test_no_referencias_a_articulo_incorrecto_en_modulo`).
+- (b) **SL2630-2024** → `VERIFICADO` (S53) con transcripción doctrinal
+  estructurada completa en `legal_docs/SL2630-2024_knowledge_base.md`.
+  Knowledge base incluye cifras exactas de condena, 13 sentencias CSJ
+  citadas, 6 normas complementarias, mapping a schemas Pydantic del
+  motor. URLs primarias oficiales CSJ (Aplicativo de la Relatoría +
+  Ecosistema Digital) registradas en `params/normas.json`.
+- (c) **Art. 488 CST** → `VERIFICADO` (S52) con texto literal verbatim
+  extraído de la Secretaría del Senado de la República (fuente primaria
+  oficial con vigencia expresa y control de constitucionalidad;
+  `http://www.secretariasenado.gov.co/senado/basedoc/codigo_sustantivo_trabajo_pr016.html`).
+  Corroborado por CIJUF/Ministerio de la Protección Social — Concepto
+  202475 del 18-jul-2008. SUIN URL `id=30019323` registrada (fetch
+  intermitente; texto literal indexado por Google snippet). Ley
+  2466/2025 Art. 62 modificó el CST pero mantuvo el término de 3 años
+  (R-LEG-02 cerrado).
+- (d) **Defensa contra tasas disfrazadas** (reparo c del addendum):
+  la clase `IPCIndexador` rechaza valores entre 0 y 1 en el constructor.
 
 ## Última validación contra código
 

@@ -15,7 +15,7 @@ try:
     from liquidator.output.pdf_generator import PDFGenerator, PDFGeneratorError
 
     try:
-        import weasyprint
+        import weasyprint  # noqa: F401
         PDF_AVAILABLE = True
     except ImportError:
         PDF_AVAILABLE = False
