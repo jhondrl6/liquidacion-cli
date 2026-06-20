@@ -79,7 +79,8 @@ class TestTemplateManager(unittest.TestCase):
 
     def test_format_currency(self):
         """Test currency formatting"""
-        # Get a template to access the format_currency function
+        # render_template adds format_currency global
+        result = self.manager.render_template("periodica", {"fecha": "2025-01-01", "total": 1000})
         template = self.manager.get_template("periodica")
 
         # Test formatting different values

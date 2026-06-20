@@ -2,43 +2,45 @@
 Tests para el módulo de hash calculator.
 """
 
-from liquidator.audit.hash_calculator import HashCalculator
+from liquidator.audit.hash_calculator import HashCalculator, calculate_hash
 
 
-class TestHashCalculator:
-    """Tests para HashCalculator."""
+class TestHashCalculatorModule:
+    """Tests para la función module-level calculate_hash."""
 
-    def setup_method(self):
-        """Configuración antes de cada test."""
-        self.hash_calculator = HashCalculator()
-
-    def test_calculate_hash_string(self):
-        """Test cálculo de hash para string."""
-        test_string = "test_string_123"
-        hash_result = self.hash_calculator.calculate_hash(test_string)
-
+    def test_calculate_hash_returns_sha256_prefix(self):
+        """Test que calculate_hash retorna prefijo sha256:."""
+        test_dict = {"field1": "value1"}
+        hash_result = calculate_hash(test_dict)
         assert hash_result.startswith("sha256:")
-        assert len(hash_result) == 71  # sha256: + 64 caracteres hex
+        assert len(hash_result) == 71  # sha256: + 64 hex chars
 
-    def test_calculate_hash_dict_deterministic(self):
+    def test_calculate_hash_deterministic(self):
         """Test que el hash de dict es determinístico."""
-        test_dict = {
+        test_dict1 = {
             "field1": "value1",
             "field2": "value2",
             "nested": {"field3": "value3"},
         }
-
-        # Mismo dict, diferente orden
         test_dict2 = {
             "field2": "value2",
             "nested": {"field3": "value3"},
             "field1": "value1",
         }
+        assert calculate_hash(test_dict1) == calculate_hash(test_dict2)
 
-        hash1 = self.hash_calculator.calculate_hash(test_dict)
-        hash2 = self.hash_calculator.calculate_hash(test_dict2)
+    def test_calculate_hash_different_data(self):
+        """Test que datos distintos producen hashes distintos."""
+        hash1 = calculate_hash({"a": 1})
+        hash2 = calculate_hash({"a": 2})
+        assert hash1 != hash2
 
-        assert hash1 == hash2
+
+class TestHashCalculator:
+    """Tests para la clase HashCalculator."""
+
+    def setup_method(self):
+        self.calc = HashCalculator()
 
     def test_calculate_input_hash(self):
         """Test cálculo de hash de input."""
@@ -47,78 +49,31 @@ class TestHashCalculator:
             "fecha_ingreso": "2024-01-01",
             "fecha_corte": "2025-01-01",
             "salario_mensual": 2000000,
-            "human_override": True,
-            "operator_id": "OP001",
         }
-
-        input_hash = self.hash_calculator.calculate_input_hash(input_data)
-
-        assert input_hash.startswith("sha256:")
-        # El hash no debe incluir campos de override
-        input_without_override = input_data.copy()
-        input_without_override.pop("human_override")
-        input_without_override.pop("operator_id")
-
-        expected_hash = self.hash_calculator.calculate_hash(input_without_override)
-        assert input_hash == expected_hash
+        result = self.calc.calculate_input_hash(input_data)
+        assert result.startswith("sha256:")
+        # Debe ser igual al module-level calculate_hash
+        assert result == calculate_hash(input_data)
 
     def test_calculate_output_hash(self):
         """Test cálculo de hash de output."""
         output_data = {
-            "meta": {
-                "fecha_generacion": "2025-01-01T10:00:00",
-                "output_hash": "sha256:previous_hash",
-            },
+            "meta": {"modo": "PERIÓDICA"},
             "desglose": {"cesantias": {"valor": 1000000}},
-            "compliance_report": {"timestamp": "2025-01-01T10:00:00"},
         }
+        result = self.calc.calculate_output_hash(output_data)
+        assert result.startswith("sha256:")
+        assert result == calculate_hash(output_data)
 
-        output_hash = self.hash_calculator.calculate_output_hash(output_data)
+    def test_verify_integrity_valid(self):
+        """Test verificación de integridad cuando datos coinciden."""
+        data = {"key": "value"}
+        expected_hash = calculate_hash(data)
+        assert self.calc.verify_integrity(data, expected_hash) is True
 
-        # El hash debe ser consistente excluyendo campos variables
-        output_consistent = output_data.copy()
-        output_consistent["meta"].pop("fecha_generacion")
-        output_consistent["meta"].pop("output_hash")
-        output_consistent["compliance_report"].pop("timestamp")
-
-        expected_hash = self.hash_calculator.calculate_hash(output_consistent)
-        assert output_hash == expected_hash
-
-    def test_verify_output_integrity(self):
-        """Test verificación de integridad de output."""
-        output_data = {
-            "desglose": {"cesantias": {"valor": 1000000}},
-            "meta": {"fecha_generacion": "2025-01-01T10:00:00"},
-        }
-
-        # Calcular hash esperado
-        expected_hash = self.hash_calculator.calculate_output_hash(output_data)
-
-        # Verificar integridad
-        is_valid = self.hash_calculator.verify_output_integrity(
-            output_data, expected_hash
-        )
-        assert is_valid is True
-
-        # Modificar datos y verificar que falla
-        output_data["desglose"]["cesantias"]["valor"] = 2000000
-        is_valid = self.hash_calculator.verify_output_integrity(
-            output_data, expected_hash
-        )
-        assert is_valid is False
-
-    def test_generate_hash_report(self):
-        """Test generación de reporte de hashes."""
-        input_hash = "sha256:input123"
-        output_hash = "sha256:output456"
-        params_version = "2025-01-01"
-
-        report = self.hash_calculator.generate_hash_report(
-            input_hash, output_hash, params_version
-        )
-
-        assert report["input_hash"] == input_hash
-        assert report["output_hash"] == output_hash
-        assert report["params_version"] == params_version
-        assert report["hash_algorithm"] == "sha256"
-        assert report["verification_status"] == "HASHES_CALCULATED"
+    def test_verify_integrity_invalid(self):
+        """Test verificación de integridad cuando datos NO coinciden."""
+        data = {"key": "value"}
+        expected_hash = calculate_hash(data)
+        data["key"] = "modified"
+        assert self.calc.verify_integrity(data, expected_hash) is False

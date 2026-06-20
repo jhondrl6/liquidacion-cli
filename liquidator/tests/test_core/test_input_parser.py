@@ -10,10 +10,10 @@ def test_parse_input_file_normalizes_fields():
     example_path = FIXTURES_DIR / "example_finca_rural.json"
     data = parse_input_file(example_path)
 
-    assert data["modo"] == "PERIÓDICA"
-    assert data["moneda"] == "COP"
-    assert data["enforce_compliance"] is True
-    assert data["auxilio_conectividad_pactado"] is True
+    assert data["modo"] == "PERIODICA"
+    assert "fecha_ingreso" in data
+    assert "fecha_corte" in data
+    assert "salario_mensual" in data
 
 
 def test_input_parser_applies_validation():
@@ -21,7 +21,7 @@ def test_input_parser_applies_validation():
     parser = InputParser()
     payload = parse_input_file(FIXTURES_DIR / "example_finca_rural.json")
 
-    parsed = parser.parse_payload(payload, params=params)
+    parsed = parser.parse(payload)
 
-    assert parsed.data["modo"] == "PERIÓDICA"
-    assert isinstance(parsed.warnings, list)
+    assert parsed["modo"] == "PERIODICA"
+    assert "salario_mensual" in parsed

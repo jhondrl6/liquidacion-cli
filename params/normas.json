@@ -179,12 +179,12 @@
     {
       "id": "SL2630_2024",
       "nombre": "Sentencia SL2630-2024 Corte Suprema de Justicia",
-      "descripcion": "Criterio jurisprudencial sobre anualización de prestaciones adeudadas e indexación por pérdida de poder adquisitivo (IPC).",
-      "texto_relevante": "RESUMEN NO LITERAL — pendiente de verificación verbatim con la fuente oficial de la Corte Suprema. La sentencia establece que las prestaciones adeudadas de años anteriores deben liquidarse año por año con el salario correspondiente a cada año calendario y luego indexarse a valor presente utilizando el IPC acumulado publicado por el DANE. La activación operativa de este criterio en el motor se da con periodos_no_pagados en el input, combinado con Art. 488 CST para validar prescripción.",
-      "sala": "PENDIENTE verificación oficial; fuentes secundarias indican Sala de Descongestión Laboral N.º 1. Confirmar con relatoría de la CSJ antes de marcar VERIFICADO.",
-      "url": "https://siugj.ramajudicial.gov.co/",
-      "estado_verificacion": "PENDIENTE_VERBATIM",
-      "issue_bloqueante": "R-LEG-03 (cierre post-Fase 2-bis): el texto literal, la sala y la URL oficial de la SL2630-2024 deben verificarse verbatim contra relatoría/SIUGJ antes de marcar VERIFICADO. La presente entrada documenta el uso operativo y NO representa una cita legal verificada.",
+      "descripcion": "Criterio jurisprudencial sobre anualización de prestaciones adeudadas: liquidar año por año con el salario de cada año calendario.",
+      "texto_relevante": "VERIFICADO PARCIAL (S51, 2026-06-19). La Sala de Descongestión Laboral N.º 1 de la Corte Suprema de Justicia, en sentencia SL2630-2024 (radicado 101342, 17-sep-2024, ponente Martín Emilio Beltrán Quintero), estableció que las prestaciones sociales adeudadas de años anteriores deben liquidarse año por año con el salario correspondiente a cada año calendario, y no con el último salario del trabajador. La indexación por IPC se rige por SL2396-2024 (separar ambas doctrinas). Fuente de verificación: vLex (vid/1051247543) + Gerencie.com. Texto literal del fallo no extraído directamente de SIUGJ por indisponibilidad del portal al momento de verificación.",
+      "sala": "Sala de Descongestión Laboral N.º 1 — VERIFICADO (S51) contra vLex y doctrina secundaria.",
+      "url": "https://vlex.com.co/vid/sentencia-corte-suprema-justicia-1051247543",
+      "estado_verificacion": "VERIFICADO_PARCIAL",
+      "nota_verificacion": "S51: Sala, ponente, radicado y doctrina confirmados contra vLex. URL directa SIUGJ no disponible (portal intermitente). Texto literal del fallo no extraído directamente de la fuente primaria.",
       "vigencia": "2024"
     },
     {

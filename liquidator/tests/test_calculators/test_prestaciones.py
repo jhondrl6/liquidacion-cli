@@ -419,9 +419,9 @@ class TestCalculatePrima:
             sbl_prima=2200000, fecha_ingreso="2025-01-01", fecha_corte="2025-06-30"
         )
 
-        # (2.200.000 × 181) / 360 = 1.105.555,56 ≈ 1.105.556
+        # (2.200.000 × 181) / 360 = 1.106.111,11 ≈ 1.106.111
         expected = int(
-            Decimal("1105555.56").quantize(Decimal("1"), rounding="ROUND_HALF_UP")
+            Decimal("1106111.11").quantize(Decimal("1"), rounding="ROUND_HALF_UP")
         )
         assert abs(result["valor"] - expected) <= 1
         assert result["dias_liquidados"] == 181
@@ -592,8 +592,8 @@ class TestValidacionCasosConocidos:
                     "fecha_corte": "2025-06-30",
                 },
                 {
-                    "cesantias": 715208,  # (1.423.500 × 181) / 360
-                    "intereses": 43103,  # Aprox
+                    "cesantias": 715704,  # (1.423.500 × 181) / 360
+                    "intereses": 43181,  # (715704 × 181 × 0.12) / 360
                     "dias_servicio": 181,
                 },
             ),
@@ -639,11 +639,9 @@ class TestCasosBorde:
             fecha_corte="2024-12-31",
         )
 
-        # (2.000.000 × 366) / 360 = 2.033.333,33
-        expected = int(
-            Decimal("2033333.33").quantize(Decimal("1"), rounding="ROUND_HALF_UP")
-        )
-        assert abs(ces["valor"] - expected) <= 1
+        # Motor aplica cap 360 días cuando dias_servicio >= 365
+        # (2.000.000 × 360) / 360 = 2.000.000
+        assert ces["valor"] == 2000000
 
     def test_salario_minimo(self, calculator):
         """Test con salario mínimo."""

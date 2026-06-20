@@ -14,7 +14,11 @@ import pytest
 try:
     from liquidator.output.pdf_generator import PDFGenerator, PDFGeneratorError
 
-    PDF_AVAILABLE = True
+    try:
+        import weasyprint
+        PDF_AVAILABLE = True
+    except ImportError:
+        PDF_AVAILABLE = False
 except ImportError:
     PDF_AVAILABLE = False
 

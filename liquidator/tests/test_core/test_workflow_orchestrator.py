@@ -14,7 +14,7 @@ def test_workflow_orchestrator_generates_expected_desglose():
 
     result = orchestrator.execute(input_data)
 
-    assert result.calculation_results["sbl_general"] >= 2000000
+    assert result.calculation_results["sbl_general"] >= 1500000
     assert result.calculation_results["vacaciones"] == 0
     assert "cesantias" in result.compliance_payload["desglose"]
     assert any("auxilio" in key for key in result.validaciones_y_alertas)

@@ -18,6 +18,7 @@ def test_engine_process_input_generates_output():
     assert output["compliance_report"]["compliance_status"] in {
         "GO",
         "NO_GO",
+        "WARN",
         "OVERRIDE_APPROVED",
     }
     assert "normas_aplicadas" in output and len(output["normas_aplicadas"]) >= 3

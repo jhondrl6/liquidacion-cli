@@ -1,0 +1,13 @@
+{
+  "modo": "PERIODICA",
+  "fecha_ingreso": "2025-01-01",
+  "fecha_corte": "2025-12-31",
+  "salario_mensual": 2000000,
+  "comisiones_promedio_mensual": 0,
+  "horas_extras_promedio_mensual": 0,
+  "bonificaciones_promedio_mensual": 0,
+  "reside_en_lugar_trabajo": false,
+  "auxilio_transporte": 200000,
+  "dias_vacaciones_pendientes": 0,
+  "tipo_contrato": "indefinido"
+}

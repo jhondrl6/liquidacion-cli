@@ -1,0 +1,21 @@
+{
+  "modo": "PERIODICA",
+  "fecha_ingreso": "2024-06-01",
+  "fecha_corte": "2025-06-30",
+  "salario_mensual": 1500000,
+  "salarios_historicos": [
+    {"mes": "2024-07", "valor": 1500000},
+    {"mes": "2024-08", "valor": 1500000},
+    {"mes": "2024-09", "valor": 1500000},
+    {"mes": "2024-10", "valor": 1500000},
+    {"mes": "2024-11", "valor": 1500000},
+    {"mes": "2024-12", "valor": 1500000}
+  ],
+  "comisiones_promedio_mensual": 800000,
+  "horas_extras_promedio_mensual": 400000,
+  "bonificaciones_promedio_mensual": 300000,
+  "reside_en_lugar_trabajo": false,
+  "auxilio_transporte": 200000,
+  "dias_vacaciones_pendientes": 10,
+  "tipo_contrato": "indefinido"
+}

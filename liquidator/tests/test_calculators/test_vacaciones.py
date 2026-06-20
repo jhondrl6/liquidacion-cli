@@ -160,7 +160,8 @@ class TestVacacionesCalculator:
             input_data, sbl_vacaciones
         )
 
-        valor_esperado = round((2000000 * 15) / 720)
+        # Fórmula compensación directa Art. 189 CST: (SBL / 30) × días
+        valor_esperado = round((2000000 / 30) * 15)
 
         assert (
             resultado["valor"] == valor_esperado

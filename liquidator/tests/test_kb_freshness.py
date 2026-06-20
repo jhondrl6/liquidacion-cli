@@ -2,7 +2,7 @@
 
 Cubre:
   * El script corre con exit 0 (KB fresca).
-  * KB_LLM/ tiene exactamente 10 notas (00-09).
+  * KB_LLM/ tiene exactamente 11 notas (00-09 + 05_schema_salida).
   * Cada `params/<YYYY>.json` tiene su SMMLV citado en KB_LLM/02
     (con o sin separadores de miles — formato colombiano `1.423.500`
     y raw `1423500` matchean por igual).
@@ -90,10 +90,10 @@ def test_kb_freshness_informe_clara_errores() -> None:
 
 # --- Tests estructurales de la KB ----------------------------------------
 
-def test_kb_has_ten_notes() -> None:
+def test_kb_has_eleven_notes() -> None:
     notes = sorted(KB.glob("[0-9][0-9]_*.md"))
-    assert len(notes) == 10, (
-        f"Esperadas 10 notas (00-09), encontradas {len(notes)}: "
+    assert len(notes) == 11, (
+        f"Esperadas 11 notas (00-09 + 05_schema_salida), encontradas {len(notes)}: "
         f"{[n.name for n in notes]}"
     )
 
