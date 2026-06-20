@@ -324,7 +324,7 @@ class FinalValidator:
                 'params/2025.json',
                 'params/normas.json',
                 'params/plazos.json',
-                'config/default_config.yaml',
+                'config/production_config.yaml',
                 'config/logging_config.yaml',
                 'config/production_config.yaml',
                 'bin/liquidar.py',
