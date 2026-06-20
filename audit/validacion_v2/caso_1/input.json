@@ -1,14 +1,25 @@
 {
-  "_pendiente_datos_reales": "Caso 1 (Básico PERIODICA). PENDIENTE: el usuario debe proveer fecha_ingreso (≠ día 16), fecha_corte (mismo año que ingreso, NO cruzar 1-Ene), salario_mensual real + cálculo manual opcional. Ver audit/validacion_v2/STRATEGY.md §2 (perfil) y §3 (formulario) para qué datos se necesitan. Ver audit/validacion_v2/TEMPLATE_input.json para el schema Forma 1 completo. Una vez lleno, correr el comando de STRATEGY.md §4.",
-  "_perfil_caso": "Básico",
-  "_modo_esperado": "PERIODICA",
-  "_features_objetivo": ["calculo_proporcional_basico", "sin_segmentacion", "sin_salario_variable", "sin_ipc"],
-  "_forma_input": "PLANA EN RAÍZ (Forma 1 legacy, ver TEMPLATE_input.json cabecera y STRATEGY §2 nota sobre Forma 1 vs Forma 2). NO anidar campos (NO usar contrato.fecha_ingreso, salario.SBL, etc.).",
+  "_caso": "1",
+  "_perfil": "Básico PERIODICA INDEFINIDO (smoke test, sin features avanzadas)",
+  "_forma": "PLANA EN RAÍZ (Forma 1, validada contra ejemplos/inputs/finca_rural.json)",
+  "_fuente_datos": "Planificación/Casos.md (sesión S49)",
+  "_correcciones_aplicadas": [
+    "auxilio_transporte: true (boolean, borrador) → 162000 (numérico COP 2024). El motor crash-ea con boolean (sbl_calculator.py:40 + Pitfall #47): Decimal(str(True)) → ConversionSyntax.",
+    "Eliminado aux_transporte_real_mensual: campo inventado, 0 referencias en liquidator/. El motor solo lee 'auxilio_transporte' (raíz) o params['AUXILIO_TRANS'] como fallback."
+  ],
+  "_manual_referencia": "audit/validacion_v2/caso_1/comparativa.md",
+  "_nota_pii": "nombre/documento anonimizados por defecto; reemplazar con datos reales si aplica.",
 
   "modo": "PERIODICA",
-  "fecha_ingreso": "YYYY-MM-DD",
-  "fecha_corte": "YYYY-MM-DD",
-  "salario_mensual": 0,
+  "fecha_ingreso": "2024-03-01",
+  "fecha_corte": "2024-11-30",
+  "salario_mensual": 1500000,
+  "auxilio_transporte": 162000,
+  "reside_en_lugar_trabajo": false,
+  "comisiones_promedio_mensual": 0,
+  "horas_extras_promedio_mensual": 0,
+  "bonificaciones_promedio_mensual": 0,
   "tipo_contrato": "INDEFINIDO",
-  "auxilio_transporte": false
+  "nombre": "[ANONIMIZADO]",
+  "documento": "[ANONIMIZADO]"
 }

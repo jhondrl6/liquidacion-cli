@@ -1,25 +1,40 @@
 {
-  "_pendiente_datos_reales": "Caso 2 (Avanzado FINIQUITO con SBL variable + vacaciones compensadas). PENDIENTE: el usuario debe proveer fechas (contrato > 1 año), SBL por año (cambios mid-periodo), motivo_terminacion, vacaciones.dias_pendientes (>0), y cálculo manual. Ver audit/validacion_v2/STRATEGY.md §2 (perfil) y §3 (formulario). Ver audit/validacion_v2/TEMPLATE_input.json para el schema Forma 1 completo. Una vez lleno, correr STRATEGY.md §4.",
-  "_perfil_caso": "Avanzado",
-  "_modo_esperado": "FINIQUITO",
-  "_features_objetivo": ["salario_variable_sbl_por_anio", "historial_salarial_o_sbl_por_anio", "vacaciones_compensadas_finiquito", "auxilio_transporte_condicional", "addendum_sl2630_end_to_end"],
-  "_forma_input": "PLANA EN RAÍZ (Forma 1 legacy, ver TEMPLATE_input.json cabecera).",
-  "_decision_clave": "Elegir UNO: sbl_por_anio={año:monto} O historial_salarial=[{año,mes,valor}]. Si SBL constante, dejar ambos como placeholders (no se activan). Si SBL variable, llenar al menos uno. Modelo valida: variable=true exige al menos uno (Tarea 1.C-bis, S23).",
+  "_caso": "2",
+  "_perfil": "Avanzado FINIQUITO INDEFINIDO con SBL variable por año (Addendum SL2630-2024 end-to-end)",
+  "_forma": "PLANA EN RAÍZ + salario:{} anidado (Forma 1 + Forma 2 mixta, requerida por motor)",
+  "_fuente_datos": "Planificación/Casos.md (sesión S49)",
+  "_correcciones_aplicadas": [
+    "sbl_por_anio en RAÍZ (borrador) ignorado por SalarioResolver (workflow_orchestrator.py:287-304). El Resolver solo activa si input_data['salario'] es un dict con SBL/sbl_por_anio. AGREGADO bloque 'salario: {}' anidado con SBL=3.000.000, variable=true, sbl_por_anio={2023, 2024}.",
+    "Mantenido sbl_por_anio en raíz por compatibilidad con KB contract (forma1-forma2-contract.md §4 grupo) y documentación; el motor usa el anidado.",
+    "Mantenido salario_mensual=3.000.000 en raíz como fallback (engine.py:605)."
+  ],
+  "_manual_referencia": "audit/validacion_v2/caso_2/comparativa.md",
+  "_nota_pii": "nombre/documento anonimizados por defecto; reemplazar con datos reales si aplica.",
 
   "modo": "FINIQUITO",
-  "fecha_ingreso": "YYYY-MM-DD",
-  "fecha_corte": "YYYY-MM-DD",
-  "fecha_terminacion_real": "YYYY-MM-DD",
-  "salario_mensual": 0,
-  "tipo_contrato": "INDEFINIDO",
+  "fecha_ingreso": "2023-01-01",
+  "fecha_terminacion_real": "2024-12-30",
+  "fecha_corte": "2024-12-30",
+  "salario_mensual": 3000000,
   "auxilio_transporte": false,
+  "tipo_contrato": "INDEFINIDO",
   "motivo_terminacion": "renuncia_voluntaria",
+  "sbl_por_anio": {
+    "2023": 2500000,
+    "2024": 3000000
+  },
+  "salario": {
+    "SBL": 3000000,
+    "variable": true,
+    "sbl_por_anio": {
+      "2023": 2500000,
+      "2024": 3000000
+    }
+  },
   "vacaciones": {
-    "dias_pendientes": 0,
+    "dias_pendientes": 15,
     "dias_disfrutados": 0
   },
-  "sbl_por_anio": {
-    "YYYY": 0
-  },
-  "historial_salarial": []
+  "nombre": "[ANONIMIZADO]",
+  "documento": "[ANONIMIZADO]"
 }

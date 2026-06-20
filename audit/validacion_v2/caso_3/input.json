@@ -1,33 +1,53 @@
 {
-  "_pendiente_datos_reales": "Caso 3 (Complejo FINIQUITO con IPC + segmentación multi-año + compliance compuesta). PENDIENTE: el usuario debe proveer fechas (con cruce 1-Ene, contrato > 1 año), SBL por año, motivo_terminacion, 1+ periodos_no_pagados (con fechas causación/exigibilidad/referencia), y cálculo manual. Ver audit/validacion_v2/STRATEGY.md §2 (perfil) y §3 (formulario). Ver audit/validacion_v2/TEMPLATE_input.json para el schema Forma 1 completo. Una vez lleno, correr STRATEGY.md §4.",
-  "_perfil_caso": "Complejo",
-  "_modo_esperado": "FINIQUITO",
-  "_features_objetivo": ["periodos_no_pagados_ipc", "segmentacion_multianio", "prescripcion_art_488_cst", "compliance_compuesta_v011_a_v015"],
-  "_forma_input": "PLANA EN RAÍZ (Forma 1 legacy, ver TEMPLATE_input.json cabecera).",
-  "_decision_clave": "Si tipo_contrato=FIJO: agregar preaviso_entregado, dias_preaviso, fecha_preaviso, fecha_vencimiento_termino_fijo (Art. 46 CST, Tarea 1.C-quater S25). Si INDEFINIDO (default): omitir bloque preaviso completo. modelo valida: preaviso solo aplica a FIJO.",
+  "_caso": "3",
+  "_perfil": "Complejo FINIQUITO FIJO con IPC + segmentación multi-año + preaviso Art. 46 CST",
+  "_forma": "PLANA EN RAÍZ + contrato:{} anidado (Forma 1 + Forma 2 mixta, requerida por motor)",
+  "_fuente_datos": "Planificación/Casos.md (sesión S49)",
+  "_correcciones_aplicadas": [
+    "Campos de preaviso en RAÍZ (fecha_vencimiento_termino_fijo, preaviso_entregado, fecha_preaviso, dias_preaviso) ignorados por hook _calcular_preaviso_si_fijo_vencido (engine.py:552-562): contrato = parsed_data.get('contrato', {}) retorna {} y contrato.get('tipo') retorna '' → hook retorna early. AGREGADO bloque 'contrato: {}' anidado con tipo, motivo_terminacion, fechas de preaviso y fecha_vencimiento_termino_fijo.",
+    "Mantenidos campos de preaviso en raíz por compatibilidad con KB contract y compliance V012/V013 (rule_evaluator.py:252-255, 365-367 que sí tienen fallback empty-dict).",
+    "Mantenido salario_mensual=4.000.000 en raíz como fallback (engine.py:605).",
+    "Para el motor, SBL constante 4M a lo largo de 3 años (2023+2024+2025) genera segmentación por año calendario (segmentar_periodo) pero con SBL único por SalarioResolver (no activado, no hay sbl_por_anio en este caso)."
+  ],
+  "_manual_referencia": "audit/validacion_v2/caso_3/comparativa.md",
+  "_nota_pii": "nombre/documento anonimizados por defecto; reemplazar con datos reales si aplica.",
+  "_nota_prescripcion": "periodos_no_pagados[0]: fecha_exigibilidad 2024-02-14 → fecha_referencia 2025-06-30 = 502 días < 1.095 días (3 años Art. 488 CST). NO prescrito. Tolerancia motor: 5 días extras.",
 
   "modo": "FINIQUITO",
-  "fecha_ingreso": "YYYY-MM-DD",
-  "fecha_corte": "YYYY-MM-DD",
-  "fecha_terminacion_real": "YYYY-MM-DD",
-  "salario_mensual": 0,
-  "tipo_contrato": "INDEFINIDO",
+  "fecha_ingreso": "2023-01-01",
+  "fecha_terminacion_real": "2025-06-30",
+  "fecha_corte": "2025-06-30",
+  "salario_mensual": 4000000,
   "auxilio_transporte": false,
-  "motivo_terminacion": "renuncia_voluntaria",
+  "tipo_contrato": "FIJO",
+  "motivo_terminacion": "termino_fijo_vencido",
   "vacaciones": {
-    "dias_pendientes": 0,
-    "dias_disfrutados": 0
-  },
-  "sbl_por_anio": {
-    "YYYY": 0
+    "dias_pendientes": 0
   },
   "periodos_no_pagados": [
     {
       "concepto": "cesantias",
-      "valor_historico": 0,
-      "fecha_causacion": "YYYY-MM-DD",
-      "fecha_exigibilidad": "YYYY-MM-DD",
-      "fecha_referencia_indexacion": "YYYY-MM-DD"
+      "valor_historico": 3500000,
+      "fecha_causacion": "2023-12-31",
+      "fecha_exigibilidad": "2024-02-14",
+      "fecha_referencia_indexacion": "2025-06-30"
     }
-  ]
+  ],
+  "fecha_vencimiento_termino_fijo": "2025-06-30",
+  "preaviso_entregado": true,
+  "fecha_preaviso": "2025-05-25",
+  "dias_preaviso": 36,
+  "contrato": {
+    "fecha_ingreso": "2023-01-01",
+    "fecha_corte": "2025-06-30",
+    "fecha_terminacion_real": "2025-06-30",
+    "tipo": "FIJO",
+    "motivo_terminacion": "termino_fijo_vencido",
+    "fecha_vencimiento_termino_fijo": "2025-06-30",
+    "preaviso_entregado": true,
+    "fecha_preaviso": "2025-05-25",
+    "dias_preaviso": 36
+  },
+  "nombre": "[ANONIMIZADO]",
+  "documento": "[ANONIMIZADO]"
 }

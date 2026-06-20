@@ -71,6 +71,12 @@ audit/**
 !audit/validacion_v2/caso_1/input.json
 !audit/validacion_v2/caso_2/input.json
 !audit/validacion_v2/caso_3/input.json
+# [FIX S49] Tarea 4.F: trackear las comparativa.md de los 3 casos
+# (deliverables humanos de validación, no outputs generados).
+# Los output.json siguen gitignored (re-generables desde el CLI).
+!audit/validacion_v2/caso_1/comparativa.md
+!audit/validacion_v2/caso_2/comparativa.md
+!audit/validacion_v2/caso_3/comparativa.md
 # [FIX S14] mirror histórico de auditoría en docs/
 docs/audit/
 # [FIX S14] subdirs (logs/, reports/, trails/)
