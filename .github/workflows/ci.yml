@@ -10,21 +10,13 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    # Force Node 24 en todas las actions de JavaScript del job.
-    # GitHub deprecó Node 20 el 2026-06-16 y la removerá completamente el
-    # 2026-09-16. Sin esta env var, actions/checkout@v4 y
-    # actions/setup-python@v5 corren con runtime de Node 20 (deprecation
-    # warning en cada run). Bumpear a v5/v6 es la solución definitiva
-    # pero requiere validar compat — la env var es el fix mecánico
-    # documentado en REGISTRY (entrada S46) y funciona desde ya.
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
-
+    # Node 24: actions/checkout@v6 y actions/setup-python@v6 usan
+    # Node 24 nativamente (sin env var). Solución definitiva post-S54.
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
