@@ -191,6 +191,16 @@ R3 del plan mitigado: 0 inputs en `examples/inputs/` con `variable=true` (grep c
 ### Changed (post-S53)
 - **Node 20 → Node 24 forzado en CI (S54, 2026-06-20)**. GitHub deprecó Node 20 el 2026-06-16 (forzado desde esa fecha) y lo removerá completamente el 2026-09-16. El workflow `.github/workflows/ci.yml` usaba `actions/checkout@v4` y `actions/setup-python@v5` (ambos Node 20), generando un warning de deprecation en cada run. **Fix mecánico aplicado (S54):** agregada env var `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"` a nivel del job `test` en `.github/workflows/ci.yml`. Esto fuerza a GitHub Actions a ejecutar todas las actions de JavaScript del job con runtime de Node 24, eliminando el warning de deprecation. **Archivo modificado:** `.github/workflows/ci.yml` (8 líneas agregadas: 1 env var + 7 de comentario explicativo). **Verificación:** YAML validado con `yaml.safe_load()` → válido, 8 steps preservados, env var en `jobs.test.env`. **Pendiente no bloqueante:** bumpear `actions/checkout@v4` → `@v5` y `actions/setup-python@v5` → `@v6` (solución definitiva, no requiere env var). Requiere validar compat — diferible a sesión futura con testing.
 
+- **Housekeeping S55-S56 (2026-06-20)**. Limpieza local post-release: .gitignore stale TODOs, `colombia_payroll_settlement.egg-info/` eliminado, documentación de limpieza en REGISTRY. 0 cambios de código.
+
+### Cleanup (S57 — 2026-06-23)
+
+- **Fase 1 — Duplicados triviales:** Eliminados `legal/` (directorio vacío), `bin/Permisos.txt` (stub chmod 21B), `config/default_config.yaml` (duplicado byte-a-byte de `production_config.yaml`). Commit `cfecafb`.
+- **Fase 2 — Archivos legacy con PII:** `liquidacion_kb_agente.md` (12KB, PII) archivado en `legal_docs/_archive/`. 3 planes legacy (~84KB) consolidados en `docs/audit/_legacy_plans/`. One-shot scripts movidos de `scripts/_legacy/` a `Planificación/_legacy/code_snippets/`. Directorios de archivo creados con `.gitkeep`. Commit `4bb5dfd`.
+- **Fase 3 — Estructura obsoleta:** `Planificación/Estructura.ini` eliminado (zero refs). Diagnóstico `Contexto/diagnostico_liquidacion_cli_2026-06-09.md` (55KB) movido a `docs/audit/diagnosticos/` con actualización en cascada de 10+ referencias (scripts, tests, prompts, AGENTS.md, README, REGISTRY, STRATEGY.md, KB_LLM). 3 resúmenes de sesión obsoletos archivados en `docs/audit/sesiones/`. `code_quality_analysis.md` archivado. `tests/_legacy/test_encabezado.py` eliminado (test superseded, gap heredado). Commit `afdb931`.
+- **Fase 4 — Higiene `.gitignore`:** 27 marcadores stale `# [ADD]`/`# [FIX]` eliminados. Bloque de secretos/rotación consolidado con comentario semántico limpio. 0 reglas funcionales rotas (mismas 83 reglas activas). Commit `6a8e422`.
+- **Verificación:** 682 passed, 28 skipped, 2 xfailed (1 fallo pre-existente `test_finca_caso_cumple` — fixture ausente, no relacionado con S57). CI green. Smoke test CLI OK. 269 archivos tracked. 0 referencias rotas detectadas.
+
 ---
 
 ## [1.0.0] - 2025-11-04

@@ -382,7 +382,7 @@ MIT — ver [`LICENSE`](./LICENSE).
 - **Estado del proyecto:** [`Planificación/REGISTRY.md`](./Planificación/REGISTRY.md)
 - **Reglas para agentes:** [`AGENTS.md`](./AGENTS.md)
 - **Segundo cerebro local:** [`Contexto/KB_LLM/`](./Contexto/KB_LLM/)
-- **Diagnóstico fuente (2026-06-09):** `Contexto/diagnostico_liquidacion_cli_2026-06-09.md`
+- **Diagnóstico fuente (2026-06-09):** `docs/audit/diagnosticos/diagnostico_inicial_2026-06-09.md`
 - **Repositorio:** [github.com/jhondrl6/liquidacion-cli](https://github.com/jhondrl6/liquidacion-cli)
 
 ---

@@ -88,7 +88,7 @@ class HealthChecker:
             }
 
         # Check configuration files
-        config_files = ['config/default_config.yaml', 'config/logging_config.yaml']
+        config_files = ['config/production_config.yaml', 'config/logging_config.yaml']  # noqa: E501
         for config_file in config_files:
             file_path = Path(config_file)
             file_exists = file_path.exists()

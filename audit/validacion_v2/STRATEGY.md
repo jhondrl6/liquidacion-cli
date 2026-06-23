@@ -11,7 +11,7 @@
 
 ## 1. Por qué 3 liquidaciones reales (no más, no menos)
 
-`Contexto/diagnostico_liquidacion_cli_2026-06-09.md` §6.8 punto 5
+`docs/audit/diagnosticos/diagnostico_inicial_2026-06-09.md` §6.8 punto 5
 exige que el usuario haya ejecutado **al menos 3 liquidaciones reales**
 y los resultados coincidan con cálculos manuales o con otra herramienta
 de referencia. Es el DoD (Definition of Done) del plan completo de
