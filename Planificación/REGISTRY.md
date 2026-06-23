@@ -12,9 +12,9 @@
 
 ## Estado actual (leer primero)
 
-- **Última sesión cerrada:** **S57 — 2026-06-20, Cleanup Fase 1 duplicados triviales**. Se completaron las eliminaciones de `bin/Permisos.txt` y `config/default_config.yaml` de forma limpia usando `git rm`. El directorio `legal/` ya no existe en el working tree. Se aplicaron redirecciones en `liquidator/monitor/health_checker.py` y `scripts/final_validation.py` para usar `production_config.yaml` en vez del archivo configurado por defecto antiguo. Todo commiteado y verificado con la suite de pruebas completa en WSL (682 passed, 28 skipped, 2 xfailed, 1 warning, 0 failures).
-- **Próxima tarea a ejecutar:** **Fase 4 CERRADA — no hay Fase 4.X pendiente**. Siguiente fase: **Fase 5 (CONDICIONAL)** "Investigación casos reales" — solo se activa si surgen casos reales en Fases 0-4 que motiven investigación adicional.
-- **Bloqueos activos:** ninguno de Fase 0 (cerrada). Limpieza local completada (S57): todos los duplicados triviales removidos y redireccionados de forma limpia. Working tree limpio. CI local exitoso.
+- **Última sesión cerrada:** **S57 — 2026-06-23, Cleanup orphan/legacy removal (4 fases)**. Fase 1: duplicados triviales (legal/, Permisos.txt, default_config.yaml). Fase 2: archivos legacy con PII (liquidacion_kb_agente.md, 3 planes, one-shot scripts). Fase 3: estructura obsoleta (Estructura.ini, diagnostico 55KB reubicado con 10+ refs actualizadas, sesiones legacy, test_encabezado.py). Fase 4: .gitignore limpiado de 27 marcadores stale. 4 commits en branch `cleanup/s57-orphan-removal`. Verificación: 682P/28S/2xfail, CI green, smoke test OK, 0 refs rotas.
+- **Próxima tarea:** **Fase 6 — Push y merge.** Los 4 commits de S57 están en branch `cleanup/s57-orphan-removal`. Decidir: merge --no-ff a master (historial append-only) o cherry-pick + force-push (limpio, precedente S44). Ver plan §Fase 6.
+- **Bloqueos activos:** ninguno. Working tree limpio. Suite sin regresiones vs baseline. CHANGELOG y REGISTRY actualizados.
 
 ---
 
