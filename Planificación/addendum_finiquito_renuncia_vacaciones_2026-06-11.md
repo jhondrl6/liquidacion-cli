@@ -732,7 +732,7 @@ def test_finiquito_renuncia_212d():
    sigue vigente; el sistema puede seguir calculando liquidaciones
    periódicas. El finiquito con vacaciones quedará como brecha pendiente.
 
-## K. Relación con el caso real (Pedro Franco — liquidacion_kb_agente.md)
+## K. Relación con el caso real (Pedro Franco — archivado en legal_docs/_archive/liquidacion_kb_agente_v1.0_2025.md)
 
 El caso del plan original (línea 150 del plan) menciona:
 
