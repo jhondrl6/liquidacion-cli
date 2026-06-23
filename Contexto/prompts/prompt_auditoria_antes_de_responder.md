@@ -32,7 +32,7 @@ Jerarquía de verdad (de mayor a menor autoridad):
    `params/normas.json`, `params/plazos.json`,
    `params/checklist.json`).
 3. Tests reales y su resultado de ejecución.
-4. Diagnóstico `Contexto/diagnostico_liquidacion_cli_2026-06-09.md`
+4. Diagnóstico `docs/audit/diagnosticos/diagnostico_inicial_2026-06-09.md`
    (contrastar contra código; ver §5.10).
 5. KB local `Contexto/KB_LLM/` (re-validar si >30 días).
 6. `docs/`, `README.md`, `QWEN.md` (última en la jerarquía).

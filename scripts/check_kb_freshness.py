@@ -39,7 +39,7 @@ REPO = Path(__file__).resolve().parents[1]
 KB = REPO / "Contexto" / "KB_LLM"
 PARAMS = REPO / "params"
 AGENTS = REPO / "AGENTS.md"
-DIAGNOSTICO = "diagnostico_liquidacion_cli_2026-06-09.md"
+DIAGNOSTICO = "docs/audit/diagnosticos/diagnostico_inicial_2026-06-09.md"
 
 # Acepta nombre "vigentes" (Tarea 0.K) o legado "2025" (Tarea 0.E).
 KB_02_CANDIDATES = (

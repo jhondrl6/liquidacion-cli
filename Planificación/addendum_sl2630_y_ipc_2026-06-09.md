@@ -32,7 +32,7 @@
   - `liquidator/core/params_provider.py` ya es year-aware en código vivo
   - `liquidator/contracts/input_model.py` schema actual de `Salario`
   - `legal_docs/` para confirmar si SL2630-2024 ya está citada
-  - `Contexto/diagnostico_liquidacion_cli_2026-06-09.md` para ver si el
+  - `docs/audit/diagnosticos/diagnostico_inicial_2026-06-09.md` para ver si el
     diagnóstico original cubre parcialmente las brechas
 
 ---

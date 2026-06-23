@@ -306,7 +306,7 @@ Al cerrar la sesión, en este orden:
 ## Referencias
 
 - **Plan fuente:** `Planificación/plan_modernizacion_v2.0_2026-06-09.md` (~4.021 líneas — consultar solo para detalle)
-- **Diagnóstico fuente:** `Contexto/diagnostico_liquidacion_cli_2026-06-09.md`
+- **Diagnóstico fuente:** `docs/audit/diagnosticos/diagnostico_inicial_2026-06-09.md`
 - **Addenda:**
   - `Planificación/addendum_sl2630_y_ipc_2026-06-09.md`
   - `Planificación/addendum_finiquito_renuncia_vacaciones_2026-06-11.md`

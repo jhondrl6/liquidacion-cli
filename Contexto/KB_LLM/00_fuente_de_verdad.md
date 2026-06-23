@@ -16,7 +16,7 @@
 3. **Tests reales y resultados de ejecución.** Lo que la suite verifica hoy
    es lo que el motor hace hoy. Un test que falla es un bug o una regresión,
    no una "inconsistencia menor".
-4. **Diagnóstico `Contexto/diagnostico_liquidacion_cli_2026-06-09.md`.**
+4. **Diagnóstico `docs/audit/diagnosticos/diagnostico_inicial_2026-06-09.md`.**
    Útil como mapa de riesgos conocido, pero contrastado contra código: fue
    escrito en una sola pasada y puede tener errores (ver §5.10 del
    diagnóstico y `06_riesgos_modelo.md`).
