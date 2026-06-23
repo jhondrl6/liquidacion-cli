@@ -5,7 +5,6 @@
 
 # Entornos virtuales
 .venv/
-# [ADD S14] venv local usado en uv pip install -e . para validar packaging
 .venv-liq/
 venv/
 liquidacion-env/
@@ -37,30 +36,20 @@ coverage.xml
 # Salidas generadas por el motor (directorios vacíos se mantienen con .gitignore)
 # artefactos de liquidación (gitignored; .gitkeep tracked)
 output/
-# [FIX S34] NO ignorar liquidator/output/ (código fuente del paquete)
 !liquidator/output/
 # auditoría inmutable
 artifacts/
 # logs de ejecución
 logs/
-# [FIX] mantener marcador para que el dir exista post-clone
 !output/.gitkeep
-# [FIX]
 !artifacts/.gitkeep
-# [FIX]
 !logs/.gitkeep
-# [FIX] auditoría histórica (gitignored; .gitkeep tracked)
 # Nota: NO usamos `audit/` como patrón porque Git ignora todos los archivos
 # bajo un dir ignorado, y los `!` no los re-incluyen. Usamos `audit/**`
 # (recursivo) y luego re-incluimos con `!` los templates que sí queremos
 # trackear.
 audit/**
-# [FIX] mantener marcador
 !audit/.gitkeep
-# [FIX S43] Tarea 4.F: trackear SOLO los templates de audit/validacion_v2/
-# (README + STRATEGY.md + TEMPLATE_input.json + 3 input.json placeholder).
-# El resto (output.json, comparativa.md, notas.md con datos reales) sigue
-# gitignored para evitar PII en el repo.
 !audit/validacion_v2/
 !audit/validacion_v2/README.md
 !audit/validacion_v2/STRATEGY.md
@@ -71,19 +60,13 @@ audit/**
 !audit/validacion_v2/caso_1/input.json
 !audit/validacion_v2/caso_2/input.json
 !audit/validacion_v2/caso_3/input.json
-# [FIX S49] Tarea 4.F: trackear las comparativa.md de los 3 casos
-# (deliverables humanos de validación, no outputs generados).
-# Los output.json siguen gitignored (re-generables desde el CLI).
 !audit/validacion_v2/caso_1/comparativa.md
 !audit/validacion_v2/caso_2/comparativa.md
 !audit/validacion_v2/caso_3/comparativa.md
-# [FIX S14] mirror histórico de auditoría en docs/
 docs/audit/
-# [FIX S14] subdirs (logs/, reports/, trails/)
 docs/audit/**
 
 # Datos de ejecución local (mencionado en .env: LIQUIDACION_DATA_PATH=./data)
-# [ADD] ruta de datos, puede contener PII
 data/
 *.sqlite
 *.sqlite3
@@ -100,55 +83,41 @@ liquidacion_actualizada*
 liquidacion_20*.pdf
 
 # Secretos y entorno (no modificar orden — los .env.* dependen de que .env se liste primero)
+# Backups de rotación de clave (issue 2026-06-12)
 .env
 .env.local
 .env.*.local
-# [ADD] proteger backups de rotación de clave (issue 2026-06-12)
 .env.backup*
 *.pem
 *.key
 
-# Scripts espurios de un solo uso (mover a scripts/_legacy/ o eliminar)
+# Scripts espurios de un solo uso
 /generate_liquidacion.py
 /generar_varios.py
 /test_encabezado.py
-# [ADD] legacy 68KB; revisar en Tarea 0.C
 /Plan de ejecución.py
 
 # Backups genéricos (cualquier .bak, .backup, ~)
-# [ADD]
 *.bak
-# [ADD]
 *.backup
-# [ADD]
 *.tmp
-# [ADD]
 *.swp
-# [ADD]
 *~
 
 # Logs genéricos (directorios ya ignorados arriba; este es catch-all)
-# [ADD]
 *.log
 
 # Configuración de editores
-# [ADD]
 .vscode/
-# [ADD]
 .idea/
-# [ADD]
 *.iml
-# [ADD]
 .DS_Store
-# [ADD]
 Thumbs.db
 
-# Documentos legacy a revisar (pueden contener PII; mover o ignorar)
-# [ADD] revisar contenido en Tarea 0.C
+# Documentos legacy (pueden contener PII)
 /documentos_legales_rurales/
 
 # Sistema
 *.swp
 *.swo
-# [ADD] KDE
 .directory
